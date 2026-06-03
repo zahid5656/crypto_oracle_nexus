@@ -386,4 +386,45 @@ class CryptoViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
     }
+
+    fun archiveSignalOutcome(
+        coinName: String,
+        coinSymbol: String,
+        signalType: String,
+        entryPrice: Double,
+        currentPrice: Double,
+        targetPrice: Double,
+        priceChangePct: Double,
+        probabilityPct: Int,
+        timeframe: String,
+        result: String,
+        isLong: Boolean
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                signalDao.insertSignal(
+                    SignalEntity(
+                        coinName = coinName,
+                        coinSymbol = coinSymbol,
+                        signalType = signalType,
+                        entryPrice = entryPrice,
+                        currentPrice = currentPrice,
+                        targetPrice = targetPrice,
+                        priceChangePct = priceChangePct,
+                        probabilityPct = probabilityPct,
+                        timeframe = timeframe,
+                        result = result,
+                        isLong = isLong,
+                        marketRegime = _marketRegime.value
+                    )
+                )
+                sendLocalAlert(
+                    title = "🎯 SIGNAL ARCHIVED: $coinSymbol",
+                    message = "Simulated validation complete. Status: $result! Real-time Win Rate updated."
+                )
+            } catch (e: Exception) {
+                Log.e("CryptoViewModel", "Error archiving signal outcome", e)
+            }
+        }
+    }
 }

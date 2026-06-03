@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.text.style.TextOverflow
 import com.example.ui.AnalysisScreen
 import com.example.ui.HomeScreen
 import com.example.ui.MarketRadarScreen
@@ -47,9 +48,9 @@ class MainActivity : ComponentActivity() {
                     NavigationBar(
                         containerColor = DarkSurface,
                         tonalElevation = 8.dp,
+                        windowInsets = WindowInsets.navigationBars,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(68.dp)
                             .border(androidx.compose.foundation.BorderStroke(1.dp, BorderColor))
                     ) {
                         // Home Tab
@@ -57,7 +58,15 @@ class MainActivity : ComponentActivity() {
                             selected = currentScreen is AppScreen.Home,
                             onClick = { viewModel.navigateTo(AppScreen.Home) },
                             icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "Home index") },
-                            label = { Text("Oracle Feed", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
+                            label = { 
+                                Text(
+                                    text = "Oracle Feed", 
+                                    fontSize = 11.sp, 
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                ) 
+                            },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = CryptoCyan,
                                 selectedTextColor = CryptoCyan,
@@ -72,7 +81,15 @@ class MainActivity : ComponentActivity() {
                             selected = currentScreen is AppScreen.Analysis,
                             onClick = { viewModel.navigateTo(AppScreen.Analysis) },
                             icon = { Icon(imageVector = Icons.Default.Star, contentDescription = "Oracle signals Pro") },
-                            label = { Text("Signals Pro", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
+                            label = { 
+                                Text(
+                                    text = "Signals Pro", 
+                                    fontSize = 11.sp, 
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                ) 
+                            },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = CryptoCyan,
                                 selectedTextColor = CryptoCyan,
@@ -87,7 +104,15 @@ class MainActivity : ComponentActivity() {
                             selected = currentScreen is AppScreen.MarketRadar,
                             onClick = { viewModel.navigateTo(AppScreen.MarketRadar) },
                             icon = { Icon(imageVector = Icons.Default.Refresh, contentDescription = "Live indicators radar") },
-                            label = { Text("Live Radar", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
+                            label = { 
+                                Text(
+                                    text = "Live Radar", 
+                                    fontSize = 11.sp, 
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                ) 
+                            },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = CryptoCyan,
                                 selectedTextColor = CryptoCyan,
@@ -102,7 +127,15 @@ class MainActivity : ComponentActivity() {
                             selected = currentScreen is AppScreen.AccuracyCenter,
                             onClick = { viewModel.navigateTo(AppScreen.AccuracyCenter) },
                             icon = { Icon(imageVector = Icons.Default.Info, contentDescription = "Accuracy tracking metrics") },
-                            label = { Text("Stats Hub", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
+                            label = { 
+                                Text(
+                                    text = "Stats Hub", 
+                                    fontSize = 11.sp, 
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                ) 
+                            },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = CryptoCyan,
                                 selectedTextColor = CryptoCyan,

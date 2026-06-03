@@ -255,6 +255,8 @@ fun MarketRadarScreen(
 
 @Composable
 fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean) {
+    var expandedKey by remember { mutableStateOf<String?>(null) }
+
     // Top 3 dynamic simulation metrics
     val spotScalps = listOf(
         Triple("Bitcoin", "BTC", 66520.0),
@@ -268,10 +270,142 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean) 
         Triple("Floki", "FLOKI", 0.000215)
     )
 
+    val shortScalps = listOf(
+        Triple("Cardano", "ADA", 0.45),
+        Triple("Dogecoin", "DOGE", 0.125),
+        Triple("Arbitrum", "ARB", 0.95)
+    )
+
+    val spotDetails = listOf(
+        mapOf(
+            "pattern" to "200-EMA Support Bounce",
+            "pattern_bn" to "২০০-ইএমএ সাপোর্ট বাউন্স",
+            "vol" to "+148% Limit Buy Volume",
+            "vol_bn" to "+১৪৮% লিমিট বাই ভলিউম",
+            "prob" to "89%",
+            "bid_ask" to "2.4x Bid Imbalance",
+            "bid_ask_bn" to "২.৪ গুণ বিড ভারসাম্য",
+            "sl" to "$65,210",
+            "desc" to "Bitcoin is displaying strong buy absorption at the 200-EMA support channel on the 15M chart. A heavy cluster of institutional limit orders confirms solid floor strength. Expect an explosive continuation toward the target with minimal drawdown risk.",
+            "desc_bn" to "বিটকয়েন ১৫-মিনিটের চার্টে ২০০-ইএমএ সমর্থন চ্যানেলে শক্তিশালী ক্রয় শোষণ প্রদর্শন করছে। প্রাতিষ্ঠানিক লিমিট বাই অর্ডারগুলোর ভারী ক্লাস্টার এখানে মেঝের শক্তি নিশ্চিত করেছে। সামান্য ড্রডাউন ঝুঁকি সহ টার্গেটের দিকে একটি উর্ধ্বমুখী গতির আশা করা হচ্ছে।"
+        ),
+        mapOf(
+            "pattern" to "Ascending Triangle Breakout",
+            "pattern_bn" to "অ্যাসেন্ডিং ট্রায়াঙ্গেল ব্রেকআউট",
+            "vol" to "+195% Breakout Volume",
+            "vol_bn" to "+১৯৫% ব্রেকআউট ভলিউম",
+            "prob" to "85%",
+            "bid_ask" to "1.9x Bid Imbalance",
+            "bid_ask_bn" to "১.৯ গুণ বিড ভারসাম্য",
+            "sl" to "$3,410",
+            "desc" to "Ethereum has successfully breached its horizontal resistance line on high volume velocity. Positive RSI slope on multiple micro-timeframes validates that bulls are firmly in control of the trend.",
+            "desc_bn" to "ইথেরিয়াম অত্যন্ত উচ্চ গতিতে তার সমান্তরাল প্রতিরোধ লাইন সফলভাবে অতিক্রম করেছে। একাধিক ক্ষুদ্র টাইমফ্রেমে ধনাত্মক আরএসআই (RSI) স্লোপ প্রমাণ করে যে বাজারের নিয়ন্ত্রণ সম্পূর্ণ ক্রেতাদের হাতে।"
+        ),
+        mapOf(
+            "pattern" to "Orderbook Liquidity Sweep",
+            "pattern_bn" to "অর্ডারবুক লিকুইডিটি সুইপ",
+            "vol" to "+220% Buy Absorption",
+            "vol_bn" to "+২২০% ক্রয় শোষণ ভলিউম",
+            "prob" to "82%",
+            "bid_ask" to "3.1x Bid Imbalance",
+            "bid_ask_bn" to "৩.১ গুণ বিড ভারসাম্য",
+            "sl" to "$161.0",
+            "desc" to "Solana completed a clean sweep of stop-loss levels below $163 before pivoting. Intense limit buying was detected, reflecting automated accumulation from quantitative funds in the demand zone.",
+            "desc_bn" to "সোলানা পুনরায় উর্ধ্বমুখী হওয়ার আগে $১৬৩-এর নিচের স্টপ-লস স্তরগুলো সফলভাবে সুইপ করেছে। ডিমান্ড জোনে কোয়ান্ট ফান্ডের স্বয়ংক্রিয় একুমুলেশন ও ক্রয়ের প্রবল চাপ সনাক্ত করা হয়েছে।"
+        )
+    )
+
+    val longDetails = listOf(
+        mapOf(
+            "pattern" to "Short-Squeeze Trigger above VWAP",
+            "pattern_bn" to "ভিওয়াপের উপরে শর্ট-স্কুইজ ট্রিগার",
+            "vol" to "+310% Vol Surge",
+            "vol_bn" to "+৩১০% ভলিউম সার্জ",
+            "prob" to "84%",
+            "bid_ask" to "+18.2% Open Interest",
+            "bid_ask_bn" to "+১৮.২% ওপেন ইন্টারেস্ট",
+            "sl" to "$8.15",
+            "desc" to "Render's open interest has spiked significantly alongside massive short liquidations. Maintaining position above the daily VWAP creates high probability for an rapid upward cascade.",
+            "desc_bn" to "রেন্ডার টোকেনের ওপেন ইন্টারেস্ট এবং শর্ট লিকুইডেশন উভয়ই অত্যন্ত বৃদ্ধি পেয়েছে। দৈনিক ভিওয়াপ (VWAP) স্তরের উপরে এর অবস্থান একটি তীব্র উর্ধ্বমুখী শর্ট-স্কুইজ তরঙ্গের পথ প্রসারিত করছে।"
+        ),
+        mapOf(
+            "pattern" to "RSI Bullish Divergence",
+            "pattern_bn" to "আরএসআই বুলিশ ডাইভারজেন্স",
+            "vol" to "+160% Spot Buying Premium",
+            "vol_bn" to "+১৬০% স্পট বাইং প্রিমিয়াম",
+            "prob" to "81%",
+            "bid_ask" to "+14.5% Open Interest",
+            "bid_ask_bn" to "+১৪.৫% ওপেন ইন্টারেস্ট",
+            "sl" to "$5.94",
+            "desc" to "While the price tested lower levels, the 15M RSI printed higher lows to confirm a classic bullish divergence. Spot buying premiums are climbing, indicating immediate bullish intent.",
+            "desc_bn" to "মূল্য যখন নিম্ন স্তরে অবস্থান নিচ্ছিল, ১৫-মিনিটের আরএসআই (RSI) তার তুলনায় উচ্ছে অবস্থান করে বুলিশ ডাইভারজেন্স তৈরি করেছে। স্পট প্রিমিয়াম ক্রয়ের বৃদ্ধি আসন্ন গতির নির্দেশক।"
+        ),
+        mapOf(
+            "pattern" to "High-Beta Social Momentum",
+            "pattern_bn" to "হাই-বিটা সোশাল মোমেন্টাম",
+            "vol" to "+420% Aggressive Bids",
+            "vol_bn" to "+৪২০% আক্রমণাত্মক বিডস",
+            "prob" to "76%",
+            "bid_ask" to "+32.0% Open Interest",
+            "bid_ask_bn" to "+৩২.০% ওপেন ইন্টারেস্ট",
+            "sl" to "$0.000205",
+            "desc" to "FLOKI has major buy walls resting on top tier DEX and CEX depth books. Backed by intense and explosive social volume velocity, this high-beta scalp setup is fully primed.",
+            "desc_bn" to "ফ্লকি টোকেনটির শীর্ষস্থানীয় ডেক্স এবং সেন্ট্রাল এক্সচেঞ্জগুলোতে বড় ক্রয় প্রাচীর তৈরি হয়েছে। বিস্ফোরক সামাজিক ভলিউম গতির সাথে এই হাই-বিটা স্ক্যাল্প সেটআপটি এখন পুরোপুরি প্রস্তুত।"
+        )
+    )
+
+    val shortDetails = listOf(
+        mapOf(
+            "pattern" to "Descending Resistance Rejection",
+            "pattern_bn" to "ডাউনট্রেন্ড রেজিস্ট্যান্স রিজেকশন",
+            "vol" to "+120% Heavy Sell Wall",
+            "vol_bn" to "+১২০% ভারী সেল ওয়াল",
+            "prob" to "80%",
+            "bid_ask" to "-11.2% Open Interest Decline",
+            "bid_ask_bn" to "-১১.২% ওপেন ইন্টারেস্ট হ্রাস",
+            "sl" to "$0.462",
+            "desc" to "ADA hit the ceiling of an active descending channel with declining volume on small bounces, verifying weak buyer conviction. A high confidence short scalp set up.",
+            "desc_bn" to "কার্ডানো তার সক্রিয় ডাউনট্রেন্ড চ্যানেলের সর্বোচ্চ প্রতিরোধ স্তরে বাধা পেয়েছে। ধীরগতির উর্ধ্বমুখী বাউন্সে কম ভলিউম নির্দেশ করে যে ক্রেতাদের আত্মবিশ্বাসের চূড়ান্ত অভাব।"
+        ),
+        mapOf(
+            "pattern" to "Distribution Phase Breakdown",
+            "pattern_bn" to "ডিস্ট্রিবিউশন ফেজ ব্রেকডাউন",
+            "vol" to "+175% Distribution Outflow",
+            "vol_bn" to "+১৭৫% ডিস্ট্রিবিউশন আউটফ্লো",
+            "prob" to "82%",
+            "bid_ask" to "-15.8% Open Interest Decline",
+            "bid_ask_bn" to "-১৫.৮% ওপেন ইন্টারেস্ট হ্রাস",
+            "sl" to "$0.129",
+            "desc" to "Dogecoin failed to sustain its levels above the daily open high as large distribution outflows occurred. Rising negative funding momentum suggests active short hedging blocks.",
+            "desc_bn" to "ডগকয়েন বড় ধরনের লাভ তোলার কারণে দৈনিক সর্বোচ্চ সীমার ওপর স্থায়িত্ব ধরে রাখতে ব্যর্থ হয়েছে। ক্রমবর্ধমান নেতিবাচক ফান্ডিং মোমেন্টাম সক্রিয় শর্ট পজিশনের ইঙ্গিত দেয়।"
+        ),
+        mapOf(
+            "pattern" to "Unlock Liquidation Hedging",
+            "pattern_bn" to "আনলক লিকুইডেশন হেজিং",
+            "vol" to "+190% Perpetual Liquidations",
+            "vol_bn" to "+১৯০% পার্পেচুয়াল লিকুইডেশন",
+            "prob" to "85%",
+            "bid_ask" to "-22.4% Open Interest Decline",
+            "bid_ask_bn" to "-২২.৪% ওপেন ইন্টারেস্ট হ্রাস",
+            "sl" to "$0.978",
+            "desc" to "Arbitrum shows systematic futures dumping and perpetual orderbook short aggression. Failing to defend local support will trigger extensive algorithmic sell orders.",
+            "desc_bn" to "আরবিট্রাম ফিউচার মার্কেটে পদ্ধতিগত বিক্রয় চাপ লক্ষ্য করা যাচ্ছে। স্থানীয় সাপোর্ট বা সমর্থন স্তরটি ধরে রাখতে ব্যর্থ হলে তাৎক্ষণিকভাবে অ্যালগরিদমিক বিক্রয় আদেশ সচল হবে।"
+        )
+    )
+
+    val formatPrice = { price: Double ->
+        when {
+            price < 0.01 -> String.format("%.6f", price)
+            price < 1.0 -> String.format("%.4f", price)
+            else -> String.format("%,.2f", price)
+        }
+    }
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // --- 1. SPOT SECTIONS ---
         Text(
             text = if (isBengali) "🔥 তাত্ক্ষণিক স্পট টার্গেট (সেরা ৩)" else "🔥 HOT SPOT TRIGGERS (TOP 3)",
-            fontSize = 10.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             color = AccentGold,
             letterSpacing = 0.5.sp
@@ -280,38 +414,144 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean) 
         spotScalps.forEachIndexed { index, (name, symbol, basePrice) ->
             val potential = 1.5 + index * 0.4
             val target = basePrice * (1.0 + potential / 100)
-            Row(
+            val isExpanded = expandedKey == "spot_$index"
+            val details = spotDetails[index]
+
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(DarkBackground, RoundedCornerShape(8.dp))
-                    .border(1.dp, BorderColor, RoundedCornerShape(8.dp))
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .background(AccentGold.copy(alpha = 0.12f), RoundedCornerShape(6.dp))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(text = symbol, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = AccentGold)
+                    .border(
+                        1.dp,
+                        if (isExpanded) AccentGold.copy(alpha = 0.6f) else BorderColor,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clickable {
+                        expandedKey = if (isExpanded) null else "spot_$index"
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    .animateContentSize()
+                    .padding(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .background(AccentGold.copy(alpha = 0.12f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(text = symbol, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = AccentGold)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Text(
+                                text = if (isBengali) "বিশ্লেষণ দেখতে ট্যাপ করুন" else "Tap for Deep Quant Info",
+                                fontSize = 8.sp,
+                                color = AccentGold,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "Target: $${formatPrice(target)}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = CryptoGreen
+                        )
+                        Text(
+                            text = "+${String.format("%.2f", potential)}% ($timeframe)",
+                            fontSize = 9.sp,
+                            color = TextSecondary
+                        )
+                    }
                 }
 
-                Column(horizontalAlignment = Alignment.End) {
+                if (isExpanded) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    HorizontalDivider(color = BorderColor, thickness = 1.dp)
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     Text(
-                        text = "Target: $${String.format("%,.2f", target)}",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = CryptoGreen
-                    )
-                    Text(
-                        text = "+${String.format("%.2f", potential)}% ($timeframe)",
+                        text = if (isBengali) "ওরাকল কোয়ান্ট বিশ্লেষণ" else "ORACLE ANALYTIC METADATA",
                         fontSize = 9.sp,
-                        color = TextSecondary
+                        fontWeight = FontWeight.Bold,
+                        color = AccentGold,
+                        letterSpacing = 1.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = if (isBengali) "প্যাটার্ন" else "PATTERN DETECTED", fontSize = 8.sp, color = TextMuted)
+                            Text(
+                                text = if (isBengali) details["pattern_bn"]!! else details["pattern"]!!,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = if (isBengali) "অর্ডারবুক ইমব্যালেন্স" else "ORDERBOOK RATIO", fontSize = 8.sp, color = TextMuted)
+                            Text(
+                                text = if (isBengali) details["bid_ask_bn"]!! else details["bid_ask"]!!,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = if (isBengali) "স্টপ লস" else "SUGGESTED STOP LOSS", fontSize = 8.sp, color = TextMuted)
+                            Text(
+                                text = details["sl"]!!,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFFF3F60)
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = if (isBengali) "সম্ভাব্যতা স্কোর" else "PROBABILITY SCORE", fontSize = 8.sp, color = TextMuted)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = details["prob"]!!,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = CryptoGreen
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .background(CryptoGreen, CircleShape)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = if (isBengali) details["desc_bn"]!! else details["desc"]!!,
+                        fontSize = 11.sp,
+                        color = TextSecondary,
+                        lineHeight = 16.sp
                     )
                 }
             }
@@ -319,9 +559,10 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean) 
 
         Spacer(modifier = Modifier.height(4.dp))
 
+        // --- 2. FUTURES LONG SECTIONS ---
         Text(
             text = if (isBengali) "⚡ ফিউচার লং টার্গেট" else "⚡ FUTURES LONG TRIGGERS (TOP 3)",
-            fontSize = 10.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             color = CryptoGreen,
             letterSpacing = 0.5.sp
@@ -330,38 +571,301 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean) 
         longScalps.forEachIndexed { index, (name, symbol, basePrice) ->
             val potential = 3.2 + index * 0.8
             val target = basePrice * (1.0 + potential / 100)
-            Row(
+            val isExpanded = expandedKey == "long_$index"
+            val details = longDetails[index]
+
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(DarkBackground, RoundedCornerShape(8.dp))
-                    .border(1.dp, BorderColor, RoundedCornerShape(8.dp))
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .background(CryptoGreen.copy(alpha = 0.12f), RoundedCornerShape(6.dp))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(text = symbol, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = CryptoGreen)
+                    .border(
+                        1.dp,
+                        if (isExpanded) CryptoGreen.copy(alpha = 0.6f) else BorderColor,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clickable {
+                        expandedKey = if (isExpanded) null else "long_$index"
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    .animateContentSize()
+                    .padding(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .background(CryptoGreen.copy(alpha = 0.12f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(text = symbol, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = CryptoGreen)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Text(
+                                text = if (isBengali) "বিশ্লেষণ দেখতে ট্যাপ করুন" else "Tap for Deep Quant Info",
+                                fontSize = 8.sp,
+                                color = CryptoGreen,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "Target: $${formatPrice(target)}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = CryptoGreen
+                        )
+                        Text(
+                            text = "Leverage: 5x | +${String.format("%.2f", potential)}%",
+                            fontSize = 9.sp,
+                            color = TextSecondary
+                        )
+                    }
                 }
 
-                Column(horizontalAlignment = Alignment.End) {
+                if (isExpanded) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    HorizontalDivider(color = BorderColor, thickness = 1.dp)
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     Text(
-                        text = "Target: $${String.format("%,.2f", target)}",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = CryptoGreen
-                    )
-                    Text(
-                        text = "Leverage: 5x | +${String.format("%.2f", potential)}%",
+                        text = if (isBengali) "ওরাকল কোয়ান্ট ফিউচার লং বিশ্লেষণ" else "ORACLE FUTURES LONG METADATA",
                         fontSize = 9.sp,
-                        color = TextSecondary
+                        fontWeight = FontWeight.Bold,
+                        color = CryptoGreen,
+                        letterSpacing = 1.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = if (isBengali) "প্যাটার্ন" else "PATTERN DETECTED", fontSize = 8.sp, color = TextMuted)
+                            Text(
+                                text = if (isBengali) details["pattern_bn"]!! else details["pattern"]!!,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = if (isBengali) "ওপেন ইন্টারেস্ট গতি" else "OPEN INTEREST DYNAMICS", fontSize = 8.sp, color = TextMuted)
+                            Text(
+                                text = if (isBengali) details["bid_ask_bn"]!! else details["bid_ask"]!!,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = if (isBengali) "স্টপ লস টার্গেট" else "SUGGESTED STOP LOSS", fontSize = 8.sp, color = TextMuted)
+                            Text(
+                                text = details["sl"]!!,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFFF3F60)
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = if (isBengali) "সম্ভাব্যতা স্কোর" else "PROBABILITY SCORE", fontSize = 8.sp, color = TextMuted)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = details["prob"]!!,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = CryptoGreen
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .background(CryptoGreen, CircleShape)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = if (isBengali) details["desc_bn"]!! else details["desc"]!!,
+                        fontSize = 11.sp,
+                        color = TextSecondary,
+                        lineHeight = 16.sp
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // --- 3. FUTURES SHORT SECTIONS ---
+        Text(
+            text = if (isBengali) "🔻 ফিউচার শর্ট টার্গেট (সেরা ৩)" else "🔻 FUTURES SHORT TRIGGERS (TOP 3)",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFFFF3F60),
+            letterSpacing = 0.5.sp
+        )
+
+        shortScalps.forEachIndexed { index, (name, symbol, basePrice) ->
+            val potential = 2.8 + index * 0.7
+            val target = basePrice * (1.0 - potential / 100)
+            val isExpanded = expandedKey == "short_$index"
+            val details = shortDetails[index]
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(DarkBackground, RoundedCornerShape(8.dp))
+                    .border(
+                        1.dp,
+                        if (isExpanded) Color(0xFFFF3F60).copy(alpha = 0.6f) else BorderColor,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clickable {
+                        expandedKey = if (isExpanded) null else "short_$index"
+                    }
+                    .animateContentSize()
+                    .padding(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xFFFF3F60).copy(alpha = 0.12f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(text = symbol, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF3F60))
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Text(
+                                text = if (isBengali) "বিশ্লেষণ দেখতে ট্যাপ করুন" else "Tap for Deep Quant Info",
+                                fontSize = 8.sp,
+                                color = Color(0xFFFF3F60),
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "Target: $${formatPrice(target)}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFF3F60)
+                        )
+                        Text(
+                            text = "Leverage: 5x | -${String.format("%.2f", potential)}%",
+                            fontSize = 9.sp,
+                            color = TextSecondary
+                        )
+                    }
+                }
+
+                if (isExpanded) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    HorizontalDivider(color = BorderColor, thickness = 1.dp)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = if (isBengali) "ওরাকল কোয়ান্ট ফিউচার শর্ট বিশ্লেষণ" else "ORACLE FUTURES SHORT METADATA",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFF3F60),
+                        letterSpacing = 1.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = if (isBengali) "প্যাটার্ন" else "PATTERN DETECTED", fontSize = 8.sp, color = TextMuted)
+                            Text(
+                                text = if (isBengali) details["pattern_bn"]!! else details["pattern"]!!,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = if (isBengali) "ওপেন ইন্টারেস্ট গতি" else "OPEN INTEREST DYNAMICS", fontSize = 8.sp, color = TextMuted)
+                            Text(
+                                text = if (isBengali) details["bid_ask_bn"]!! else details["bid_ask"]!!,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = if (isBengali) "স্টপ লস টার্গেট" else "SUGGESTED STOP LOSS", fontSize = 8.sp, color = TextMuted)
+                            Text(
+                                text = details["sl"]!!,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFFF3F60)
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = if (isBengali) "সম্ভাব্যতা স্কোর" else "PROBABILITY SCORE", fontSize = 8.sp, color = TextMuted)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = details["prob"]!!,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = CryptoGreen
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .background(CryptoGreen, CircleShape)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = if (isBengali) details["desc_bn"]!! else details["desc"]!!,
+                        fontSize = 11.sp,
+                        color = TextSecondary,
+                        lineHeight = 16.sp
                     )
                 }
             }
