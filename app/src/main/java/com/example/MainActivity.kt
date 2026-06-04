@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,6 +45,7 @@ class MainActivity : ComponentActivity() {
             
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
+                containerColor = DarkBackground,
                 bottomBar = {
                     NavigationBar(
                         containerColor = DarkSurface,
@@ -61,10 +63,11 @@ class MainActivity : ComponentActivity() {
                             label = { 
                                 Text(
                                     text = "Oracle Feed", 
-                                    fontSize = 11.sp, 
+                                    fontSize = 9.sp, 
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    softWrap = false,
+                                    overflow = TextOverflow.Visible
                                 ) 
                             },
                             colors = NavigationBarItemDefaults.colors(
@@ -83,11 +86,12 @@ class MainActivity : ComponentActivity() {
                             icon = { Icon(imageVector = Icons.Default.Star, contentDescription = "Oracle signals Pro") },
                             label = { 
                                 Text(
-                                    text = "Signals Pro", 
-                                    fontSize = 11.sp, 
+                                    text = "Signal Pro", 
+                                    fontSize = 9.sp, 
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    softWrap = false,
+                                    overflow = TextOverflow.Visible
                                 ) 
                             },
                             colors = NavigationBarItemDefaults.colors(
@@ -107,10 +111,35 @@ class MainActivity : ComponentActivity() {
                             label = { 
                                 Text(
                                     text = "Live Radar", 
-                                    fontSize = 11.sp, 
+                                    fontSize = 9.sp, 
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    softWrap = false,
+                                    overflow = TextOverflow.Visible
+                                ) 
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = CryptoCyan,
+                                selectedTextColor = CryptoCyan,
+                                unselectedIconColor = TextMuted,
+                                unselectedTextColor = TextMuted,
+                                indicatorColor = CryptoCyan.copy(alpha = 0.12f)
+                            )
+                        )
+
+                        // Mission Center Tab
+                        NavigationBarItem(
+                            selected = currentScreen is AppScreen.MissionCenter,
+                            onClick = { viewModel.navigateTo(AppScreen.MissionCenter) },
+                            icon = { Icon(imageVector = Icons.Default.CheckCircle, contentDescription = "Mission Center") },
+                            label = { 
+                                Text(
+                                    text = "Mission Center", 
+                                    fontSize = 9.sp, 
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Visible
                                 ) 
                             },
                             colors = NavigationBarItemDefaults.colors(
@@ -130,10 +159,11 @@ class MainActivity : ComponentActivity() {
                             label = { 
                                 Text(
                                     text = "Stats Hub", 
-                                    fontSize = 11.sp, 
+                                    fontSize = 9.sp, 
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    softWrap = false,
+                                    overflow = TextOverflow.Visible
                                 ) 
                             },
                             colors = NavigationBarItemDefaults.colors(
@@ -163,6 +193,10 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxSize()
                         )
                         AppScreen.MarketRadar -> MarketRadarScreen(
+                            viewModel = viewModel,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        AppScreen.MissionCenter -> com.example.ui.MissionCenterScreen(
                             viewModel = viewModel,
                             modifier = Modifier.fillMaxSize()
                         )

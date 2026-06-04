@@ -41,7 +41,7 @@ fun MarketRadarScreen(
     val marketRegime by viewModel.marketRegime.collectAsState()
     val shortTermInterval by viewModel.shortTermTimeframe.collectAsState()
 
-    var isBengaliMode by remember { mutableStateOf(false) }
+    val isBengali by viewModel.isBengali.collectAsState()
 
     LazyColumn(
         modifier = modifier
@@ -76,7 +76,7 @@ fun MarketRadarScreen(
 
                 // Inline language switcher
                 Button(
-                    onClick = { isBengaliMode = !isBengaliMode },
+                    onClick = { viewModel.toggleLanguage() },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = DarkSurface,
                         contentColor = CryptoCyan
@@ -87,7 +87,7 @@ fun MarketRadarScreen(
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp)
                 ) {
                     Text(
-                        text = if (isBengaliMode) "English" else "বাংলা",
+                        text = if (isBengali) "English" else "বাংলা",
                         fontWeight = FontWeight.Bold,
                         fontSize = 11.sp
                     )
@@ -117,7 +117,7 @@ fun MarketRadarScreen(
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = if (isBengaliMode) "অন-চেইন বাজার পরিস্থিতি" else "CURRENT MARKET REGIME",
+                            text = if (isBengali) "অন-চেইন বাজার পরিস্থিতি" else "CURRENT MARKET REGIME",
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextSecondary,
@@ -146,7 +146,7 @@ fun MarketRadarScreen(
                     .padding(12.dp)
             ) {
                 Text(
-                    text = if (isBengaliMode) "সংক্ষিপ্ত সময়ের ওরাকল স্ক্যাল্পস" else "SHORT-TERM SCALP ORACLE",
+                    text = if (isBengali) "সংক্ষিপ্ত সময়ের ওরাকল স্ক্যাল্পস" else "SHORT-TERM SCALP ORACLE",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary,
@@ -192,7 +192,7 @@ fun MarketRadarScreen(
 
                 // Short Term Signals Display List
                 val displayWindow = listOf("1M", "5M", "15M", "30M")[shortTermInterval]
-                ShortTermOpportunisticSignalsSection(timeframe = displayWindow, isBengali = isBengaliMode)
+                ShortTermOpportunisticSignalsSection(timeframe = displayWindow, isBengali = isBengali, viewModel = viewModel)
             }
         }
 
@@ -204,7 +204,7 @@ fun MarketRadarScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (isBengaliMode) "তাত্ক্ষণিক পরিমাণগত রাডার বার্তা" else "REAL-TIME ALERTS FEED",
+                    text = if (isBengali) "তাত্ক্ষণিক পরিমাণগত রাডার বার্তা" else "REAL-TIME ALERTS FEED",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = CryptoCyan,
@@ -219,7 +219,7 @@ fun MarketRadarScreen(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = if (isBengaliMode) "অটো-স্ক্যানিং" else "AUTO-SCANNING",
+                        text = if (isBengali) "অটো-স্ক্যানিং" else "AUTO-SCANNING",
                         fontSize = 9.sp,
                         color = TextMuted,
                         fontWeight = FontWeight.Bold
@@ -238,7 +238,7 @@ fun MarketRadarScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (isBengaliMode) "রাডার সক্রিয় করা হচ্ছে। নতুন সিগন্যালের সন্ধান চলছে..." else "Initializing quantum radar... searching for breakouts...",
+                        text = if (isBengali) "রাডার সক্রিয় করা হচ্ছে। নতুন সিগন্যালের সন্ধান চলছে..." else "Initializing quantum radar... searching for breakouts...",
                         fontSize = 12.sp,
                         color = TextMuted,
                         textAlign = TextAlign.Center
@@ -247,33 +247,34 @@ fun MarketRadarScreen(
             }
         } else {
             items(radarAlerts, key = { it.id }) { alert ->
-                RadarAlertCard(alert = alert, isBengali = isBengaliMode)
+                RadarAlertCard(alert = alert, isBengali = isBengali)
             }
         }
     }
 }
 
 @Composable
-fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean) {
+fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, viewModel: CryptoViewModel) {
     var expandedKey by remember { mutableStateOf<String?>(null) }
+    val livePrices by viewModel.livePrices.collectAsState()
 
     // Top 3 dynamic simulation metrics
     val spotScalps = listOf(
-        Triple("Bitcoin", "BTC", 66520.0),
-        Triple("Ethereum", "ETH", 3482.0),
-        Triple("Solana", "SOL", 164.2)
+        Triple("Bitcoin", "BTC", livePrices["BTCUSDT"] ?: 66520.0),
+        Triple("Ethereum", "ETH", livePrices["ETHUSDT"] ?: 3482.0),
+        Triple("Solana", "SOL", livePrices["SOLUSDT"] ?: 164.2)
     )
 
     val longScalps = listOf(
-        Triple("Render Token", "RNDR", 8.45),
-        Triple("NEAR Protocol", "NEAR", 6.12),
-        Triple("Floki", "FLOKI", 0.000215)
+        Triple("Render Token", "RNDR", livePrices["RNDRUSDT"] ?: 8.45),
+        Triple("NEAR Protocol", "NEAR", livePrices["NEARUSDT"] ?: 6.12),
+        Triple("Floki", "FLOKI", livePrices["FLOKIUSDT"] ?: 0.000215)
     )
 
     val shortScalps = listOf(
-        Triple("Cardano", "ADA", 0.45),
-        Triple("Dogecoin", "DOGE", 0.125),
-        Triple("Arbitrum", "ARB", 0.95)
+        Triple("Cardano", "ADA", livePrices["ADAUSDT"] ?: 0.45),
+        Triple("Dogecoin", "DOGE", livePrices["DOGEUSDT"] ?: 0.125),
+        Triple("Arbitrum", "ARB", livePrices["ARBUSDT"] ?: 0.95)
     )
 
     val spotDetails = listOf(
@@ -448,6 +449,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean) 
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Text(text = "Live: $${formatPrice(basePrice)}", fontSize = 10.sp, color = TextSecondary)
                             Text(
                                 text = if (isBengali) "বিশ্লেষণ দেখতে ট্যাপ করুন" else "Tap for Deep Quant Info",
                                 fontSize = 8.sp,
@@ -553,6 +555,24 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean) 
                         color = TextSecondary,
                         lineHeight = 16.sp
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    val mission = remember(symbol, target) {
+                        com.example.model.Mission(
+                            coinSymbol = symbol,
+                            type = "LONG",
+                            marketType = "Spot",
+                            entryPrice = basePrice,
+                            currentPrice = basePrice,
+                            targets = formatPrice(target),
+                            stopLoss = formatPrice(basePrice * 0.98), // approximate 2%
+                            confidence = details["prob"]?.replace("%", "")?.toIntOrNull() ?: 80,
+                            aiStatusEnglish = "Radar Spot setup active.",
+                            aiStatusBengali = "রাডার স্পট সেটআপ সক্রিয়।"
+                        )
+                    }
+                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission)
                 }
             }
         }
@@ -605,6 +625,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean) 
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Text(text = "Live: $${formatPrice(basePrice)}", fontSize = 10.sp, color = TextSecondary)
                             Text(
                                 text = if (isBengali) "বিশ্লেষণ দেখতে ট্যাপ করুন" else "Tap for Deep Quant Info",
                                 fontSize = 8.sp,
@@ -710,6 +731,24 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean) 
                         color = TextSecondary,
                         lineHeight = 16.sp
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    val mission = remember(symbol, target) {
+                        com.example.model.Mission(
+                            coinSymbol = symbol,
+                            type = "LONG",
+                            marketType = "Futures",
+                            entryPrice = basePrice,
+                            currentPrice = basePrice,
+                            targets = formatPrice(target),
+                            stopLoss = formatPrice(basePrice * 0.98), // approximate 2%
+                            confidence = details["prob"]?.replace("%", "")?.toIntOrNull() ?: 80,
+                            aiStatusEnglish = "Radar Long setup active.",
+                            aiStatusBengali = "রাডার লং সেটআপ সক্রিয়।"
+                        )
+                    }
+                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission)
                 }
             }
         }
@@ -762,6 +801,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean) 
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Text(text = "Live: $${formatPrice(basePrice)}", fontSize = 10.sp, color = TextSecondary)
                             Text(
                                 text = if (isBengali) "বিশ্লেষণ দেখতে ট্যাপ করুন" else "Tap for Deep Quant Info",
                                 fontSize = 8.sp,
@@ -867,6 +907,24 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean) 
                         color = TextSecondary,
                         lineHeight = 16.sp
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    val mission = remember(symbol, target) {
+                        com.example.model.Mission(
+                            coinSymbol = symbol,
+                            type = "SHORT",
+                            marketType = "Futures",
+                            entryPrice = basePrice,
+                            currentPrice = basePrice,
+                            targets = formatPrice(target),
+                            stopLoss = formatPrice(basePrice * 1.02), // approximate 2%
+                            confidence = details["prob"]?.replace("%", "")?.toIntOrNull() ?: 80,
+                            aiStatusEnglish = "Radar Short setup active.",
+                            aiStatusBengali = "রাডার শর্ট সেটআপ সক্রিয়।"
+                        )
+                    }
+                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission)
                 }
             }
         }

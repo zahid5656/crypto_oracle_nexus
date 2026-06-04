@@ -6,9 +6,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_crypto_oracle_logo_1780253119065"
+        android:icon="@drawable/ic_app_logo_ai"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/ic_crypto_oracle_logo_1780253119065"
+        android:roundIcon="@drawable/ic_app_logo_ai"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen"
         android:usesCleartextTraffic="true">

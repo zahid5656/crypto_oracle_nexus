@@ -1,9 +1,13 @@
 package com.example.ui
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.example.R
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
@@ -17,14 +21,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -37,6 +44,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.ui.graphics.Brush
 import com.example.model.FuturesSignal
 import com.example.model.OracleAnalysisResponse
 import com.example.model.SpotSignal
@@ -53,6 +69,7 @@ fun AnalysisScreen(
     modifier: Modifier = Modifier
 ) {
     val analysisState by viewModel.analysisState.collectAsState()
+    val isBengali by viewModel.isBengali.collectAsState()
 
     androidx.activity.compose.BackHandler {
         viewModel.navigateTo(AppScreen.Home)
@@ -65,9 +82,11 @@ fun AnalysisScreen(
     ) {
         when (val state = analysisState) {
             is AnalysisState.Idle -> {
-                LaunchedEffect(Unit) {
-                    viewModel.runScanner()
-                }
+                val initData by viewModel.newsFeedData.collectAsState()
+                PredictionDashboard(
+                    data = initData,
+                    viewModel = viewModel
+                )
             }
             is AnalysisState.Analyzing -> {
                 AnalyzingTelemetryScreen(stepMessage = state.statusMessage)
@@ -94,35 +113,35 @@ fun AnalyzingTelemetryScreen(stepMessage: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.size(120.dp)
+            modifier = Modifier.size(64.dp)
         ) {
             CircularProgressIndicator(
                 color = CryptoCyan,
-                strokeWidth = 6.dp,
+                strokeWidth = 4.dp,
                 modifier = Modifier.fillMaxSize()
             )
             Icon(
                 imageVector = Icons.Default.Refresh,
                 contentDescription = "Calculating scanner metrics",
                 tint = CryptoCyan,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text(
             text = "SCANNING SIGNAL MATRIX",
-            fontSize = 13.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             color = CryptoCyan,
-            letterSpacing = 2.sp,
+            letterSpacing = 1.sp,
             textAlign = TextAlign.Center
         )
 
@@ -130,19 +149,19 @@ fun AnalyzingTelemetryScreen(stepMessage: String) {
 
         Text(
             text = stepMessage,
-            fontSize = 16.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
             color = TextPrimary,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         // Futuristic decorative log box
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(0.9f)
                 .background(DarkSurface, RoundedCornerShape(12.dp))
                 .border(1.dp, BorderColor, RoundedCornerShape(12.dp))
                 .padding(16.dp),
@@ -150,15 +169,15 @@ fun AnalyzingTelemetryScreen(stepMessage: String) {
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(modifier = Modifier.size(6.dp).background(CryptoGreen, CircleShape).align(Alignment.CenterVertically))
-                Text(text = "RSI Relative indicators calculated", fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = TextSecondary)
+                Text(text = "RSI Relative indicators calculated", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = TextSecondary)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(modifier = Modifier.size(6.dp).background(CryptoGreen, CircleShape).align(Alignment.CenterVertically))
-                Text(text = "MACD trend histograms synchronized", fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = TextSecondary)
+                Text(text = "MACD trend histograms synchronized", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = TextSecondary)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(modifier = Modifier.size(6.dp).background(CryptoCyan, CircleShape).align(Alignment.CenterVertically))
-                Text(text = "Evaluating historical probability metrics", fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = TextSecondary)
+                Text(text = "Evaluating historical probability metrics", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = TextSecondary)
             }
         }
     }
@@ -227,6 +246,100 @@ fun PredictionDashboard(
             }
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Condensed AI Modality and Scan Button
+        val useAiOracle by viewModel.useAiOracle.collectAsState()
+        val lastScanTime by viewModel.lastScanTime.collectAsState()
+        
+        val now = System.currentTimeMillis()
+        val diffSecs = (now - lastScanTime) / 1000
+        val diffMins = diffSecs / 60
+        val timeString = if (diffMins > 0) "$diffMins mins ago" else "$diffSecs secs ago"
+        
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Modality Switch Side
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_app_logo_ai),
+                    contentDescription = "AI Oracle Modality Logo",
+                    modifier = Modifier.size(24.dp).clip(RoundedCornerShape(4.dp))
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Column {
+                    Text(
+                        text = "AI ORACLE MODALITY",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        text = if (useAiOracle) "Deep Gemini Sentient API" else "Fast Technical Simulator local",
+                        fontSize = 9.sp,
+                        color = if (useAiOracle) CryptoCyan else TextSecondary
+                    )
+                    Text(
+                        text = "Last Scan: $timeString",
+                        fontSize = 9.sp,
+                        color = TextSecondary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Spacer(modifier = Modifier.width(6.dp))
+                Switch(
+                    checked = useAiOracle,
+                    onCheckedChange = { viewModel.toggleOracleMode(it) },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = CryptoCyan,
+                        uncheckedThumbColor = TextMuted,
+                        uncheckedTrackColor = DarkSurface
+                    ),
+                    modifier = Modifier.scale(0.7f)
+                )
+            }
+            
+            // Scan Button
+            Button(
+                onClick = { viewModel.runScanner() },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE2E8F0), // Near white
+                    contentColor = DarkBackground
+                ),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                modifier = Modifier
+                    .height(36.dp)
+                    .graphicsLayer {
+                        shadowElevation = 8.dp.toPx()
+                        shape = RoundedCornerShape(8.dp)
+                    }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = Color(0xFF0F172A)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Scan Now",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF0F172A),
+                    letterSpacing = 0.5.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         // Category Tab Selectors (A: Spot Trading, B: Futures Trading)
         Row(
             modifier = Modifier
@@ -277,7 +390,8 @@ fun PredictionDashboard(
 
                         SpotTradingList(
                             signals = sortedSpot,
-                            timeframeIndex = spotTimeframe
+                            timeframeIndex = spotTimeframe,
+                            viewModel = viewModel
                         )
                     }
                 }
@@ -325,7 +439,8 @@ fun PredictionDashboard(
 
                         FuturesTradingList(
                             signals = sortedFutures,
-                            timeframeIndex = futuresTimeframe
+                            timeframeIndex = futuresTimeframe,
+                            viewModel = viewModel
                         )
                     }
                 }
@@ -410,8 +525,9 @@ fun SubTabButton(
 }
 
 @Composable
-fun SpotTradingList(signals: List<SpotSignal>, timeframeIndex: Int) {
+fun SpotTradingList(signals: List<SpotSignal>, timeframeIndex: Int, viewModel: CryptoViewModel) {
     val oraclePick = signals.maxByOrNull { it.opportunityScore }
+    val livePrices by viewModel.livePrices.collectAsState()
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -419,7 +535,7 @@ fun SpotTradingList(signals: List<SpotSignal>, timeframeIndex: Int) {
     ) {
         if (oraclePick != null) {
             item {
-                OraclePickCard(asset = oraclePick, timeframeIndex = timeframeIndex)
+                OraclePickCard(asset = oraclePick, timeframeIndex = timeframeIndex, viewModel = viewModel, livePrices = livePrices)
             }
             item {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -434,14 +550,17 @@ fun SpotTradingList(signals: List<SpotSignal>, timeframeIndex: Int) {
             }
         }
         items(signals) { coin ->
-            SpotItemCard(coin, timeframeIndex = timeframeIndex)
+            SpotItemCard(coin, timeframeIndex = timeframeIndex, viewModel = viewModel, livePrices = livePrices)
         }
     }
 }
 
 @Composable
-fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int) {
+fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewModel, livePrices: Map<String, Double>) {
+    val isBengali by viewModel.isBengali.collectAsState()
     var isExpanded by remember { mutableStateOf(false) }
+    
+    val livePrice = livePrices["${coin.coinSymbol}USDT"] ?: coin.currentPrice
 
     val confidence = when(timeframeIndex) {
         0 -> coin.confidencePct
@@ -563,12 +682,13 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Column 1: ENTRY (LOCKED)
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = priceDiffLabel,
+                        text = "ENTRY (LOCKED)",
                         fontSize = 9.sp,
                         color = TextSecondary,
                         fontWeight = FontWeight.Normal,
@@ -576,11 +696,11 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int) {
                         maxLines = 1
                     )
                     Text(
-                        text = formatPrice(prevPrice),
+                        text = formatPrice(coin.currentPrice),
                         fontFamily = FontFamily.Monospace,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
+                        color = TextMuted,
                         modifier = Modifier.padding(top = 2.dp),
                         maxLines = 1,
                         softWrap = false
@@ -606,7 +726,7 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int) {
                         fontFamily = FontFamily.Monospace,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
+                        color = Color.White,
                         modifier = Modifier.padding(top = 2.dp),
                         maxLines = 1,
                         softWrap = false
@@ -711,10 +831,15 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int) {
                         else -> 168
                     }
                     RealTimeCountdown(coin.coinSymbol, hours)
-
+                    
                     Spacer(modifier = Modifier.height(16.dp))
-
-                    LiveTrackingModule(coin, timeframeIndex)
+                    
+                    RealTimeInvestmentTrackingModule(
+                        entryPrice = coin.currentPrice,
+                        projectedPrice = projectedPrice,
+                        isLong = true,
+                        currentPrice = livePrice
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -759,7 +884,25 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    AiExplanationModule(coin.whyThisSignalEnglish, coin.whyThisSignalBengali, coin.coinSymbol)
+                    AiExplanationModule(coin.whyThisSignalEnglish, coin.whyThisSignalBengali, coin.coinSymbol, isBengali) { viewModel.toggleLanguage() }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    val mission = remember(coin, projectedPrice) {
+                        com.example.model.Mission(
+                            coinSymbol = coin.coinSymbol,
+                            type = "LONG",
+                            marketType = "Spot",
+                            entryPrice = coin.currentPrice,
+                            currentPrice = coin.currentPrice,
+                            targets = formatPrice(projectedPrice),
+                            stopLoss = formatPrice(coin.invalidationPrice),
+                            confidence = confidence,
+                            aiStatusEnglish = "Spot trade holding strong.\nNo signs of reversal.",
+                            aiStatusBengali = "স্পট ট্রেড মজবুত রয়েছে।\nরিভার্সালের কোনো লক্ষণ নেই।"
+                        )
+                    }
+                    StartTradeFlow(viewModel = viewModel, mission = mission)
                 }
             }
         }
@@ -767,8 +910,119 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int) {
 }
 
 @Composable
-fun FuturesTradingList(signals: List<FuturesSignal>, timeframeIndex: Int) {
+fun StartTradeFlow(viewModel: CryptoViewModel, mission: com.example.model.Mission) {
+    var step by remember { mutableStateOf(0) }
+
+    if (step == 1) {
+        val verifiedEntryLocked = remember { mission.entryPrice }
+        
+        AlertDialog(
+            onDismissRequest = { step = 0 },
+            title = { Text("Verify Trade Details", color = CryptoCyan, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+            text = {
+                Column {
+                    Text("Direction: ${mission.type} (${mission.marketType})", color = TextSecondary, fontSize = 14.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Locked Entry Price:", color = TextSecondary, fontSize = 12.sp)
+                    Text(String.format("$%.4f", verifiedEntryLocked), color = TextPrimary, fontSize = 24.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Once accepted, live updating stops for this entry and the execution journal activates.", color = AccentGold, fontSize = 10.sp)
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    viewModel.startMission(mission.copy(id = java.util.UUID.randomUUID().toString(), entryPrice = verifiedEntryLocked, startTime = System.currentTimeMillis()))
+                    viewModel.sendLocalAlert("Mission Started", "AI intelligence system successfully started monitoring ${mission.coinSymbol}")
+                    step = 0
+                }, colors = ButtonDefaults.buttonColors(containerColor = CryptoGreen)) {
+                    Text("CONFIRM MISSION", fontWeight = FontWeight.Black, color = DarkBackground)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { step = 0 }) {
+                    Text("Cancel", color = TextSecondary)
+                }
+            },
+            containerColor = DarkSurface,
+            titleContentColor = TextPrimary,
+            textContentColor = TextSecondary
+        )
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End
+    ) {
+        val interactionSource = remember { MutableInteractionSource() }
+        val isPressed by interactionSource.collectIsPressedAsState()
+        val scale by animateFloatAsState(
+            targetValue = if (isPressed) 0.97f else 1f,
+            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+            label = "ButtonScale"
+        )
+        
+        // Pulse glow
+        val infiniteTransition = rememberInfiniteTransition(label = "Pulse")
+        val pulseAlpha by infiniteTransition.animateFloat(
+            initialValue = 0.5f,
+            targetValue = 0.8f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(1500, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "PulseAlpha"
+        )
+
+        Box(
+            modifier = Modifier
+                .scale(scale)
+                .height(36.dp)
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            CryptoCyan.copy(alpha = pulseAlpha), 
+                            CryptoGreen.copy(alpha = pulseAlpha)
+                        )
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    color = Color.White.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = LocalIndication.current,
+                    onClick = { step = 1 }
+                )
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Start Trade",
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "ACCEPT SIGNAL",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 11.sp,
+                    color = Color.White,
+                    letterSpacing = 1.2.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FuturesTradingList(signals: List<FuturesSignal>, timeframeIndex: Int, viewModel: CryptoViewModel) {
     val oraclePick = signals.maxByOrNull { it.opportunityScore }
+    val livePrices by viewModel.livePrices.collectAsState()
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -776,7 +1030,7 @@ fun FuturesTradingList(signals: List<FuturesSignal>, timeframeIndex: Int) {
     ) {
         if (oraclePick != null) {
             item {
-                OraclePickCard(asset = oraclePick, timeframeIndex = timeframeIndex)
+                OraclePickCard(asset = oraclePick, timeframeIndex = timeframeIndex, viewModel = viewModel, livePrices = livePrices)
             }
             item {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -791,14 +1045,17 @@ fun FuturesTradingList(signals: List<FuturesSignal>, timeframeIndex: Int) {
             }
         }
         items(signals) { coin ->
-            FuturesItemCard(coin, timeframeIndex = timeframeIndex)
+            FuturesItemCard(coin, timeframeIndex = timeframeIndex, viewModel = viewModel, livePrices = livePrices)
         }
     }
 }
 
 @Composable
-fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int) {
+fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoViewModel, livePrices: Map<String, Double>) {
+    val isBengali by viewModel.isBengali.collectAsState()
     var isExpanded by remember { mutableStateOf(false) }
+    
+    val livePrice = livePrices["${coin.coinSymbol}USDT"] ?: coin.currentPrice
 
     val isLong = coin.isLong
     
@@ -925,15 +1182,15 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Column 1: CURRENT PRICE (Left Aligned)
+                // Column 1: ENTRY (LOCKED)
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = "CURRENT PRICE",
+                        text = "ENTRY (LOCKED)",
                         fontSize = 9.sp,
-                        color = if (isLong) TextSecondary else Color(0xFFD1D5DB), // Enhanced high contrast grey
+                        color = if (isLong) TextSecondary else Color(0xFFD1D5DB),
                         fontWeight = FontWeight.Normal,
                         letterSpacing = 0.5.sp,
                         maxLines = 1
@@ -943,7 +1200,7 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int) {
                         fontFamily = FontFamily.Monospace,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
+                        color = TextMuted,
                         modifier = Modifier.padding(top = 2.dp),
                         maxLines = 1,
                         softWrap = false
@@ -952,10 +1209,37 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int) {
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // Column 2: EXPECTED GAIN/DROP (Center Aligned)
+                // Column 2: CURRENT PRICE
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "CURRENT PRICE",
+                        fontSize = 9.sp,
+                        color = if (isLong) TextSecondary else Color(0xFFD1D5DB),
+                        fontWeight = FontWeight.Normal,
+                        letterSpacing = 0.5.sp,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = formatPrice(coin.currentPrice),
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier.padding(top = 2.dp),
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Column 3: EXPECTED GAIN/DROP
                 Column(
                     modifier = Modifier.weight(1.1f),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.End
                 ) {
                     Text(
                         text = changeLabel,
@@ -1033,9 +1317,12 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int) {
                     RealTimeCountdown(coin.coinSymbol, hours)
 
                     Spacer(modifier = Modifier.height(16.dp))
-
-                    LiveTrackingFuturesModule(coin, timeframeIndex)
-
+                    RealTimeInvestmentTrackingModule(
+                        entryPrice = coin.currentPrice,
+                        projectedPrice = targetPrice,
+                        isLong = isLong,
+                        currentPrice = livePrice
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
 
                     LeverageIntelligenceModule(coin)
@@ -1083,7 +1370,25 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    AiExplanationModule(coin.whyThisSignalEnglish, coin.whyThisSignalBengali, coin.coinSymbol)
+                    AiExplanationModule(coin.whyThisSignalEnglish, coin.whyThisSignalBengali, coin.coinSymbol, isBengali) { viewModel.toggleLanguage() }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    val mission = remember(coin, targetPrice, isLong) {
+                        com.example.model.Mission(
+                            coinSymbol = coin.coinSymbol,
+                            type = if (isLong) "LONG" else "SHORT",
+                            marketType = "Futures",
+                            entryPrice = coin.currentPrice,
+                            currentPrice = coin.currentPrice,
+                            targets = formatPrice(targetPrice),
+                            stopLoss = formatPrice(coin.invalidationPrice),
+                            confidence = probability,
+                            aiStatusEnglish = if (isLong) "Bullish convergence intact." else "Bearish momentum building.",
+                            aiStatusBengali = if (isLong) "বুলিশ কনভারজেন্স অটুট রয়েছে।" else "বেয়ারিশ মোমেন্টাম তৈরি হচ্ছে।"
+                        )
+                    }
+                    StartTradeFlow(viewModel = viewModel, mission = mission)
                 }
             }
         }
@@ -1091,7 +1396,8 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int) {
 }
 
 @Composable
-fun OraclePickCard(asset: Any, timeframeIndex: Int) {
+fun OraclePickCard(asset: Any, timeframeIndex: Int, viewModel: CryptoViewModel, livePrices: Map<String, Double> = emptyMap()) {
+    val isBengali by viewModel.isBengali.collectAsState()
     var isExpanded by remember { mutableStateOf(false) }
     val isFutures = asset is FuturesSignal
     val isLong = if (asset is FuturesSignal) asset.isLong else true
@@ -1106,11 +1412,12 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int) {
         is FuturesSignal -> asset.coinSymbol
         else -> ""
     }
-    val curPrice = when (asset) {
+    val entryPrice = when (asset) {
         is SpotSignal -> asset.currentPrice
         is FuturesSignal -> asset.currentPrice
         else -> 0.0
     }
+    val curPrice = livePrices["${symbol}USDT"] ?: entryPrice
 
     val potential = when (asset) {
         is SpotSignal -> when(timeframeIndex) {
@@ -1134,12 +1441,12 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int) {
     }
 
     val projPrice = when (asset) {
-        is SpotSignal -> curPrice * (1.0 + potential / 100.0)
+        is SpotSignal -> entryPrice * (1.0 + potential / 100.0)
         is FuturesSignal -> {
             if (isLong) {
-                curPrice * (1.0 + potential / 100.0)
+                entryPrice * (1.0 + potential / 100.0)
             } else {
-                curPrice * (1.0 - potential / 100.0)
+                entryPrice * (1.0 - potential / 100.0)
             }
         }
         else -> 0.0
@@ -1186,6 +1493,7 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int) {
 
                 Box(
                     modifier = Modifier
+                        .wrapContentWidth()
                         .background(AccentGold.copy(alpha = 0.15f), RoundedCornerShape(6.dp))
                         .padding(horizontal = 8.dp, vertical = 2.dp)
                 ) {
@@ -1303,13 +1611,11 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int) {
                     RealTimeCountdown(symbol, hours)
 
                     Spacer(modifier = Modifier.height(16.dp))
+                    RealTimeInvestmentTrackingModule(entryPrice = entryPrice, projectedPrice = projPrice, isLong = isLong, currentPrice = curPrice)
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     if (isFutures && asset is FuturesSignal) {
-                        LiveTrackingFuturesModule(asset, timeframeIndex)
-                        Spacer(modifier = Modifier.height(16.dp))
                         LeverageIntelligenceModule(asset)
-                    } else if (asset is SpotSignal) {
-                        LiveTrackingModule(asset, timeframeIndex)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -1350,9 +1656,108 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int) {
                         is FuturesSignal -> asset.whyThisSignalBengali
                         else -> ""
                     }
-                    AiExplanationModule(whyEn, whyBn, symbol)
+                    AiExplanationModule(whyEn, whyBn, symbol, isBengali) { viewModel.toggleLanguage() }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    val mission = remember(asset, projPrice, isLong) {
+                        val invalidation = when (asset) {
+                            is SpotSignal -> asset.invalidationPrice
+                            is FuturesSignal -> asset.invalidationPrice
+                            else -> 0.0
+                        }
+                        val conf = when (asset) {
+                            is SpotSignal -> asset.confidencePct
+                            is FuturesSignal -> asset.probabilityPct
+                            else -> 80
+                        }
+                        com.example.model.Mission(
+                            coinSymbol = symbol,
+                            type = if (isLong) "LONG" else "SHORT",
+                            marketType = if (isFutures) "Futures" else "Spot",
+                            entryPrice = curPrice,
+                            currentPrice = curPrice,
+                            targets = formatPrice(projPrice),
+                            stopLoss = formatPrice(invalidation),
+                            confidence = conf,
+                            aiStatusEnglish = "Oracle Pick active monitoring.",
+                            aiStatusBengali = "ওরাকল পিক সক্রিয় পর্যবেক্ষণ।"
+                        )
+                    }
+                    StartTradeFlow(viewModel = viewModel, mission = mission)
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun RealTimeInvestmentTrackingModule(
+    entryPrice: Double,
+    projectedPrice: Double,
+    isLong: Boolean,
+    currentPrice: Double
+) {
+    val progress = ((currentPrice - entryPrice) / (projectedPrice - entryPrice)).coerceIn(0.0, 1.0)
+    val currentRoi = if (entryPrice > 0) ((currentPrice - entryPrice) / entryPrice) * 100 * (if(isLong) 1 else -1) else 0.0
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, BorderColor),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "REAL-TIME INVESTMENT TRACKING",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Black,
+                color = CryptoCyan,
+                letterSpacing = 1.sp,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(horizontalAlignment = Alignment.Start) {
+                    Text(text = "ENTRY (LOCKED)", fontSize = 9.sp, color = TextSecondary)
+                    Text(text = formatPrice(entryPrice), fontFamily = FontFamily.Monospace, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextMuted)
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = Modifier.size(6.dp).background(CryptoGreen, shape = CircleShape))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = "LIVE PRICE", fontSize = 9.sp, color = TextSecondary)
+                        Text(text = formatPrice(currentPrice), fontFamily = FontFamily.Monospace, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                }
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(text = "CURRENT ROI", fontSize = 9.sp, color = CryptoGreen)
+                    Text(text = String.format("%s%.2f%%", if(currentRoi >= 0) "+" else "", currentRoi), fontFamily = FontFamily.Monospace, fontSize = 13.sp, fontWeight = FontWeight.Black, color = CryptoGreen)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = "Target Progress", fontSize = 10.sp, color = TextSecondary)
+                Text(text = String.format("%.1f%% achieved", progress * 100), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = CryptoGreen)
+            }
+
+            LinearProgressIndicator(
+                progress = progress.toFloat(),
+                modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                color = CryptoGreen,
+                trackColor = BorderColor
+            )
         }
     }
 }
@@ -1375,7 +1780,12 @@ fun RealTimeCountdown(coinSymbol: String, totalDurationHours: Int) {
     val minutes = (remainingSeconds % 3600) / 60
     val seconds = remainingSeconds % 60
 
-    val timeText = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+    val isLongTerm = totalDurationHours >= 4
+    val timeText = if (isLongTerm) {
+        String.format("%02dh %02dm", hours, minutes)
+    } else {
+        String.format("%02d:%02d", minutes, seconds)
+    }
     val pctRemaining = remainingSeconds.toFloat() / (totalDurationHours * 3600f)
 
     Column {
@@ -1411,180 +1821,7 @@ fun RealTimeCountdown(coinSymbol: String, totalDurationHours: Int) {
     }
 }
 
-@Composable
-fun LiveTrackingModule(coin: SpotSignal, timeframeIndex: Int) {
-    val scaleFactor = when(timeframeIndex) {
-        0 -> 1.0
-        1 -> 1.8
-        2 -> 3.2
-        3 -> 7.5
-        else -> 12.0
-    }
-    val prevPrice = coin.currentPrice * (1.0 - (coin.growthPotentialPct * 0.1 * scaleFactor).coerceIn(0.01, 0.4))
-    val entryPrice = prevPrice
-    val currentPrice = coin.currentPrice
 
-    val growthPotential = when(timeframeIndex) {
-        0 -> coin.growthPotentialPct
-        1 -> coin.growthPotentialTwelveHoursPct ?: (coin.growthPotentialPct * 1.5)
-        2 -> coin.growthPotentialPct * 2.2
-        3 -> coin.growthPotentialPct * 3.5
-        else -> coin.growthPotentialPct * 5.0
-    }
-    val projectedPrice = coin.currentPrice * (1.0 + growthPotential / 100.0)
-
-    val currentRoi = ((currentPrice - entryPrice) / entryPrice) * 100
-
-    Card(
-        colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant),
-        modifier = Modifier.fillMaxWidth().border(1.dp, BorderColor, RoundedCornerShape(12.dp))
-    ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Text(
-                text = "REAL-TIME INVESTMENT TRACKING",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = CryptoCyan,
-                letterSpacing = 1.sp
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                    Text(text = "ENTRY (LOCKED)", fontSize = 9.sp, color = TextSecondary)
-                    Text(text = formatPrice(entryPrice), fontFamily = FontFamily.Monospace, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "LIVE PRICE", fontSize = 9.sp, color = TextSecondary)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(modifier = Modifier.size(6.dp).background(CryptoGreen, CircleShape))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = formatPrice(currentPrice), fontFamily = FontFamily.Monospace, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                    }
-                }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "CURRENT ROI", fontSize = 9.sp, color = if (currentRoi >= 0) CryptoGreen else CryptoRedText)
-                    Text(
-                        text = String.format("%+.2f%%", currentRoi),
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Black,
-                        color = if (currentRoi >= 0) CryptoGreen else CryptoRedText
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Progress bar to Target Price
-            val totalDistance = projectedPrice - entryPrice
-            val currentDistance = currentPrice - entryPrice
-            val pctToTarget = if (totalDistance != 0.0) (currentDistance / totalDistance).coerceIn(0.0, 1.0).toFloat() else 0f
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Target Progress", fontSize = 10.sp, color = TextSecondary)
-                Text(text = String.format("%.1f%% achieved", pctToTarget * 100f), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = CryptoGreen)
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-            LinearProgressIndicator(
-                progress = pctToTarget,
-                color = CryptoGreen,
-                trackColor = BorderColor,
-                modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp))
-            )
-        }
-    }
-}
-
-@Composable
-fun LiveTrackingFuturesModule(coin: FuturesSignal, timeframeIndex: Int) {
-    val isLong = coin.isLong
-    val entryPrice = if (isLong) coin.currentPrice * 0.985 else coin.currentPrice * 1.015
-    val currentPrice = coin.currentPrice
-
-    val priceChangeMultiplier = when(timeframeIndex) {
-        0 -> 1.0
-        1 -> 1.48
-        2 -> 2.1
-        3 -> 3.8
-        else -> 5.5
-    }
-    val priceChange = coin.priceChangePct * priceChangeMultiplier
-
-    val targetPrice = if (isLong) {
-        coin.currentPrice * (1.0 + (priceChange / 100.0))
-    } else {
-        coin.currentPrice * (1.0 - (priceChange / 100.0))
-    }
-
-    val rawChange = if (isLong) {
-        ((currentPrice - entryPrice) / entryPrice) * 100
-    } else {
-        ((entryPrice - currentPrice) / entryPrice) * 100
-    }
-
-    val leverage = coin.leverageBalanced
-    val currentRoi = rawChange * leverage
-
-    Card(
-        colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant),
-        modifier = Modifier.fillMaxWidth().border(1.dp, BorderColor, RoundedCornerShape(12.dp))
-    ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Text(
-                text = "FUTURES POSITION LIVE REAL-TIME METRICS",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (isLong) CryptoGreen else Color(0xFFFF3F60),
-                letterSpacing = 1.sp
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                    Text(text = "ENTRY (LOCKED)", fontSize = 9.sp, color = TextSecondary)
-                    Text(text = formatPrice(entryPrice), fontFamily = FontFamily.Monospace, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "LIVE PRICE", fontSize = 9.sp, color = TextSecondary)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(modifier = Modifier.size(6.dp).background(if (isLong) CryptoGreen else Color(0xFFFF3F60), CircleShape))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = formatPrice(currentPrice), fontFamily = FontFamily.Monospace, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                    }
-                }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "LEVERAGED ROI (${leverage}x)", fontSize = 9.sp, color = if (currentRoi >= 0) CryptoGreen else CryptoRedText)
-                    Text(
-                        text = String.format("%+.2f%%", currentRoi),
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Black,
-                        color = if (currentRoi >= 0) CryptoGreen else CryptoRedText
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            val totalDistance = (targetPrice - entryPrice).absoluteValue
-            val currentDistance = (currentPrice - entryPrice).absoluteValue
-            val pctToTarget = if (totalDistance != 0.0) (currentDistance / totalDistance).coerceIn(0.0, 1.0).toFloat() else 0f
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Target Progress", fontSize = 10.sp, color = TextSecondary)
-                Text(text = String.format("%.1f%% achieved", pctToTarget * 100f), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = if (isLong) CryptoGreen else Color(0xFFFF3F60))
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-            LinearProgressIndicator(
-                progress = pctToTarget,
-                color = if (isLong) CryptoGreen else Color(0xFFFF3F60),
-                trackColor = BorderColor,
-                modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp))
-            )
-        }
-    }
-}
 
 @Composable
 fun MultiAiConsensusModule(coinSymbol: String, oracleScore: Int, isLong: Boolean) {
@@ -1892,9 +2129,7 @@ fun generateMultiTimeframeForecasts(currentPrice: Double, isLong: Boolean, price
 }
 
 @Composable
-fun AiExplanationModule(whyEnglish: String, whyBengali: String, coinSymbol: String) {
-    var isBengali by remember { mutableStateOf(false) }
-
+fun AiExplanationModule(whyEnglish: String, whyBengali: String, coinSymbol: String, isBengali: Boolean, onToggleLanguage: () -> Unit) {
     val rotation by animateFloatAsState(
         targetValue = if (isBengali) 180f else 0f,
         animationSpec = spring(stiffness = Spring.StiffnessLow)
@@ -1915,7 +2150,7 @@ fun AiExplanationModule(whyEnglish: String, whyBengali: String, coinSymbol: Stri
             )
 
             TextButton(
-                onClick = { isBengali = !isBengali },
+                onClick = onToggleLanguage,
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                 modifier = Modifier.height(28.dp)
             ) {
@@ -2129,7 +2364,7 @@ fun ScrollableTimeframeRow(
     onIntervalSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val intervals = listOf("6h", "12h", "24h", "3d", "7d")
+    val intervals = listOf("6H", "12H", "24H", "3D", "7D")
     Row(
         modifier = modifier
             .fillMaxWidth()

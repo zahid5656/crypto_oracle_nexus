@@ -99,76 +99,7 @@ object GeminiClient {
         response: OracleAnalysisResponse,
         prices: Map<String, Double>
     ): OracleAnalysisResponse {
-        if (prices.isEmpty()) return response
-        
-        val updatedSpot = response.spotSignals.map { spot ->
-            val usdtSymbol = "${spot.coinSymbol}USDT"
-            val livePrice = prices[usdtSymbol]
-            if (livePrice != null) {
-                val scale = livePrice / spot.currentPrice
-                spot.copy(
-                    currentPrice = livePrice,
-                    priceSixHoursAgo = spot.priceSixHoursAgo * scale,
-                    projectedPrice = spot.projectedPrice * scale,
-                    priceTwelveHoursAgo = (spot.priceTwelveHoursAgo ?: spot.priceSixHoursAgo) * scale,
-                    projectedPriceTwelveHours = (spot.projectedPriceTwelveHours ?: spot.projectedPrice) * scale
-                )
-            } else {
-                spot
-            }
-        }
-
-        val updatedFuturesLong = response.futuresLongSignals.map { fut ->
-            val usdtSymbol = "${fut.coinSymbol}USDT"
-            val livePrice = prices[usdtSymbol]
-            if (livePrice != null) {
-                val scale = livePrice / fut.currentPrice
-                fut.copy(
-                    currentPrice = livePrice,
-                    targetPrice = fut.targetPrice * scale,
-                    targetPriceTwelveHours = (fut.targetPriceTwelveHours ?: fut.targetPrice) * scale
-                )
-            } else {
-                fut
-            }
-        }
-
-        val updatedFuturesShort = response.futuresShortSignals.map { fut ->
-            val usdtSymbol = "${fut.coinSymbol}USDT"
-            val livePrice = prices[usdtSymbol]
-            if (livePrice != null) {
-                val scale = livePrice / fut.currentPrice
-                fut.copy(
-                    currentPrice = livePrice,
-                    targetPrice = fut.targetPrice * scale,
-                    targetPriceTwelveHours = (fut.targetPriceTwelveHours ?: fut.targetPrice) * scale
-                )
-            } else {
-                fut
-            }
-        }
-
-        val updatedDeepInsights = response.deepInsights.map { insight ->
-            val usdtSymbol = "${insight.coinSymbol}USDT"
-            val livePrice = prices[usdtSymbol]
-            if (livePrice != null) {
-                val updatedTarget = if (insight.direction == "PUMP") {
-                    livePrice * (1.0 + (insight.expectedChangePct / 100.0))
-                } else {
-                    livePrice * (1.0 - (insight.expectedChangePct / 100.0))
-                }
-                insight.copy(targetPrice = updatedTarget)
-            } else {
-                insight
-            }
-        }
-
-        return response.copy(
-            spotSignals = updatedSpot,
-            futuresLongSignals = updatedFuturesLong,
-            futuresShortSignals = updatedFuturesShort,
-            deepInsights = updatedDeepInsights
-        )
+        return response
     }
 
     private val api: GeminiApiService by lazy {

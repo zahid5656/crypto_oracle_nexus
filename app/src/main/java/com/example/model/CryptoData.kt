@@ -108,3 +108,19 @@ data class RadarAlert(
     val magnitude: Double,
     val timestamp: Long = System.currentTimeMillis()
 )
+
+data class Mission(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val coinSymbol: String,
+    val type: String, // LONG, SHORT
+    val marketType: String, // Spot, Futures
+    val entryPrice: Double,
+    val currentPrice: Double,
+    val targets: String,
+    val stopLoss: String,
+    val confidence: Int,
+    val aiStatusEnglish: String = "Bullish Momentum Strong\nNo Immediate Risk Detected",
+    val aiStatusBengali: String = "বুলিশ মোমেন্টাম শক্তিশালী\nকোন তাৎক্ষণিক ঝুঁকি নেই",
+    val isNegative: Boolean = false,
+    val startTime: Long = System.currentTimeMillis()
+)

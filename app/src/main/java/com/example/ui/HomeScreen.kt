@@ -1,6 +1,10 @@
 package com.example.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -62,11 +66,7 @@ fun HomeScreen(
 ) {
     val newsFeed by viewModel.newsFeedData.collectAsState()
     val useAiOracle by viewModel.useAiOracle.collectAsState()
-    val isBengali = false // Legacy/ticker uses English by default
-
-    var isNewsBengali by remember { mutableStateOf(false) }
-    var isInsightsBengali by remember { mutableStateOf(false) }
-    var isMarketIndexBengali by remember { mutableStateOf(false) }
+    val isBengali by viewModel.isBengali.collectAsState()
 
     LazyColumn(
         modifier = modifier
@@ -81,52 +81,14 @@ fun HomeScreen(
             HeaderSection(viewModel)
         }
 
+        item {
+            RealTimePublicMarketDashboard()
+        }
+
         // Ticker for top coins: BTC, ETH, XRP
         item {
-            TopCoinsTickerSection(newsFeed, isBengali)
-        }
-
-        // AI Oracle Switch Card
-        item {
-            OracleModeControllerCard(
-                useAiOracle = useAiOracle,
-                onToggle = { viewModel.toggleOracleMode(it) }
-            )
-        }
-
-        // Action CTA: Prominent Analysis Launcher
-        item {
-            Button(
-                onClick = { viewModel.navigateTo(AppScreen.Analysis) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .testTag("analysis_button"),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = CryptoGreen,
-                    contentColor = DarkBackground
-                ),
-                shape = RoundedCornerShape(16.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Analysis scanner icon",
-                        modifier = Modifier.size(24.getValidDp())
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "RUN ORACLE SCANNER",
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp
-                    )
-                }
-            }
+            val livePrices by viewModel.livePrices.collectAsState()
+            TopCoinsTickerSection(newsFeed, isBengali, livePrices)
         }
 
         // Star Divider
@@ -148,7 +110,7 @@ fun HomeScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (isNewsBengali) "সর্বশেষ ওরাকল মার্কেট ফিড" else "LATEST ORACLE MARKET FEED",
+                    text = "LATEST ORACLE MARKET FEED",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = CryptoCyan,
@@ -159,7 +121,8 @@ fun HomeScreen(
 
         // Scrolling News List
         items(newsFeed.newsList) { article ->
-            NewsCard(article, isNewsBengali, onToggleLanguage = { isNewsBengali = !isNewsBengali })
+            var isLocalBengali by remember { mutableStateOf(false) }
+            NewsCard(article, isLocalBengali, onToggleLanguage = { isLocalBengali = !isLocalBengali })
         }
 
         // Star Divider
@@ -181,7 +144,7 @@ fun HomeScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (isInsightsBengali) "ওরাকল গভীর বিশ্লেষণাত্মক অন্তর্দৃষ্টি" else "ORACLE DEEP ANALYTICAL INSIGHTS",
+                    text = "ORACLE DEEP ANALYTICAL INSIGHTS",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = CryptoGreen,
@@ -192,10 +155,11 @@ fun HomeScreen(
 
         // Scrolling Deep Insights List
         items(newsFeed.deepInsights) { insight ->
+            var isLocalBengali by remember { mutableStateOf(false) }
             DeepInsightCard(
                 insight = insight,
-                isBengali = isInsightsBengali,
-                onToggleLanguage = { isInsightsBengali = !isInsightsBengali }
+                isBengali = isLocalBengali,
+                onToggleLanguage = { isLocalBengali = !isLocalBengali }
             )
         }
 
@@ -230,7 +194,7 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 
                 Text(
-                    text = if (isMarketIndexBengali) "ওরাকল মার্কেট সূচক" else "ORACLE MARKET INDEX",
+                    text = "ORACLE MARKET INDEX",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = AccentGold,
@@ -257,9 +221,10 @@ fun HomeScreen(
 
         // Decoupled beautiful Currency Exchange Rate tile
         item {
+            var isLocalBengali by remember { mutableStateOf(false) }
             LiveCurrencyTile(
-                isBengali = isMarketIndexBengali,
-                onToggleLanguage = { isMarketIndexBengali = !isMarketIndexBengali }
+                isBengali = isLocalBengali,
+                onToggleLanguage = { isLocalBengali = !isLocalBengali }
             )
         }
     }
@@ -289,94 +254,70 @@ private fun Int.getValidDp() = this.dp
 @Composable
 fun BangladeshTimeWidget() {
     var timeText by remember { mutableStateOf("") }
+    var dateText by remember { mutableStateOf("") }
     
     LaunchedEffect(Unit) {
         while (true) {
             val nowInDhaka = ZonedDateTime.now(ZoneId.of("Asia/Dhaka"))
-            timeText = nowInDhaka.format(DateTimeFormatter.ofPattern("hh:mm:ss a"))
+            timeText = nowInDhaka.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+            dateText = nowInDhaka.format(DateTimeFormatter.ofPattern("dd MMM yyyy")).uppercase()
             delay(1000)
         }
     }
 
-    val silverGradient = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFFFAFAFA), // Crisp Metallic White
-            Color(0xFFBDC3C7), // Silver
-            Color(0xFFE5E7EB)  // Soft Platinum
-        )
-    )
-
-    val gmtGradient = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFFE0E6ED), // Pale White-Blue
-            Color(0xFF94A3B8)  // Medium Slate Grey
-        )
-    )
-
     Box(
         modifier = Modifier
-            .size(60.dp) // Maintain exact square ratio matching the logo size
-            .clip(RoundedCornerShape(14.dp))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF0F172A), // Slate Black (base)
-                        Color(0xFF1E293B), // Medium 3D Shade
-                        Color(0xFF090E1A)  // Core Depth shadow
-                    )
-                )
-            )
-            .drawBehind {
-                val gridSpacing = 6.dp.toPx()
-                // Horizontal grid lines representing on-chain ledger matrix
-                var y = 0f
-                while (y < size.height) {
-                    drawLine(
-                        color = Color(0x1880FFE8), // Subtle glowing quantum teal line
-                        start = androidx.compose.ui.geometry.Offset(0f, y),
-                        end = androidx.compose.ui.geometry.Offset(size.width, y),
-                        strokeWidth = 1f
-                    )
-                    y += gridSpacing
-                }
-                // Vertical grid lines
-                var x = 0f
-                while (x < size.width) {
-                    drawLine(
-                        color = Color(0x1880FFE8),
-                        start = androidx.compose.ui.geometry.Offset(x, 0f),
-                        end = androidx.compose.ui.geometry.Offset(x, size.height),
-                        strokeWidth = 1f
-                    )
-                    x += gridSpacing
-                }
-            }
-            .border(1.5.dp, CryptoGreen, RoundedCornerShape(14.dp)),
+            .width(86.dp)
+            .height(50.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color(0xFF0F172A))
+            .border(1.dp, BorderColor, RoundedCornerShape(8.dp))
+            .padding(horizontal = 6.dp, vertical = 2.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(2.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = timeText,
-                fontSize = 8.sp,
-                fontWeight = FontWeight.ExtraBold,
-                style = androidx.compose.ui.text.TextStyle(brush = silverGradient),
-                maxLines = 1,
-                softWrap = false
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "BGD",
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = AccentGold
+                )
+                Text(
+                    text = dateText,
+                    fontSize = 7.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextSecondary
+                )
+            }
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "GMT+6:00",
-                fontSize = 7.5.sp,
+                text = timeText,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Black,
-                style = androidx.compose.ui.text.TextStyle(brush = gmtGradient),
-                letterSpacing = 0.5.sp,
-                maxLines = 1,
-                softWrap = false
+                color = CryptoCyan,
+                fontFamily = FontFamily.Monospace
             )
+            Spacer(modifier = Modifier.height(1.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    text = "GMT+6",
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = CryptoGreen
+                )
+            }
         }
     }
 }
@@ -386,10 +327,9 @@ fun TelemetryStatusRow(viewModel: CryptoViewModel) {
     val isLiveConnected by viewModel.isLiveConnected.collectAsState()
     val hasGeminiApiKey by viewModel.hasGeminiApiKey.collectAsState()
 
-    Row(
+    Column(
         modifier = Modifier.padding(top = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         // Network Sync status
         Row(
@@ -409,13 +349,6 @@ fun TelemetryStatusRow(viewModel: CryptoViewModel) {
                 letterSpacing = 0.5.sp
             )
         }
-
-        // Divider dot
-        Box(
-            modifier = Modifier
-                .size(2.dp)
-                .background(BorderColor, CircleShape)
-        )
 
         // Gemini Key status
         Row(
@@ -448,43 +381,43 @@ fun HeaderSection(viewModel: CryptoViewModel) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).padding(end = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Embed the generated high-quality custom png asset
             Image(
-                painter = painterResource(id = R.drawable.ic_crypto_oracle_logo_1780253119065),
-                contentDescription = "Crypto Signal Oracle logo representing deep predictive analytics",
+                painter = painterResource(id = R.drawable.ic_app_logo_ai),
+                contentDescription = "AI Trading Assistant Logo",
                 modifier = Modifier
-                    .size(60.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .border(1.5.dp, CryptoGreen, RoundedCornerShape(14.dp)),
+                    .size(42.dp) // Scaled down logo
+                    .clip(RoundedCornerShape(10.dp))
+                    .border(1.5.dp, CryptoGreen, RoundedCornerShape(10.dp)),
                 contentScale = ContentScale.Crop
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Column {
                 Text(
                     text = "Crypto Signal",
-                    fontSize = 13.sp,
+                    fontSize = 10.sp, // Reduced 2px
                     fontWeight = FontWeight.Medium,
                     color = CryptoCyan,
-                    letterSpacing = 2.sp
+                    letterSpacing = 0.5.sp
                 )
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.ExtraBold)) {
+                        withStyle(style = SpanStyle(color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)) {
                             append("Oracle ")
                         }
-                        withStyle(style = SpanStyle(color = TextSecondary, fontSize = 18.sp, fontWeight = FontWeight.Bold)) {
+                        withStyle(style = SpanStyle(color = TextSecondary, fontSize = 14.sp, fontWeight = FontWeight.Bold)) {
                             append("B")
                         }
-                        withStyle(style = SpanStyle(color = TextSecondary, fontSize = 13.sp, fontWeight = FontWeight.Medium)) {
+                        withStyle(style = SpanStyle(color = TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Medium)) {
                             append("Y ")
                         }
-                        withStyle(style = SpanStyle(color = CryptoGreen, fontSize = 18.sp, fontWeight = FontWeight.Black)) {
+                        withStyle(style = SpanStyle(color = CryptoGreen, fontSize = 14.sp, fontWeight = FontWeight.Black)) {
                             append("Z")
                         }
-                        withStyle(style = SpanStyle(color = CryptoGreen, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)) {
+                        withStyle(style = SpanStyle(color = CryptoGreen, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold)) {
                             append("AHID")
                         }
                     },
@@ -497,15 +430,16 @@ fun HeaderSection(viewModel: CryptoViewModel) {
             }
         }
         
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // Bangladesh Live Clock
-        BangladeshTimeWidget()
+        Box(
+            modifier = Modifier.padding(start = 8.dp)
+        ) {
+            BangladeshTimeWidget()
+        }
     }
 }
 
 @Composable
-fun TopCoinsTickerSection(newsFeed: OracleAnalysisResponse, isBengali: Boolean) {
+fun TopCoinsTickerSection(newsFeed: OracleAnalysisResponse, isBengali: Boolean, livePrices: Map<String, Double>) {
     Card(
         colors = CardDefaults.cardColors(containerColor = DarkSurface),
         shape = RoundedCornerShape(16.dp),
@@ -515,7 +449,7 @@ fun TopCoinsTickerSection(newsFeed: OracleAnalysisResponse, isBengali: Boolean) 
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = if (isBengali) "ওরাকল রেফারেন্স সূচক" else "ORACLE REFERENCE INDEX",
+                text = "ORACLE REFERENCE INDEX",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextSecondary,
@@ -529,19 +463,19 @@ fun TopCoinsTickerSection(newsFeed: OracleAnalysisResponse, isBengali: Boolean) 
             val solSpot = newsFeed.spotSignals.find { it.coinSymbol == "SOL" }
             val adaSpot = newsFeed.spotSignals.find { it.coinSymbol == "ADA" }
 
-            val btcPrice = btcSpot?.currentPrice ?: 66450.0
+            val btcPrice = livePrices["BTC"] ?: btcSpot?.currentPrice ?: 66450.0
             val btcChange = btcSpot?.growthPotentialPct ?: 3.99
 
-            val ethPrice = ethSpot?.currentPrice ?: 3485.50
+            val ethPrice = livePrices["ETH"] ?: ethSpot?.currentPrice ?: 3485.50
             val ethChange = ethSpot?.growthPotentialPct ?: 3.57
 
-            val xrpPrice = xrpSpot?.currentPrice ?: 0.512
+            val xrpPrice = livePrices["XRP"] ?: xrpSpot?.currentPrice ?: 0.512
             val xrpChange = xrpSpot?.growthPotentialPct ?: -5.8
 
-            val solPrice = solSpot?.currentPrice ?: 164.20
+            val solPrice = livePrices["SOL"] ?: solSpot?.currentPrice ?: 164.20
             val solChange = solSpot?.growthPotentialPct ?: 4.12
 
-            val adaPrice = adaSpot?.currentPrice ?: 0.435
+            val adaPrice = livePrices["ADA"] ?: adaSpot?.currentPrice ?: 0.435
             val adaChange = adaSpot?.growthPotentialPct ?: -2.15
 
             TickerRow(symbol = "BTC", name = "Bitcoin", price = btcPrice, changePct = btcChange)
@@ -559,8 +493,45 @@ fun TopCoinsTickerSection(newsFeed: OracleAnalysisResponse, isBengali: Boolean) 
 
 @Composable
 fun TickerRow(symbol: String, name: String, price: Double, changePct: Double) {
+    // Pulse effect when price changes
+    val animatedPrice = animateFloatAsState(
+        targetValue = price.toFloat(),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "PriceAnim"
+    ).value
+
+    // Determine pulse state by storing previous value
+    var prevPrice by remember { mutableStateOf(price) }
+    var pulseGlow by remember { mutableStateOf(false) }
+
+    LaunchedEffect(price) {
+        if (price != prevPrice) {
+            pulseGlow = true
+            delay(300)
+            pulseGlow = false
+            prevPrice = price
+        }
+    }
+
+    val glowAlpha by animateFloatAsState(
+        targetValue = if (pulseGlow) 0.6f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        label = "GlowAnim"
+    )
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = CryptoCyan.copy(alpha = glowAlpha * 0.2f),
+                shape = RoundedCornerShape(8.dp) // Glass premium layout
+            )
+            .border(
+                width = 1.dp,
+                color = CryptoCyan.copy(alpha = glowAlpha * 0.4f),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(vertical = 4.dp, horizontal = 4.dp), // Premium Tile
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -613,7 +584,7 @@ fun TickerRow(symbol: String, name: String, price: Double, changePct: Double) {
 
         Column(horizontalAlignment = Alignment.End) {
             Text(
-                text = if (price >= 100) String.format("$%,.2f", price) else String.format("$%.3f", price),
+                text = if (animatedPrice >= 100) String.format("$%,.2f", animatedPrice) else String.format("$%.3f", animatedPrice),
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
@@ -1278,5 +1249,142 @@ fun CurrencyRow(flag: String, code: String, name: String, rate: String) {
             fontWeight = FontWeight.Bold,
             color = AccentGold
         )
+    }
+}
+
+data class MarketAsset(
+    val symbol: String,
+    val price: Double,
+    val priceChangePercent: Double
+)
+
+@Composable
+fun RealTimePublicMarketDashboard() {
+    var assets by remember { mutableStateOf<List<MarketAsset>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            while (true) {
+                try {
+                    val response = java.net.URL("https://api.binance.com/api/v3/ticker/24hr").readText()
+                    val jsonArray = org.json.JSONArray(response)
+                    val topSymbols = listOf("BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "DOGEUSDT", "ADAUSDT", "AVAXUSDT")
+                    
+                    val parsedAssets = mutableListOf<MarketAsset>()
+                    for (i in 0 until jsonArray.length()) {
+                        val obj = jsonArray.getJSONObject(i)
+                        val symbol = obj.getString("symbol")
+                        if (symbol in topSymbols) {
+                            parsedAssets.add(
+                                MarketAsset(
+                                    symbol = symbol.replace("USDT", ""),
+                                    price = obj.getDouble("lastPrice"),
+                                    priceChangePercent = obj.getDouble("priceChangePercent")
+                                )
+                            )
+                        }
+                    }
+                    
+                    // Sort by our predefined order
+                    assets = parsedAssets.sortedBy { topSymbols.indexOf("${it.symbol}USDT") }
+                    isLoading = false
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                kotlinx.coroutines.delay(5000)
+            }
+        }
+    }
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth().border(1.dp, BorderColor, RoundedCornerShape(16.dp))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "REAL-TIME PUBLIC MARKET",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = CryptoCyan,
+                letterSpacing = 1.sp,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = CryptoCyan,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            } else {
+                assets.forEach { asset ->
+                    MarketAssetRow(asset)
+                    HorizontalDivider(color = BorderColor, modifier = Modifier.padding(vertical = 12.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MarketAssetRow(asset: MarketAsset) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(CryptoCyan.copy(alpha = 0.15f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = asset.symbol.take(1),
+                    color = CryptoCyan,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = asset.symbol,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp,
+                color = TextPrimary
+            )
+        }
+        
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                text = if (asset.price >= 100) String.format("$%,.2f", asset.price) else String.format("$%.3f", asset.price),
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                color = TextPrimary
+            )
+            
+            val isPositive = asset.priceChangePercent >= 0
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = if (isPositive) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = if (isPositive) "Price up" else "Price down",
+                    tint = if (isPositive) CryptoGreen else CryptoRed,
+                    modifier = Modifier.size(12.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "${if (isPositive) "+" else ""}${String.format("%.2f", asset.priceChangePercent)}%",
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isPositive) CryptoGreen else CryptoRed
+                )
+            }
+        }
     }
 }
