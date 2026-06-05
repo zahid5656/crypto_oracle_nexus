@@ -234,34 +234,78 @@ class CryptoViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    private var webSocket: okhttp3.WebSocket? = null
+
     private fun startBinancePriceSync() {
         binanceSyncJob?.cancel()
-        binanceSyncJob = viewModelScope.launch(Dispatchers.IO) {
-            while (true) {
-                try {
-                    val prices = GeminiClient.fetchBinancePrices()
-                    if (prices.isNotEmpty()) {
-                        _isLiveConnected.value = true
-                        _livePrices.value = prices
-                        val currentNewsFeed = _newsFeedData.value
-                        _newsFeedData.value = GeminiClient.updateResponseWithBinancePrices(currentNewsFeed, prices)
-
-                        val currentAnalysisState = _analysisState.value
-                        if (currentAnalysisState is AnalysisState.Success) {
-                            _analysisState.value = AnalysisState.Success(
-                                GeminiClient.updateResponseWithBinancePrices(currentAnalysisState.data, prices)
-                            )
-                        }
-                    } else {
-                        _isLiveConnected.value = false
-                    }
-                } catch (e: Exception) {
-                    _isLiveConnected.value = false
-                    Log.e("CryptoViewModel", "Error in binance price sync loop", e)
-                }
-                delay(4000) // Highly economic 4s spacing to avoid rate limits
+        webSocket?.cancel()
+        
+        val request = okhttp3.Request.Builder()
+            .url("wss://stream.binance.com:9443/ws/!miniTicker@arr")
+            .build()
+            
+        val client = okhttp3.OkHttpClient()
+        webSocket = client.newWebSocket(request, object : okhttp3.WebSocketListener() {
+            override fun onOpen(webSocket: okhttp3.WebSocket, response: okhttp3.Response) {
+                _isLiveConnected.value = true
+                Log.d("CryptoViewModel", "Binance WebSocket Connected")
             }
-        }
+            
+            override fun onMessage(webSocket: okhttp3.WebSocket, text: String) {
+                try {
+                    val jsonArray = org.json.JSONArray(text)
+                    val newPrices = _livePrices.value.toMutableMap()
+                    for (i in 0 until jsonArray.length()) {
+                        val obj = jsonArray.getJSONObject(i)
+                        val symbol = obj.getString("s")
+                        val price = obj.getDouble("c")
+                        newPrices[symbol] = price
+                        // Add normalized symbol counterpart
+                        if (symbol.endsWith("USDT")) {
+                            newPrices[symbol.removeSuffix("USDT")] = price
+                        }
+                    }
+                    _livePrices.value = newPrices
+                    
+                    val currentNewsFeed = _newsFeedData.value
+                    _newsFeedData.value = com.example.data.GeminiClient.updateResponseWithBinancePrices(currentNewsFeed, newPrices)
+
+                    val currentAnalysisState = _analysisState.value
+                    if (currentAnalysisState is AnalysisState.Success) {
+                        _analysisState.value = AnalysisState.Success(
+                            com.example.data.GeminiClient.updateResponseWithBinancePrices(currentAnalysisState.data, newPrices)
+                        )
+                    }
+
+                    // Update active missions with live prices
+                    val updatedMissions = _activeMissions.value.map { mission ->
+                        val livePrice = newPrices[mission.coinSymbol + "USDT"] ?: newPrices[mission.coinSymbol]
+                        if (livePrice != null) {
+                            mission.copy(currentPrice = livePrice)
+                        } else {
+                            mission
+                        }
+                    }
+                    _activeMissions.value = updatedMissions
+                } catch (e: Exception) {
+                    // Ignore transient parsing errors on live ticks
+                }
+            }
+            
+            override fun onFailure(webSocket: okhttp3.WebSocket, t: Throwable, response: okhttp3.Response?) {
+                _isLiveConnected.value = false
+                Log.e("CryptoViewModel", "WebSocket failure", t)
+                // Reconnect after delay
+                viewModelScope.launch(Dispatchers.IO) {
+                    kotlinx.coroutines.delay(5000)
+                    startBinancePriceSync()
+                }
+            }
+            
+            override fun onClosed(webSocket: okhttp3.WebSocket, code: Int, reason: String) {
+                _isLiveConnected.value = false
+            }
+        })
     }
 
     private fun startLiveRadarEngine() {

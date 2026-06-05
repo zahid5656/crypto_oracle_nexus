@@ -180,6 +180,7 @@ private fun RunningMissionsList(viewModel: CryptoViewModel, isBengali: Boolean) 
                     coinSymbol = m.coinSymbol,
                     type = m.type,
                     marketType = m.marketType,
+                    originalEntry = "$${String.format("%.4f", m.originalSignalEntry)}",
                     entryPrice = "$${String.format("%.4f", m.entryPrice)}",
                     currentPrice = "$${String.format("%.4f", m.currentPrice)}",
                     roi = "$sign${String.format("%.2f", diffPct)}%",
@@ -204,6 +205,7 @@ private fun MissionCard(
     coinSymbol: String,
     type: String,
     marketType: String,
+    originalEntry: String,
     entryPrice: String,
     currentPrice: String,
     roi: String,
@@ -258,22 +260,30 @@ private fun MissionCard(
             // Pricing & ROI
             Row(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = if (isBengali) "এন্ট্রি মূল্য" else "Entry Price", fontSize = 12.sp, color = TextMuted)
+                    Text(text = if (isBengali) "সিগন্যাল এন্ট্রি" else "Signal Entry", fontSize = 12.sp, color = TextMuted)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = originalEntry, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextSecondary)
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(text = if (isBengali) "লকড এন্ট্রি" else "Locked Entry", fontSize = 12.sp, color = TextMuted)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(text = entryPrice, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
                     
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     
                     Text(text = "ROI", fontSize = 12.sp, color = TextMuted)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(text = roi, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = roiColor)
                 }
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
-                    Text(text = if (isBengali) "বর্তমান মূল্য" else "Current Price", fontSize = 12.sp, color = TextMuted)
+                    Spacer(modifier = Modifier.height(28.dp)) // Aligns next block
+
+                    Text(text = if (isBengali) "বর্তমান মূল্য" else "Live Price", fontSize = 12.sp, color = TextMuted)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(text = currentPrice, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
                     
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     
                     Text(text = if (isBengali) "অতিবাহিত সময়" else "Time Elapsed", fontSize = 12.sp, color = TextMuted)
                     Spacer(modifier = Modifier.height(4.dp))
@@ -470,6 +480,7 @@ private fun MissionHistoryList(viewModel: CryptoViewModel, isBengali: Boolean) {
                     coinSymbol = m.coinSymbol,
                     type = m.type,
                     marketType = m.marketType,
+                    originalEntry = "$${String.format("%.4f", m.originalSignalEntry)}",
                     entryPrice = "$${String.format("%.4f", m.entryPrice)}",
                     currentPrice = "$${String.format("%.4f", m.currentPrice)}",
                     roi = "$sign${String.format("%.2f", diffPct)}%",

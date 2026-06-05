@@ -611,7 +611,7 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, if (isExpanded) CryptoCyan else BorderColor, RoundedCornerShape(16.dp))
-            .clickable { isExpanded = !isExpanded }
+            .clickable { if (!isExpanded) isExpanded = true }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -902,7 +902,19 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
                             aiStatusBengali = "স্পট ট্রেড মজবুত রয়েছে।\nরিভার্সালের কোনো লক্ষণ নেই।"
                         )
                     }
-                    StartTradeFlow(viewModel = viewModel, mission = mission)
+                    StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = livePrice)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Tap here to collapse details ⬏",
+                        fontSize = 12.sp,
+                        color = CryptoCyan,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isExpanded = false }
+                            .padding(vertical = 12.dp),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
@@ -910,37 +922,61 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
 }
 
 @Composable
-fun StartTradeFlow(viewModel: CryptoViewModel, mission: com.example.model.Mission) {
+fun StartTradeFlow(viewModel: CryptoViewModel, mission: com.example.model.Mission, livePrice: Double) {
     var step by remember { mutableStateOf(0) }
 
     if (step == 1) {
-        val verifiedEntryLocked = remember { mission.entryPrice }
-        
         AlertDialog(
             onDismissRequest = { step = 0 },
-            title = { Text("Verify Trade Details", color = CryptoCyan, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+            title = { Text("Start this trade?", color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
             text = {
-                Column {
-                    Text("Direction: ${mission.type} (${mission.marketType})", color = TextSecondary, fontSize = 14.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Locked Entry Price:", color = TextSecondary, fontSize = 12.sp)
-                    Text(String.format("$%.4f", verifiedEntryLocked), color = TextPrimary, fontSize = 24.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Once accepted, live updating stops for this entry and the execution journal activates.", color = AccentGold, fontSize = 10.sp)
-                }
+                Text("You are about to activate this signal for personal tracking.", color = TextSecondary)
             },
             confirmButton = {
-                Button(onClick = {
-                    viewModel.startMission(mission.copy(id = java.util.UUID.randomUUID().toString(), entryPrice = verifiedEntryLocked, startTime = System.currentTimeMillis()))
-                    viewModel.sendLocalAlert("Mission Started", "AI intelligence system successfully started monitoring ${mission.coinSymbol}")
-                    step = 0
-                }, colors = ButtonDefaults.buttonColors(containerColor = CryptoGreen)) {
-                    Text("CONFIRM MISSION", fontWeight = FontWeight.Black, color = DarkBackground)
+                Button(onClick = { step = 2 }, colors = ButtonDefaults.buttonColors(containerColor = CryptoGreen)) {
+                    Text("Continue", fontWeight = FontWeight.Black, color = DarkBackground)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { step = 0 }) {
                     Text("Cancel", color = TextSecondary)
+                }
+            },
+            containerColor = DarkSurface,
+            titleContentColor = TextPrimary,
+            textContentColor = TextSecondary
+        )
+    } else if (step == 2) {
+        val verifiedEntryLocked = remember { livePrice }
+        
+        AlertDialog(
+            onDismissRequest = { step = 0 },
+            title = { Text("Confirm Trade Activation", color = CryptoCyan, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+            text = {
+                Column {
+                    Text("Current Market Price:", color = TextSecondary, fontSize = 12.sp)
+                    Text(String.format("%.4f USDT", verifiedEntryLocked), color = TextPrimary, fontSize = 24.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("This price will be locked as your personal mission entry price.\nThe original signal entry remains unchanged for validation.", color = AccentGold, fontSize = 11.sp)
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    viewModel.startMission(mission.copy(
+                        id = java.util.UUID.randomUUID().toString(),
+                        entryPrice = verifiedEntryLocked, // User's personal locked entry price
+                        originalSignalEntry = mission.entryPrice, // Keep original
+                        startTime = System.currentTimeMillis()
+                    ))
+                    viewModel.sendLocalAlert("Mission Started", "AI intelligence system successfully started monitoring ${mission.coinSymbol}")
+                    step = 0
+                }, colors = ButtonDefaults.buttonColors(containerColor = CryptoGreen)) {
+                    Text("Activate Mission", fontWeight = FontWeight.Black, color = DarkBackground)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { step = 1 }) {
+                    Text("Back", color = TextSecondary)
                 }
             },
             containerColor = DarkSurface,
@@ -1108,7 +1144,7 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoV
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, if (isExpanded && isLong) CryptoCyan else cardBorder, RoundedCornerShape(16.dp))
-            .clickable { isExpanded = !isExpanded }
+            .clickable { if (!isExpanded) isExpanded = true }
     ) {
         Column(
             modifier = Modifier
@@ -1388,7 +1424,19 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoV
                             aiStatusBengali = if (isLong) "বুলিশ কনভারজেন্স অটুট রয়েছে।" else "বেয়ারিশ মোমেন্টাম তৈরি হচ্ছে।"
                         )
                     }
-                    StartTradeFlow(viewModel = viewModel, mission = mission)
+                    StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = livePrice)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Tap here to collapse details ⬏",
+                        fontSize = 12.sp,
+                        color = CryptoCyan,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isExpanded = false }
+                            .padding(vertical = 12.dp),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
@@ -1472,7 +1520,7 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int, viewModel: CryptoViewModel, 
                 ),
                 shape = RoundedCornerShape(16.dp)
             )
-            .clickable { isExpanded = !isExpanded }
+            .clickable { if (!isExpanded) isExpanded = true }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Golden title header ribbon
@@ -1681,7 +1729,7 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int, viewModel: CryptoViewModel, 
                             coinSymbol = symbol,
                             type = if (isLong) "LONG" else "SHORT",
                             marketType = if (isFutures) "Futures" else "Spot",
-                            entryPrice = curPrice,
+                            entryPrice = entryPrice,
                             currentPrice = curPrice,
                             targets = formatPrice(projPrice),
                             stopLoss = formatPrice(invalidation),
@@ -1690,7 +1738,19 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int, viewModel: CryptoViewModel, 
                             aiStatusBengali = "ওরাকল পিক সক্রিয় পর্যবেক্ষণ।"
                         )
                     }
-                    StartTradeFlow(viewModel = viewModel, mission = mission)
+                    StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = curPrice)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Tap here to collapse details ⬏",
+                        fontSize = 12.sp,
+                        color = CryptoCyan,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isExpanded = false }
+                            .padding(vertical = 12.dp),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }

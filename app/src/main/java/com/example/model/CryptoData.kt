@@ -115,6 +115,7 @@ data class Mission(
     val type: String, // LONG, SHORT
     val marketType: String, // Spot, Futures
     val entryPrice: Double,
+    val originalSignalEntry: Double = 0.0,
     val currentPrice: Double,
     val targets: String,
     val stopLoss: String,

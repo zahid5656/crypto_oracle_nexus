@@ -99,7 +99,47 @@ object GeminiClient {
         response: OracleAnalysisResponse,
         prices: Map<String, Double>
     ): OracleAnalysisResponse {
-        return response
+        val updatedSpot = response.spotSignals.map { spot ->
+            val livePrice = prices[spot.coinSymbol + "USDT"] ?: prices[spot.coinSymbol] ?: spot.currentPrice
+            val newGrowthPct = ((spot.projectedPrice - livePrice) / livePrice) * 100.0
+            val newGrowthTwelvePct = spot.projectedPriceTwelveHours?.let { ((it - livePrice) / livePrice) * 100.0 }
+            spot.copy(
+                currentPrice = livePrice,
+                growthPotentialPct = newGrowthPct,
+                growthPotentialTwelveHoursPct = newGrowthTwelvePct ?: spot.growthPotentialTwelveHoursPct
+            )
+        }
+        val updatedLong = response.futuresLongSignals.map { fut ->
+            val livePrice = prices[fut.coinSymbol + "USDT"] ?: prices[fut.coinSymbol] ?: fut.currentPrice
+            val target = fut.targetPrice
+            val targetTwelve = fut.targetPriceTwelveHours
+            fut.copy(
+                currentPrice = livePrice,
+                priceChangePct = ((target - livePrice) / livePrice) * 100.0,
+                priceChangeTwelveHoursPct = targetTwelve?.let { ((it - livePrice) / livePrice) * 100.0 } ?: fut.priceChangeTwelveHoursPct
+            )
+        }
+        val updatedShort = response.futuresShortSignals.map { fut ->
+            val livePrice = prices[fut.coinSymbol + "USDT"] ?: prices[fut.coinSymbol] ?: fut.currentPrice
+            val target = fut.targetPrice
+            val targetTwelve = fut.targetPriceTwelveHours
+            fut.copy(
+                currentPrice = livePrice,
+                priceChangePct = ((livePrice - target) / livePrice) * 100.0,
+                priceChangeTwelveHoursPct = targetTwelve?.let { ((livePrice - it) / livePrice) * 100.0 } ?: fut.priceChangeTwelveHoursPct
+            )
+        }
+        val updatedInsights = response.deepInsights.map { insight ->
+            val livePrice = prices[insight.coinSymbol + "USDT"] ?: prices[insight.coinSymbol] ?: insight.targetPrice * 0.9
+            val change = if (insight.direction == "PUMP") ((insight.targetPrice - livePrice) / livePrice) * 100.0 else ((livePrice - insight.targetPrice) / livePrice) * 100.0
+            insight.copy(expectedChangePct = change)
+        }
+        return response.copy(
+            spotSignals = updatedSpot,
+            futuresLongSignals = updatedLong,
+            futuresShortSignals = updatedShort,
+            deepInsights = updatedInsights
+        )
     }
 
     private val api: GeminiApiService by lazy {

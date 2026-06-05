@@ -463,19 +463,19 @@ fun TopCoinsTickerSection(newsFeed: OracleAnalysisResponse, isBengali: Boolean, 
             val solSpot = newsFeed.spotSignals.find { it.coinSymbol == "SOL" }
             val adaSpot = newsFeed.spotSignals.find { it.coinSymbol == "ADA" }
 
-            val btcPrice = livePrices["BTC"] ?: btcSpot?.currentPrice ?: 66450.0
+            val btcPrice = livePrices["BTCUSDT"] ?: btcSpot?.currentPrice ?: 66450.0
             val btcChange = btcSpot?.growthPotentialPct ?: 3.99
 
-            val ethPrice = livePrices["ETH"] ?: ethSpot?.currentPrice ?: 3485.50
+            val ethPrice = livePrices["ETHUSDT"] ?: ethSpot?.currentPrice ?: 3485.50
             val ethChange = ethSpot?.growthPotentialPct ?: 3.57
 
-            val xrpPrice = livePrices["XRP"] ?: xrpSpot?.currentPrice ?: 0.512
+            val xrpPrice = livePrices["XRPUSDT"] ?: xrpSpot?.currentPrice ?: 0.512
             val xrpChange = xrpSpot?.growthPotentialPct ?: -5.8
 
-            val solPrice = livePrices["SOL"] ?: solSpot?.currentPrice ?: 164.20
+            val solPrice = livePrices["SOLUSDT"] ?: solSpot?.currentPrice ?: 164.20
             val solChange = solSpot?.growthPotentialPct ?: 4.12
 
-            val adaPrice = livePrices["ADA"] ?: adaSpot?.currentPrice ?: 0.435
+            val adaPrice = livePrices["ADAUSDT"] ?: adaSpot?.currentPrice ?: 0.435
             val adaChange = adaSpot?.growthPotentialPct ?: -2.15
 
             TickerRow(symbol = "BTC", name = "Bitcoin", price = btcPrice, changePct = btcChange)
