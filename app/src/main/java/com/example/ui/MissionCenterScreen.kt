@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import com.example.model.Mission
 import com.example.ui.theme.*
 import com.example.viewmodel.CryptoViewModel
-import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +52,7 @@ fun MissionCenterScreen(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = if (isBengali) "AI Trade Guardian" else "AI Trade Guardian",
+                            text = "AI Trade Guardian",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = CryptoCyan,
@@ -192,7 +191,7 @@ private fun RunningMissionsList(viewModel: CryptoViewModel, isBengali: Boolean) 
                     mission = mission,
                     isBengali = isBengali,
                     isHistory = false,
-                    onStop = { reason -> viewModel.stopMission(mission.id, reason) }
+                    onStop = { isNegative -> viewModel.stopMission(mission.id, isNegative) }
                 )
             }
         }
@@ -255,7 +254,7 @@ private fun MissionCard(
     mission: Mission,
     isBengali: Boolean,
     isHistory: Boolean,
-    onStop: (String) -> Unit
+    onStop: (Boolean?) -> Unit
 ) {
     var showStopDialog by remember { mutableStateOf(false) }
     val roiColor = if (mission.roiPct < 0.0) CryptoRedText else CryptoGreen
@@ -357,8 +356,8 @@ private fun MissionCard(
         StopMissionDialog(
             isBengali = isBengali,
             onDismiss = { showStopDialog = false },
-            onConfirm = { reason ->
-                onStop(reason)
+            onConfirm = { isNegative ->
+                onStop(isNegative)
                 showStopDialog = false
             }
         )
@@ -392,7 +391,7 @@ private fun GuardianBrief(mission: Mission, isBengali: Boolean) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = CryptoCyan, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = if (isBengali) "AI Guardian Brief" else "AI Guardian Brief", color = CryptoCyan, fontSize = 13.sp, fontWeight = FontWeight.Black)
+            Text(text = "AI Guardian Brief", color = CryptoCyan, fontSize = 13.sp, fontWeight = FontWeight.Black)
         }
         Text(
             text = if (isBengali) mission.guardianRecommendationBengali else mission.guardianRecommendationEnglish,
@@ -413,9 +412,16 @@ private fun GuardianBrief(mission: Mission, isBengali: Boolean) {
 private fun StopMissionDialog(
     isBengali: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (Boolean?) -> Unit
 ) {
-    val reasons = listOf("Take Profit", "Stop Loss", "Manual Exit", "Risk Exit", "Other")
+    data class Reason(val label: String, val override: Boolean?)
+    val reasons = listOf(
+        Reason("Take Profit", false),
+        Reason("Stop Loss", true),
+        Reason("Manual Exit", null),
+        Reason("Risk Exit", true),
+        Reason("Other", null)
+    )
     var selected by remember { mutableStateOf(reasons.first()) }
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -434,13 +440,13 @@ private fun StopMissionDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(selected = selected == reason, onClick = { selected = reason })
-                        Text(text = reason, color = TextPrimary, fontWeight = FontWeight.Bold)
+                        Text(text = reason.label, color = TextPrimary, fontWeight = FontWeight.Bold)
                     }
                 }
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(selected) }, colors = ButtonDefaults.buttonColors(containerColor = CryptoRedContainer)) {
+            Button(onClick = { onConfirm(selected.override) }, colors = ButtonDefaults.buttonColors(containerColor = CryptoRedContainer)) {
                 Text("Close Mission", color = CryptoRedText, fontWeight = FontWeight.Black)
             }
         },
