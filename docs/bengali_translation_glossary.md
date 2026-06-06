@@ -1,9 +1,11 @@
 # Crypto Oracle Nexus Bengali Translation Glossary
 
-This glossary is the project-wide source of truth for Bengali translation.
+This glossary is the project-level source of truth for Bengali translation.
 
 Rule:
-Same English term must use the same Bengali meaning everywhere.
+Same English term should use the same Bengali meaning unless the owner manually selects an easier local Bengali wording.
+
+Approved core Bengali wording:
 
 | English | Bengali |
 |---|---|
@@ -17,7 +19,14 @@ Same English term must use the same Bengali meaning everywhere.
 | BEARISH | দাম কমছে |
 | SIDEWAYS | দাম স্থির |
 | ACCUMULATING | সঞ্চয় হচ্ছে |
+| Momentum | মতিগতি |
+| Volume | লেনদেন |
+| Caution window • Monitor closely | সতর্ক পর্যায় • ভালোভাবে নজর রাখুন |
+| Late-stage signal — Verify before action | শেষ পর্যায়ের সিগনাল — আগে যাচাই করুন |
+| Delay may reduce signal quality | দেরি করলে সিগন্যালের মান কমতে পারে |
+| Active window — No urgency yet | সক্রিয় — এখনো তাড়াহুড়া নেই |
 
-Additional rule:
-Use simple Bengali that normal traders can understand.
-Keep prices, ROI, TP, SL, score, rank, coin symbols, and percentages unchanged.
+Owner override rule:
+- Manually selected simple Bengali wording must be preserved.
+- Do not blindly overwrite local Bengali wording if it is easier for normal users.
+- Keep prices, ROI, TP, SL, score, rank, coin symbols, and percentages unchanged.
