@@ -1855,9 +1855,9 @@ fun RealTimeCountdown(coinSymbol: String, totalDurationHours: Int) {
     val isUrgent = progress <= 0.20f && !isExpired
     val isCaution = progress in 0.21f..0.50f
 
-    val stateColor = when {
-        isExpired -> CryptoRed
-        isUrgent -> CryptoRedText
+    val accentColor = when {
+        isExpired -> CryptoRedText
+        isUrgent -> Color(0xFFFF7A90)
         isCaution -> AccentGold
         else -> CryptoCyan
     }
@@ -1869,38 +1869,32 @@ fun RealTimeCountdown(coinSymbol: String, totalDurationHours: Int) {
         else -> "Signal active • Risk window open"
     }
 
-    val pulseTransition = rememberInfiniteTransition(label = "ValidityPulse")
-    val pulseAlpha by pulseTransition.animateFloat(
-        initialValue = if (isUrgent) 0.45f else 0.18f,
-        targetValue = if (isUrgent) 0.95f else 0.34f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "ValidityPulseAlpha"
-    )
+    val titleColor = Color(0xFFEAF2FF)
+    val subtitleColor = Color(0xFFBFC7D6)
+    val supportColor = Color(0xFF98A2B3)
+    val trackColor = Color(0xFF242B3A)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(
-                brush = Brush.linearGradient(
+                brush = Brush.horizontalGradient(
                     colors = listOf(
-                        stateColor.copy(alpha = if (isUrgent) pulseAlpha else 0.16f),
-                        DarkSurfaceVariant,
-                        DarkSurface
+                        Color(0xFF141824),
+                        Color(0xFF171C2A),
+                        Color(0xFF10131D)
                     )
                 )
             )
             .border(
                 width = 1.dp,
-                color = stateColor.copy(alpha = if (isUrgent) 0.75f else 0.38f),
+                color = accentColor.copy(alpha = 0.52f),
                 shape = RoundedCornerShape(16.dp)
             )
-            .padding(14.dp)
+            .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1909,18 +1903,19 @@ fun RealTimeCountdown(coinSymbol: String, totalDurationHours: Int) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "VALIDITY WINDOW",
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Black,
-                        color = TextSecondary,
-                        letterSpacing = 1.2.sp
+                        color = titleColor,
+                        letterSpacing = 1.15.sp
                     )
 
                     Text(
                         text = stateText,
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = stateColor.copy(alpha = 0.92f),
-                        modifier = Modifier.padding(top = 2.dp)
+                        color = subtitleColor,
+                        modifier = Modifier.padding(top = 1.dp),
+                        maxLines = 1
                     )
                 }
 
@@ -1928,17 +1923,17 @@ fun RealTimeCountdown(coinSymbol: String, totalDurationHours: Int) {
                     Text(
                         text = if (isExpired) "EXPIRED" else timeText,
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Black,
-                        color = stateColor,
+                        color = accentColor,
                         maxLines = 1
                     )
 
                     Text(
-                        text = if (isExpired) "No remaining window" else "Remaining",
-                        fontSize = 9.sp,
+                        text = if (isExpired) "Expired" else "Remaining",
+                        fontSize = 8.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextMuted
+                        color = supportColor
                     )
                 }
             }
@@ -1947,10 +1942,10 @@ fun RealTimeCountdown(coinSymbol: String, totalDurationHours: Int) {
                 progress = progress,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(7.dp)
+                    .height(5.dp)
                     .clip(RoundedCornerShape(100.dp)),
-                color = stateColor,
-                trackColor = BorderColor.copy(alpha = 0.65f)
+                color = accentColor,
+                trackColor = trackColor
             )
 
             Row(
@@ -1959,16 +1954,16 @@ fun RealTimeCountdown(coinSymbol: String, totalDurationHours: Int) {
             ) {
                 Text(
                     text = "Window ${totalDurationHours}H",
-                    fontSize = 9.sp,
+                    fontSize = 8.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextMuted
+                    color = supportColor
                 )
 
                 Text(
                     text = "${(progress * 100).toInt()}% active",
-                    fontSize = 9.sp,
+                    fontSize = 8.sp,
                     fontWeight = FontWeight.Black,
-                    color = stateColor
+                    color = accentColor
                 )
             }
         }
