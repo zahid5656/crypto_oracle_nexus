@@ -62,6 +62,9 @@ import com.example.viewmodel.AppScreen
 import com.example.viewmodel.CryptoViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.absoluteValue
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun AnalysisScreen(
