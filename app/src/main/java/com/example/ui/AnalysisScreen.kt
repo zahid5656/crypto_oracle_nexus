@@ -2285,6 +2285,18 @@ fun RealTimeCountdown(
             .background(
                 brush = Brush.horizontalGradient(
                     colors = listOf(
+                        accentColor.copy(alpha = 0.12f),
+                        Color.Transparent,
+                        accentColor.copy(alpha = 0.075f),
+                        Color.White.copy(alpha = 0.035f),
+                        accentColor.copy(alpha = 0.055f),
+                        Color.Transparent
+                    )
+                )
+            ) // ValidityStaticAccentLayer
+            .background(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
                         Color.Transparent,
                         accentColor.copy(alpha = pulseAlpha),
                         Color.White.copy(alpha = 0.10f),
