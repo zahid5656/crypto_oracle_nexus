@@ -1081,7 +1081,7 @@ fun OpportunisticSignalAdornmentSection(
     HorizontalDivider(color = BorderColor.copy(alpha = 0.4f))
     Spacer(modifier = Modifier.height(10.dp))
 
-    // 1. Take Profit Matrix
+    // 1. Take Profit Matrix — Signal Pro style mini tiles
     Text(
         text = if (isBengali) "টার্গেট প্রফিট ম্যাট্রিক্স" else "TAKE PROFIT TARGET MATRIX",
         fontSize = 9.sp,
@@ -1089,30 +1089,46 @@ fun OpportunisticSignalAdornmentSection(
         color = themeColor,
         letterSpacing = 1.sp
     )
-    Spacer(modifier = Modifier.height(6.dp))
+
+    Spacer(modifier = Modifier.height(7.dp))
+
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = "TP1 (25%)", fontSize = 8.sp, color = TextMuted)
-            Text(text = "$${formatPrice(tp1)}", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = CryptoGreen)
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = "TP2 (50%)", fontSize = 8.sp, color = TextMuted)
-            Text(text = "$${formatPrice(tp2)}", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = CryptoGreen)
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = "TP3 (100%)", fontSize = 8.sp, color = TextMuted)
-            Text(text = "$${formatPrice(tp3)}", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = CryptoGreen)
-        }
+        LiveRadarAdornmentMiniTile(
+            label = "TP1 (25%)",
+            value = "$${formatPrice(tp1)}",
+            valueColor = TextPrimary,
+            labelColor = CryptoGreen,
+            borderColor = themeColor,
+            modifier = Modifier.weight(1f)
+        )
+
+        LiveRadarAdornmentMiniTile(
+            label = "TP2 (50%)",
+            value = "$${formatPrice(tp2)}",
+            valueColor = TextPrimary,
+            labelColor = CryptoGreen,
+            borderColor = themeColor,
+            modifier = Modifier.weight(1f)
+        )
+
+        LiveRadarAdornmentMiniTile(
+            label = "TP3 (100%)",
+            value = "$${formatPrice(tp3)}",
+            valueColor = TextPrimary,
+            labelColor = CryptoGreen,
+            borderColor = themeColor,
+            modifier = Modifier.weight(1f)
+        )
     }
 
     Spacer(modifier = Modifier.height(10.dp))
     HorizontalDivider(color = BorderColor.copy(alpha = 0.4f))
     Spacer(modifier = Modifier.height(10.dp))
 
-    // 2. Multi-AI Consensus Engines
+    // 2. Multi-AI Consensus Engines — mini tile wrapped for visual consistency
     Text(
         text = if (isBengali) "মাল্টি-এআই কনসেনসাস স্কোর" else "MULTI-AI CONSENSUS ENGINES",
         fontSize = 9.sp,
@@ -1120,30 +1136,46 @@ fun OpportunisticSignalAdornmentSection(
         color = themeColor,
         letterSpacing = 1.sp
     )
-    Spacer(modifier = Modifier.height(6.dp))
+
+    Spacer(modifier = Modifier.height(7.dp))
+
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = "Gemini Pro AI", fontSize = 8.sp, color = TextMuted)
-            Text(text = "94 / 100", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = "GPT-4Q Quant", fontSize = 8.sp, color = TextMuted)
-            Text(text = "90 / 100", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = "Claude Sentient", fontSize = 8.sp, color = TextMuted)
-            Text(text = "93 / 100", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-        }
+        LiveRadarAdornmentMiniTile(
+            label = "Gemini Pro AI",
+            value = "94/100",
+            valueColor = TextPrimary,
+            labelColor = TextMuted,
+            borderColor = themeColor,
+            modifier = Modifier.weight(1f)
+        )
+
+        LiveRadarAdornmentMiniTile(
+            label = "GPT-4Q Quant",
+            value = "90/100",
+            valueColor = TextPrimary,
+            labelColor = TextMuted,
+            borderColor = themeColor,
+            modifier = Modifier.weight(1f)
+        )
+
+        LiveRadarAdornmentMiniTile(
+            label = "Claude Sentient",
+            value = "93/100",
+            valueColor = TextPrimary,
+            labelColor = TextMuted,
+            borderColor = themeColor,
+            modifier = Modifier.weight(1f)
+        )
     }
 
     Spacer(modifier = Modifier.height(10.dp))
     HorizontalDivider(color = BorderColor.copy(alpha = 0.4f))
     Spacer(modifier = Modifier.height(10.dp))
 
-    // 3. Recommended Position Sizing
+    // 3. Recommended Position Sizing — Signal Pro style mini tiles
     Text(
         text = if (isBengali) "পজিশন সাইজিং পোর্টফোলিও কন্ট্রোল" else "RECOMMENDED POSITION ALLOCATION SIZING",
         fontSize = 9.sp,
@@ -1151,23 +1183,101 @@ fun OpportunisticSignalAdornmentSection(
         color = themeColor,
         letterSpacing = 1.sp
     )
-    Spacer(modifier = Modifier.height(6.dp))
+
+    Spacer(modifier = Modifier.height(7.dp))
+
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = "CONSERVATIVE", fontSize = 8.sp, color = TextMuted)
-            Text(text = "2.0% Cap", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = AccentGold)
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = "BALANCED", fontSize = 8.sp, color = TextMuted)
-            Text(text = "5.0% Cap", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = AccentGold)
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = "AGGRESSIVE", fontSize = 8.sp, color = TextMuted)
-            Text(text = "10.0% Max", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = AccentGold)
-        }
+        LiveRadarAdornmentMiniTile(
+            label = if (isBengali) "Conservative" else "Conservative",
+            value = "2.0% Cap",
+            valueColor = AccentGold,
+            labelColor = TextPrimary,
+            borderColor = themeColor,
+            modifier = Modifier.weight(1f)
+        )
+
+        LiveRadarAdornmentMiniTile(
+            label = if (isBengali) "Balanced" else "Balanced",
+            value = "5.0% Cap",
+            valueColor = AccentGold,
+            labelColor = TextPrimary,
+            borderColor = themeColor,
+            modifier = Modifier.weight(1f)
+        )
+
+        LiveRadarAdornmentMiniTile(
+            label = if (isBengali) "Aggressive" else "Aggressive",
+            value = "10.0% Max",
+            valueColor = AccentGold,
+            labelColor = TextPrimary,
+            borderColor = themeColor,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+fun LiveRadarAdornmentMiniTile(
+    label: String,
+    value: String,
+    valueColor: Color,
+    labelColor: Color,
+    borderColor: Color,
+    modifier: Modifier = Modifier
+) {
+    val valueFontSize = when {
+        value.length >= 12 -> 8.0.sp
+        value.length >= 10 -> 8.6.sp
+        else -> 9.6.sp
+    }
+
+    Column(
+        modifier = modifier
+            .heightIn(min = 52.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFF02050D),
+                        Color(0xFF050B15),
+                        Color(0xFF02050D)
+                    )
+                )
+            )
+            .border(
+                0.75.dp,
+                borderColor.copy(alpha = 0.46f),
+                RoundedCornerShape(8.dp)
+            )
+            .padding(horizontal = 5.dp, vertical = 7.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = label,
+            fontSize = 7.6.sp,
+            fontWeight = FontWeight.Black,
+            color = labelColor,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.height(3.dp))
+
+        Text(
+            text = value,
+            fontSize = valueFontSize,
+            fontWeight = FontWeight.Black,
+            color = valueColor,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
