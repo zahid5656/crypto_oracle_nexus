@@ -1128,24 +1128,31 @@ private fun OracleMetadataTile(
         modifier = modifier
             .heightIn(min = 58.dp)
             .background(LiveRadarTileDark, RoundedCornerShape(10.dp))
-            .border(0.9.dp, borderColor.copy(alpha = 0.68f), RoundedCornerShape(10.dp))
+            .border(0.9.dp, borderColor.copy(alpha = 0.76f), RoundedCornerShape(10.dp))
             .padding(horizontal = 8.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
         Text(
             text = title,
+            modifier = Modifier.fillMaxWidth(),
             fontSize = titleSizeSp.sp,
             fontWeight = FontWeight.Black,
             color = titleColor,
             letterSpacing = 0.12.sp,
             lineHeight = 10.4.sp,
+            textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
 
         Spacer(modifier = Modifier.height(5.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             if (showRiskDot) {
                 Box(
                     modifier = Modifier
@@ -1161,6 +1168,7 @@ private fun OracleMetadataTile(
                 fontWeight = FontWeight.Black,
                 color = valueColor,
                 lineHeight = (valueSizeSp + 1.7f).sp,
+                textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -1367,6 +1375,7 @@ private fun LiveRadarBetaDivergenceGuard(
                 value = "${state.readinessScore}/100",
                 stat = "-${state.penaltyPoints} pts",
                 severity = state.readinessSeverity,
+                statColorOverride = LiveRadarDangerRed,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -1380,19 +1389,32 @@ private fun BetaGuardMiniTile(
     stat: String,
     severity: LiveRadarGuardSeverity,
     modifier: Modifier = Modifier,
-    forceAmberWarning: Boolean = false
+    forceAmberWarning: Boolean = false,
+    statColorOverride: Color? = null
 ) {
     val baseColor = if (forceAmberWarning && severity != LiveRadarGuardSeverity.CLEAR) {
         Color(0xFFFF9F0A)
     } else {
         liveRadarGuardColor(severity)
     }
+    val visibleStatColor = statColorOverride ?: baseColor
+    val borderBrush = if (severity == LiveRadarGuardSeverity.CLEAR) {
+        Brush.horizontalGradient(listOf(baseColor, baseColor))
+    } else {
+        Brush.horizontalGradient(
+            listOf(
+                baseColor.copy(alpha = 0.42f),
+                baseColor,
+                baseColor.copy(alpha = 0.42f)
+            )
+        )
+    }
 
     Column(
         modifier = modifier
             .heightIn(min = 64.dp)
             .background(LiveRadarTileDark, RoundedCornerShape(9.dp))
-            .border(0.85.dp, baseColor.copy(alpha = 0.68f), RoundedCornerShape(9.dp))
+            .border(0.85.dp, borderBrush, RoundedCornerShape(9.dp))
             .padding(horizontal = 7.dp, vertical = 7.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -1425,7 +1447,7 @@ private fun BetaGuardMiniTile(
             text = stat,
             fontSize = 9.6.sp,
             fontWeight = FontWeight.Bold,
-            color = baseColor,
+            color = visibleStatColor,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -1453,7 +1475,7 @@ private fun TakeProfitTargetTile(
             text = label,
             fontSize = 11.4.sp,
             fontWeight = FontWeight.Black,
-            color = accent,
+            color = CryptoGreen,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -1493,7 +1515,7 @@ private fun ConsensusEngineTile(
             text = name,
             fontSize = 9.4.sp,
             fontWeight = FontWeight.Black,
-            color = accent,
+            color = TextPrimary,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -1505,7 +1527,7 @@ private fun ConsensusEngineTile(
             text = score,
             fontSize = 15.sp,
             fontWeight = FontWeight.Black,
-            color = TextPrimary,
+            color = CryptoGreen,
             textAlign = TextAlign.Center,
             maxLines = 1
         )
@@ -1521,10 +1543,10 @@ private fun AllocationSizingTile(
 ) {
     Column(
         modifier = modifier
-            .heightIn(min = 52.dp)
+            .heightIn(min = 44.dp)
             .background(LiveRadarTileDark, RoundedCornerShape(9.dp))
-            .border(0.75.dp, accent.copy(alpha = 0.46f), RoundedCornerShape(9.dp))
-            .padding(horizontal = 6.dp, vertical = 6.dp),
+            .border(0.75.dp, accent.copy(alpha = 0.56f), RoundedCornerShape(9.dp))
+            .padding(horizontal = 6.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -1538,13 +1560,13 @@ private fun AllocationSizingTile(
             overflow = TextOverflow.Ellipsis
         )
 
-        Spacer(modifier = Modifier.height(3.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
         Text(
             text = value,
             fontSize = 11.8.sp,
             fontWeight = FontWeight.Black,
-            color = accent,
+            color = Color(0xFFFFC247),
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
