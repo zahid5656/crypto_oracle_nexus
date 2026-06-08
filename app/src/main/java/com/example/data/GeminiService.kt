@@ -29,7 +29,8 @@ data class GeminiRequest(
 )
 
 data class GeminiContent(
-    val parts: List<GeminiPart>
+    val parts: List<GeminiPart>,
+    val role: String? = null
 )
 
 data class GeminiPart(
@@ -149,6 +150,40 @@ object GeminiClient {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(GeminiApiService::class.java)
+    }
+
+    suspend fun sendChatMessage(history: List<GeminiContent>, newMessage: String, isBengali: Boolean): String {
+        val apiKey = BuildConfig.GEMINI_API_KEY
+        val hasValidKey = apiKey.isNotEmpty() && apiKey != "MY_GEMINI_API_KEY"
+
+        if (!hasValidKey) {
+            return if (isBengali) "অনুগ্রহ করে API কী সেট করুন।" else "Please set up your Gemini API key."
+        }
+
+        try {
+            val systemPrompt = """
+                You are the "Crypto Oracle Assistant", an expert AI trading advisor.
+                You provide highly accurate, analytical, and professional cryptocurrency market advice.
+                Respond in ${if (isBengali) "Bengali (Bangla)" else "English"}.
+                Keep responses concise, insightful, and formatted cleanly.
+            """.trimIndent()
+
+            val contents = history.toMutableList()
+            contents.add(GeminiContent(parts = listOf(GeminiPart(text = newMessage)), role = "user"))
+
+            val request = GeminiRequest(
+                contents = contents,
+                systemInstruction = GeminiContent(parts = listOf(GeminiPart(text = systemPrompt))),
+                generationConfig = GeminiGenerationConfig(temperature = 0.5)
+            )
+
+            val response = api.generateContent(apiKey, request)
+            val responseText = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
+            return responseText?.trim() ?: if (isBengali) "দুঃখিত, কোনো উত্তর পাওয়া যায়নি।" else "Sorry, no response available."
+        } catch (e: Exception) {
+            Log.e(TAG, "Chat API failed", e)
+            return if (isBengali) "নেটওয়ার্ক ত্রুটি।" else "Network Error."
+        }
     }
 
     /**

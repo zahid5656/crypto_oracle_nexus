@@ -14,6 +14,7 @@ import com.example.data.GeminiClient
 import com.example.data.SignalEntity
 import com.example.model.OracleAnalysisResponse
 import com.example.model.RadarAlert
+import com.example.model.Mission
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -31,6 +32,7 @@ sealed interface AppScreen {
     object MarketRadar : AppScreen
     object MissionCenter : AppScreen
     object AccuracyCenter : AppScreen
+    object Chat : AppScreen
 }
 
 sealed interface AnalysisState {
@@ -102,6 +104,44 @@ class CryptoViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _isBengali = MutableStateFlow(false)
     val isBengali: StateFlow<Boolean> = _isBengali.asStateFlow()
+
+    data class ChatMessage(val text: String, val isUser: Boolean, val isLoading: Boolean = false)
+    private val _chatMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
+    val chatMessages: StateFlow<List<ChatMessage>> = _chatMessages.asStateFlow()
+
+    fun sendChatMessage(message: String) {
+        if (message.isBlank()) return
+        
+        val currentContext = _chatMessages.value
+        val newMessages = currentContext.toMutableList()
+        newMessages.add(ChatMessage(message, isUser = true))
+        newMessages.add(ChatMessage("", isUser = false, isLoading = true))
+        _chatMessages.value = newMessages
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val historyContents = currentContext.filter { !it.isLoading }.map {
+                com.example.data.GeminiContent(
+                    parts = listOf(com.example.data.GeminiPart(text = it.text)),
+                    role = if (it.isUser) "user" else "model"
+                )
+            }
+            
+            val responseText = com.example.data.GeminiClient.sendChatMessage(
+                historyContents,
+                message,
+                _isBengali.value
+            )
+            
+            val finalMessages = _chatMessages.value.toMutableList()
+            finalMessages.removeLastOrNull() // Remove loading message
+            finalMessages.add(ChatMessage(responseText, isUser = false))
+            _chatMessages.value = finalMessages
+        }
+    }
+
+    fun clearChat() {
+        _chatMessages.value = emptyList()
+    }
 
     fun toggleLanguage() {
         _isBengali.value = !_isBengali.value

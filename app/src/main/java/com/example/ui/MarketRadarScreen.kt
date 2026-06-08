@@ -511,7 +511,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                             aiStatusBengali = "রাডার স্পট সেটআপ সক্রিয়।"
                         )
                     }
-                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission)
+                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = livePrices["${symbol}USDT"] ?: basePrice)
                 }
             }
         }
@@ -626,7 +626,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                             aiStatusBengali = "রাডার লং সেটআপ সক্রিয়।"
                         )
                     }
-                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission)
+                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = livePrices["${symbol}USDT"] ?: basePrice)
                 }
             }
         }
@@ -741,7 +741,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                             aiStatusBengali = "রাডার শর্ট সেটআপ সক্রিয়।"
                         )
                     }
-                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission)
+                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = livePrices["${symbol}USDT"] ?: basePrice)
                 }
             }
         }
