@@ -51,17 +51,7 @@ class MainActivity : ComponentActivity() {
                 topBar = {
                     if (currentScreen is AppScreen.Chat) {}
                 },
-                floatingActionButton = {
-                    if (currentScreen !is AppScreen.Chat) {
-                        FloatingActionButton(
-                            onClick = { viewModel.navigateTo(AppScreen.Chat) },
-                            containerColor = CryptoCyan,
-                            contentColor = Color.Black
-                        ) {
-                            Icon(imageVector = Icons.AutoMirrored.Filled.Chat, contentDescription = "AI Chat")
-                        }
-                    }
-                },
+                floatingActionButton = {},
                 bottomBar = {
                     if (currentScreen !is AppScreen.Chat) {
                         NavigationBar(
