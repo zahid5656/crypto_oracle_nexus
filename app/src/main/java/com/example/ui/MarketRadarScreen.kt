@@ -1576,10 +1576,11 @@ fun BetaGuardPenaltyTile(
     modifier: Modifier = Modifier
 ) {
     val color = executionGuardColor(status)
+    val currentScore = (100 - penalty).coerceIn(0, 100)
 
     Column(
         modifier = modifier
-            .heightIn(min = 42.dp)
+            .heightIn(min = 46.dp)
             .background(Color(0xFF050A13), RoundedCornerShape(7.dp))
             .border(0.58.dp, color.copy(alpha = 0.34f), RoundedCornerShape(7.dp))
             .padding(horizontal = 7.dp, vertical = 5.dp),
@@ -1597,13 +1598,24 @@ fun BetaGuardPenaltyTile(
         Spacer(modifier = Modifier.height(2.dp))
 
         Text(
-            text = "$readiness/100 • -$penalty",
-            fontSize = 8.4.sp,
+            text = "$currentScore/100",
+            fontSize = 9.3.sp,
             fontWeight = FontWeight.Black,
             color = color,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
+        if (penalty > 0) {
+            Text(
+                text = "-$penalty pts",
+                fontSize = 7.8.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFE95772),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 
