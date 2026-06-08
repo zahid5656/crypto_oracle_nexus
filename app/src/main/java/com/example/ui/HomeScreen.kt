@@ -59,6 +59,25 @@ import com.example.ui.theme.*
 import com.example.viewmodel.AppScreen
 import com.example.viewmodel.CryptoViewModel
 
+// ============================================================================
+// ORACLE FEED — INSTITUTIONAL APPLE / BLOOMBERG STYLE COLOR SYSTEM
+// Scope: Oracle Feed UI only. Signal Pro, Live Radar, Mission Center, Stats Hub untouched.
+// ============================================================================
+private val OracleFeedBg = Color(0xFF02050D)
+private val OracleCardBg = Color(0xFF050A13)
+private val OracleTileBg = Color(0xFF080E18)
+private val OracleTileBgElevated = Color(0xFF0B1220)
+private val OracleBorder = Color(0xFF1C2636)
+private val OracleBorderSoft = Color(0xFF101827)
+private val OracleWhite = Color(0xFFF5F5F5)
+private val OracleTextSecondary = Color(0xFFB8C1CF)
+private val OracleTextMuted = Color(0xFF7A8494)
+private val OracleGreen = Color(0xFF0ECB81)
+private val OracleRed = Color(0xFFFF453A)
+private val OracleYellow = Color(0xFFFFD60A)
+private val OracleBlue = Color(0xFF64D2FF)
+
+
 @Composable
 fun HomeScreen(
     viewModel: CryptoViewModel,
@@ -71,12 +90,11 @@ fun HomeScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkBackground)
+            .background(OracleFeedBg)
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
         contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp)
     ) {
-        // App Header Brand Profile
         item {
             HeaderSection(viewModel)
         }
@@ -85,75 +103,68 @@ fun HomeScreen(
             RealTimePublicMarketDashboard()
         }
 
-        // Ticker for top coins: BTC, ETH, XRP
         item {
             val livePrices by viewModel.livePrices.collectAsState()
             TopCoinsTickerSection(newsFeed, isBengali, livePrices)
         }
 
-        // Star Divider
         item {
             StarDivider()
         }
 
-        // Section Title: Crypto News Feed
         item {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Info,
                     contentDescription = "News icon",
-                    tint = CryptoCyan,
-                    modifier = Modifier.size(20.dp)
+                    tint = OracleBlue,
+                    modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "LATEST ORACLE MARKET FEED",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = CryptoCyan,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black,
+                    color = OracleWhite,
                     letterSpacing = 1.sp
                 )
             }
         }
 
-        // Scrolling News List
         items(newsFeed.newsList) { article ->
             var isLocalBengali by remember { mutableStateOf(false) }
             NewsCard(article, isLocalBengali, onToggleLanguage = { isLocalBengali = !isLocalBengali })
         }
 
-        // Star Divider
         item {
             StarDivider()
         }
 
-        // New Section Title: Deep Analytical Insights
         item {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                modifier = Modifier.padding(top = 14.dp, bottom = 2.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = "Insights icon",
-                    tint = CryptoGreen,
-                    modifier = Modifier.size(20.dp)
+                    tint = OracleGreen,
+                    modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "ORACLE DEEP ANALYTICAL INSIGHTS",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = CryptoGreen,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black,
+                    color = OracleWhite,
                     letterSpacing = 1.sp
                 )
             }
         }
 
-        // Scrolling Deep Insights List
         items(newsFeed.deepInsights) { insight ->
             var isLocalBengali by remember { mutableStateOf(false) }
             DeepInsightCard(
@@ -163,55 +174,51 @@ fun HomeScreen(
             )
         }
 
-        // Star Divider preceding Dedicated Pricing Section (Oracle Market Index)
         item {
             StarDivider()
         }
 
-        // Dedicated Pricing Section (Oracle Market Index Header)
         item {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 4.dp)
+                    .padding(top = 6.dp, bottom = 2.dp)
             ) {
-                // 3 Green Stars in front
                 Row {
                     repeat(3) {
                         Icon(
                             imageVector = Icons.Default.Star,
-                            contentDescription = "Glossy star indicator",
-                            tint = CryptoGreen,
+                            contentDescription = "Market index star",
+                            tint = OracleGreen,
                             modifier = Modifier
-                                .size(14.dp)
+                                .size(12.dp)
                                 .padding(horizontal = 1.dp)
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.width(8.dp))
-                
+
                 Text(
                     text = "ORACLE MARKET INDEX",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AccentGold,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black,
+                    color = OracleYellow,
                     letterSpacing = 1.sp
                 )
-                
+
                 Spacer(modifier = Modifier.width(8.dp))
-                
-                // 3 Green Stars at the back
+
                 Row {
                     repeat(3) {
                         Icon(
                             imageVector = Icons.Default.Star,
-                            contentDescription = "Glossy star indicator",
-                            tint = CryptoGreen,
+                            contentDescription = "Market index star",
+                            tint = OracleGreen,
                             modifier = Modifier
-                                .size(14.dp)
+                                .size(12.dp)
                                 .padding(horizontal = 1.dp)
                         )
                     }
@@ -219,7 +226,6 @@ fun HomeScreen(
             }
         }
 
-        // Decoupled beautiful Currency Exchange Rate tile
         item {
             var isLocalBengali by remember { mutableStateOf(false) }
             LiveCurrencyTile(
@@ -235,15 +241,15 @@ fun StarDivider() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 2.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "*   *   *",
-            fontSize = 14.sp,
+            text = "•   •   •",
+            fontSize = 12.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = BorderColor.copy(alpha = 0.5f),
-            letterSpacing = 12.sp
+            color = OracleBorder.copy(alpha = 0.95f),
+            letterSpacing = 10.sp
         )
     }
 }
@@ -255,7 +261,7 @@ private fun Int.getValidDp() = this.dp
 fun BangladeshTimeWidget() {
     var timeText by remember { mutableStateOf("") }
     var dateText by remember { mutableStateOf("") }
-    
+
     LaunchedEffect(Unit) {
         while (true) {
             val nowInDhaka = ZonedDateTime.now(ZoneId.of("Asia/Dhaka"))
@@ -267,12 +273,12 @@ fun BangladeshTimeWidget() {
 
     Box(
         modifier = Modifier
-            .width(86.dp)
+            .width(88.dp)
             .height(50.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFF0F172A))
-            .border(1.dp, BorderColor, RoundedCornerShape(8.dp))
-            .padding(horizontal = 6.dp, vertical = 2.dp),
+            .clip(RoundedCornerShape(9.dp))
+            .background(OracleTileBg)
+            .border(0.75.dp, OracleBorder, RoundedCornerShape(9.dp))
+            .padding(horizontal = 7.dp, vertical = 3.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -288,14 +294,14 @@ fun BangladeshTimeWidget() {
                 Text(
                     text = "BGD",
                     fontSize = 8.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AccentGold
+                    fontWeight = FontWeight.Black,
+                    color = OracleYellow
                 )
                 Text(
                     text = dateText,
                     fontSize = 7.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextSecondary
+                    color = OracleTextSecondary
                 )
             }
             Spacer(modifier = Modifier.height(2.dp))
@@ -303,21 +309,16 @@ fun BangladeshTimeWidget() {
                 text = timeText,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Black,
-                color = CryptoCyan,
+                color = OracleWhite,
                 fontFamily = FontFamily.Monospace
             )
             Spacer(modifier = Modifier.height(1.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Text(
-                    text = "GMT+6",
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = CryptoGreen
-                )
-            }
+            Text(
+                text = "GMT+6",
+                fontSize = 8.sp,
+                fontWeight = FontWeight.Bold,
+                color = OracleGreen
+            )
         }
     }
 }
@@ -331,40 +332,38 @@ fun TelemetryStatusRow(viewModel: CryptoViewModel) {
         modifier = Modifier.padding(top = 4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        // Network Sync status
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             Box(
                 modifier = Modifier
                     .size(6.dp)
-                    .background(if (isLiveConnected) CryptoGreen else TextMuted, CircleShape)
+                    .background(if (isLiveConnected) OracleGreen else OracleTextMuted, CircleShape)
             )
             Text(
                 text = if (isLiveConnected) "BINANCE SYNC: LIVE" else "LOCAL INDEX",
                 fontSize = 8.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (isLiveConnected) CryptoGreen else TextSecondary,
+                fontWeight = FontWeight.Black,
+                color = if (isLiveConnected) OracleGreen else OracleTextSecondary,
                 letterSpacing = 0.5.sp
             )
         }
 
-        // Gemini Key status
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             Box(
                 modifier = Modifier
                     .size(6.dp)
-                    .background(if (hasGeminiApiKey) CryptoCyan else AccentGold, CircleShape)
+                    .background(if (hasGeminiApiKey) OracleBlue else OracleYellow, CircleShape)
             )
             Text(
                 text = if (hasGeminiApiKey) "GEMINI: ACTIVE" else "GEMINI: SIMULATED",
                 fontSize = 8.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (hasGeminiApiKey) CryptoCyan else AccentGold,
+                fontWeight = FontWeight.Black,
+                color = if (hasGeminiApiKey) OracleBlue else OracleYellow,
                 letterSpacing = 0.5.sp
             )
         }
@@ -381,58 +380,56 @@ fun HeaderSection(viewModel: CryptoViewModel) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
-            modifier = Modifier.weight(1f).padding(end = 4.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Embed the generated high-quality custom png asset
             Image(
                 painter = painterResource(id = R.drawable.ic_app_logo_ai),
                 contentDescription = "AI Trading Assistant Logo",
                 modifier = Modifier
-                    .size(42.dp) // Scaled down logo
+                    .size(42.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .border(1.5.dp, CryptoGreen, RoundedCornerShape(10.dp)),
+                    .border(1.dp, OracleGreen, RoundedCornerShape(10.dp)),
                 contentScale = ContentScale.Crop
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(9.dp))
             Column {
                 Text(
                     text = "Crypto Signal",
-                    fontSize = 10.sp, // Reduced 2px
-                    fontWeight = FontWeight.Medium,
-                    color = CryptoCyan,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = OracleTextSecondary,
                     letterSpacing = 0.5.sp
                 )
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)) {
+                        withStyle(style = SpanStyle(color = OracleWhite, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)) {
                             append("Oracle ")
                         }
-                        withStyle(style = SpanStyle(color = TextSecondary, fontSize = 14.sp, fontWeight = FontWeight.Bold)) {
+                        withStyle(style = SpanStyle(color = OracleTextSecondary, fontSize = 14.sp, fontWeight = FontWeight.Bold)) {
                             append("B")
                         }
-                        withStyle(style = SpanStyle(color = TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Medium)) {
+                        withStyle(style = SpanStyle(color = OracleTextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Medium)) {
                             append("Y ")
                         }
-                        withStyle(style = SpanStyle(color = CryptoGreen, fontSize = 14.sp, fontWeight = FontWeight.Black)) {
+                        withStyle(style = SpanStyle(color = OracleGreen, fontSize = 14.sp, fontWeight = FontWeight.Black)) {
                             append("Z")
                         }
-                        withStyle(style = SpanStyle(color = CryptoGreen, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold)) {
+                        withStyle(style = SpanStyle(color = OracleGreen, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold)) {
                             append("AHID")
                         }
                     },
                     letterSpacing = 0.5.sp,
                     modifier = Modifier.padding(top = 2.dp)
                 )
-                
-                // Real-time telemetry indicators row below labels
+
                 TelemetryStatusRow(viewModel)
             }
         }
-        
-        Box(
-            modifier = Modifier.padding(start = 8.dp)
-        ) {
+
+        Box(modifier = Modifier.padding(start = 8.dp)) {
             BangladeshTimeWidget()
         }
     }
@@ -441,20 +438,20 @@ fun HeaderSection(viewModel: CryptoViewModel) {
 @Composable
 fun TopCoinsTickerSection(newsFeed: OracleAnalysisResponse, isBengali: Boolean, livePrices: Map<String, Double>) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+        colors = CardDefaults.cardColors(containerColor = OracleCardBg),
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, BorderColor, RoundedCornerShape(16.dp))
+            .border(0.75.dp, OracleBorder, RoundedCornerShape(16.dp))
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
             Text(
                 text = "ORACLE REFERENCE INDEX",
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextSecondary,
+                fontWeight = FontWeight.Black,
+                color = OracleWhite,
                 letterSpacing = 1.sp,
-                modifier = Modifier.padding(bottom = 12.dp)
+                modifier = Modifier.padding(bottom = 10.dp)
             )
 
             val btcSpot = newsFeed.spotSignals.find { it.coinSymbol == "BTC" }
@@ -463,29 +460,29 @@ fun TopCoinsTickerSection(newsFeed: OracleAnalysisResponse, isBengali: Boolean, 
             val solSpot = newsFeed.spotSignals.find { it.coinSymbol == "SOL" }
             val adaSpot = newsFeed.spotSignals.find { it.coinSymbol == "ADA" }
 
-            val btcPrice = livePrices["BTCUSDT"] ?: btcSpot?.currentPrice ?: 66450.0
+            val btcPrice = livePrices["BTC"] ?: btcSpot?.currentPrice ?: 66450.0
             val btcChange = btcSpot?.growthPotentialPct ?: 3.99
 
-            val ethPrice = livePrices["ETHUSDT"] ?: ethSpot?.currentPrice ?: 3485.50
+            val ethPrice = livePrices["ETH"] ?: ethSpot?.currentPrice ?: 3485.50
             val ethChange = ethSpot?.growthPotentialPct ?: 3.57
 
-            val xrpPrice = livePrices["XRPUSDT"] ?: xrpSpot?.currentPrice ?: 0.512
+            val xrpPrice = livePrices["XRP"] ?: xrpSpot?.currentPrice ?: 0.512
             val xrpChange = xrpSpot?.growthPotentialPct ?: -5.8
 
-            val solPrice = livePrices["SOLUSDT"] ?: solSpot?.currentPrice ?: 164.20
+            val solPrice = livePrices["SOL"] ?: solSpot?.currentPrice ?: 164.20
             val solChange = solSpot?.growthPotentialPct ?: 4.12
 
-            val adaPrice = livePrices["ADAUSDT"] ?: adaSpot?.currentPrice ?: 0.435
+            val adaPrice = livePrices["ADA"] ?: adaSpot?.currentPrice ?: 0.435
             val adaChange = adaSpot?.growthPotentialPct ?: -2.15
 
             TickerRow(symbol = "BTC", name = "Bitcoin", price = btcPrice, changePct = btcChange)
-            HorizontalDivider(color = BorderColor, modifier = Modifier.padding(vertical = 12.dp))
+            HorizontalDivider(color = OracleBorderSoft, modifier = Modifier.padding(vertical = 10.dp))
             TickerRow(symbol = "ETH", name = "Ethereum", price = ethPrice, changePct = ethChange)
-            HorizontalDivider(color = BorderColor, modifier = Modifier.padding(vertical = 12.dp))
+            HorizontalDivider(color = OracleBorderSoft, modifier = Modifier.padding(vertical = 10.dp))
             TickerRow(symbol = "XRP", name = "Ripple", price = xrpPrice, changePct = xrpChange)
-            HorizontalDivider(color = BorderColor, modifier = Modifier.padding(vertical = 12.dp))
+            HorizontalDivider(color = OracleBorderSoft, modifier = Modifier.padding(vertical = 10.dp))
             TickerRow(symbol = "SOL", name = "Solana", price = solPrice, changePct = solChange)
-            HorizontalDivider(color = BorderColor, modifier = Modifier.padding(vertical = 12.dp))
+            HorizontalDivider(color = OracleBorderSoft, modifier = Modifier.padding(vertical = 10.dp))
             TickerRow(symbol = "ADA", name = "Cardano", price = adaPrice, changePct = adaChange)
         }
     }
@@ -493,91 +490,82 @@ fun TopCoinsTickerSection(newsFeed: OracleAnalysisResponse, isBengali: Boolean, 
 
 @Composable
 fun TickerRow(symbol: String, name: String, price: Double, changePct: Double) {
-    // Pulse effect when price changes
     val animatedPrice = animateFloatAsState(
         targetValue = price.toFloat(),
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "PriceAnim"
     ).value
 
-    // Determine pulse state by storing previous value
     var prevPrice by remember { mutableStateOf(price) }
-    var pulseGlow by remember { mutableStateOf(false) }
+    var pulseActive by remember { mutableStateOf(false) }
 
     LaunchedEffect(price) {
         if (price != prevPrice) {
-            pulseGlow = true
-            delay(300)
-            pulseGlow = false
+            pulseActive = true
+            delay(220)
+            pulseActive = false
             prevPrice = price
         }
     }
 
-    val glowAlpha by animateFloatAsState(
-        targetValue = if (pulseGlow) 0.6f else 0f,
-        animationSpec = tween(durationMillis = 300),
-        label = "GlowAnim"
+    val borderAlpha by animateFloatAsState(
+        targetValue = if (pulseActive) 0.95f else 0.0f,
+        animationSpec = tween(durationMillis = 260),
+        label = "PriceBorderPulse"
     )
+
+    val isPositive = changePct >= 0
+    val moveColor = if (isPositive) OracleGreen else OracleRed
+    val assetColor = when (symbol) {
+        "BTC" -> OracleYellow
+        "ETH" -> OracleBlue
+        "XRP" -> OracleRed
+        "SOL" -> OracleGreen
+        "ADA" -> OracleRed
+        else -> OracleBlue
+    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                color = CryptoCyan.copy(alpha = glowAlpha * 0.2f),
-                shape = RoundedCornerShape(8.dp) // Glass premium layout
-            )
+            .background(OracleTileBg, RoundedCornerShape(9.dp))
             .border(
-                width = 1.dp,
-                color = CryptoCyan.copy(alpha = glowAlpha * 0.4f),
-                shape = RoundedCornerShape(8.dp)
+                width = 0.65.dp,
+                color = if (pulseActive) moveColor.copy(alpha = borderAlpha) else OracleBorderSoft,
+                shape = RoundedCornerShape(9.dp)
             )
-            .padding(vertical = 4.dp, horizontal = 4.dp), // Premium Tile
+            .padding(vertical = 6.dp, horizontal = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(36.dp)
-                    .background(
-                        when (symbol) {
-                            "BTC" -> AccentGold.copy(alpha = 0.15f)
-                            "ETH" -> CryptoCyan.copy(alpha = 0.15f)
-                            "XRP" -> CryptoRed.copy(alpha = 0.15f)
-                            "SOL" -> CryptoGreen.copy(alpha = 0.15f)
-                            "ADA" -> CryptoRed.copy(alpha = 0.15f)
-                            else -> CryptoCyan.copy(alpha = 0.15f)
-                        },
-                        CircleShape
-                    ),
+                    .size(34.dp)
+                    .background(OracleTileBgElevated, CircleShape)
+                    .border(0.65.dp, assetColor.copy(alpha = 0.75f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = symbol.take(1),
-                    color = when (symbol) {
-                        "BTC" -> AccentGold
-                        "ETH" -> CryptoCyan
-                        "XRP" -> CryptoRed
-                        "SOL" -> CryptoGreen
-                        "ADA" -> CryptoRed
-                        else -> CryptoCyan
-                    },
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    color = assetColor,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 15.sp
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(11.dp))
             Column {
                 Text(
                     text = name,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
-                    color = TextPrimary
+                    color = OracleWhite
                 )
                 Text(
                     text = symbol,
                     fontSize = 11.sp,
-                    color = TextSecondary
+                    fontWeight = FontWeight.Bold,
+                    color = OracleTextSecondary
                 )
             }
         }
@@ -586,17 +574,16 @@ fun TickerRow(symbol: String, name: String, price: Double, changePct: Double) {
             Text(
                 text = if (animatedPrice >= 100) String.format("$%,.2f", animatedPrice) else String.format("$%.3f", animatedPrice),
                 fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Black,
                 fontSize = 15.sp,
-                color = TextPrimary
+                color = OracleWhite
             )
-            
-            val isPositive = changePct >= 0
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = if (isPositive) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = if (isPositive) "Price up" else "Price down",
-                    tint = if (isPositive) CryptoGreen else CryptoRed,
+                    tint = moveColor,
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -604,8 +591,8 @@ fun TickerRow(symbol: String, name: String, price: Double, changePct: Double) {
                     text = String.format("%+.2f%%", changePct),
                     fontFamily = FontFamily.Monospace,
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isPositive) CryptoGreen else CryptoRed
+                    fontWeight = FontWeight.Black,
+                    color = moveColor
                 )
             }
         }
@@ -617,20 +604,19 @@ fun OracleModeControllerCard(
     useAiOracle: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
+    val accent = if (useAiOracle) OracleBlue else OracleYellow
+
     Card(
-        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+        colors = CardDefaults.cardColors(containerColor = OracleCardBg),
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                border = BorderBorder(if (useAiOracle) CryptoCyan else BorderColor),
-                shape = RoundedCornerShape(16.dp)
-            )
+            .border(0.75.dp, accent.copy(alpha = 0.70f), RoundedCornerShape(16.dp))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -640,15 +626,16 @@ fun OracleModeControllerCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
-                        .background(CryptoCyan.copy(alpha = 0.1f), CircleShape),
+                        .size(38.dp)
+                        .background(OracleTileBg, CircleShape)
+                        .border(0.65.dp, accent.copy(alpha = 0.75f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Star,
                         contentDescription = "AI Oracle intelligence core selector",
-                        tint = CryptoCyan,
-                        modifier = Modifier.size(22.dp)
+                        tint = accent,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
@@ -656,15 +643,15 @@ fun OracleModeControllerCard(
                     Text(
                         text = "AI ORACLE MODALITY",
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = CryptoCyan,
+                        fontWeight = FontWeight.Black,
+                        color = OracleWhite,
                         letterSpacing = 1.sp
                     )
                     Text(
                         text = if (useAiOracle) "Direct Gemini-3.5-Flash active" else "Fast Technical Simulator local",
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextPrimary,
+                        fontWeight = FontWeight.Bold,
+                        color = OracleTextSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -675,10 +662,10 @@ fun OracleModeControllerCard(
                 checked = useAiOracle,
                 onCheckedChange = onToggle,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = CryptoGreen,
-                    checkedTrackColor = CryptoGreen.copy(alpha = 0.3f),
-                    uncheckedThumbColor = TextSecondary,
-                    uncheckedTrackColor = DarkSurfaceVariant
+                    checkedThumbColor = OracleGreen,
+                    checkedTrackColor = OracleGreen.copy(alpha = 0.32f),
+                    uncheckedThumbColor = OracleTextSecondary,
+                    uncheckedTrackColor = OracleTileBgElevated
                 )
             )
         }
@@ -697,21 +684,25 @@ fun NewsCard(article: NewsItem, isBengali: Boolean, onToggleLanguage: () -> Unit
     val timeAgo = if (isBengali) (article.timeAgoBengali ?: article.timeAgo) else article.timeAgo
 
     val sentimentText = when (article.sentiment.uppercase()) {
-        "BULLISH" -> if (isBengali) "তেজি" else "BULLISH"
-        "BEARISH" -> if (isBengali) "মন্দা" else "BEARISH"
+        "BULLISH" -> if (isBengali) "বুলিশ" else "BULLISH"
+        "BEARISH" -> if (isBengali) "বেয়ারিশ" else "BEARISH"
         else -> if (isBengali) "নিরপেক্ষ" else "NEUTRAL"
+    }
+    val badgeColor = when (article.sentiment.uppercase()) {
+        "BULLISH" -> OracleGreen
+        "BEARISH" -> OracleRed
+        else -> OracleTextSecondary
     }
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+        colors = CardDefaults.cardColors(containerColor = OracleCardBg),
         shape = RoundedCornerShape(14.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, BorderColor, RoundedCornerShape(14.dp))
+            .border(0.75.dp, OracleBorder, RoundedCornerShape(14.dp))
             .clickable { onToggleLanguage() }
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // Header: Source, Time, Sentiment Pill
+        Column(modifier = Modifier.padding(14.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -722,66 +713,54 @@ fun NewsCard(article: NewsItem, isBengali: Boolean, onToggleLanguage: () -> Unit
                         text = source,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextSecondary
+                        color = OracleTextSecondary
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Box(
                         modifier = Modifier
                             .size(3.dp)
-                            .background(TextMuted, CircleShape)
+                            .background(OracleTextMuted, CircleShape)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = timeAgo,
                         fontSize = 11.sp,
-                        color = TextMuted
+                        color = OracleTextMuted
                     )
-                }
-
-                val badgeBg = when (article.sentiment.uppercase()) {
-                    "BULLISH" -> CryptoGreen.copy(alpha = 0.12f)
-                    "BEARISH" -> CryptoRedContainer
-                    else -> TextMuted.copy(alpha = 0.15f)
-                }
-                val badgeColor = when (article.sentiment.uppercase()) {
-                    "BULLISH" -> CryptoGreen
-                    "BEARISH" -> CryptoRedText
-                    else -> TextSecondary
                 }
 
                 Box(
                     modifier = Modifier
-                        .background(badgeBg, RoundedCornerShape(6.dp))
+                        .background(OracleTileBg, RoundedCornerShape(6.dp))
+                        .border(0.65.dp, badgeColor.copy(alpha = 0.75f), RoundedCornerShape(6.dp))
                         .padding(horizontal = 8.dp, vertical = 2.dp)
                 ) {
                     Text(
                         text = sentimentText,
                         fontSize = 9.sp,
-                        fontWeight = FontWeight.ExtraBold,
+                        fontWeight = FontWeight.Black,
                         color = badgeColor,
                         letterSpacing = 0.5.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(9.dp))
 
-            // Article Title
             Text(
                 text = title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary,
+                color = OracleWhite,
                 lineHeight = 22.sp
             )
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Article Summary
             Text(
                 text = summary,
                 fontSize = 13.sp,
-                color = TextSecondary,
+                color = OracleTextSecondary,
                 lineHeight = 18.sp
             )
         }
@@ -801,12 +780,20 @@ fun DeepInsightCard(
         )
     )
 
+    val isPump = insight.direction == "PUMP"
+    val directionColor = if (isPump) OracleGreen else OracleRed
+    val directionText = if (isBengali) {
+        if (isPump) "পাম্প" else "ডাম্প"
+    } else {
+        insight.direction
+    }
+
     Card(
-        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+        colors = CardDefaults.cardColors(containerColor = OracleCardBg),
         shape = RoundedCornerShape(14.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, if (insight.direction == "PUMP") CryptoGreen.copy(alpha = 0.5f) else CryptoRed.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
+            .border(0.75.dp, directionColor.copy(alpha = 0.70f), RoundedCornerShape(14.dp))
             .graphicsLayer {
                 rotationY = rotation
                 cameraDistance = 12 * density
@@ -814,7 +801,7 @@ fun DeepInsightCard(
             .clickable { onToggleLanguage() }
     ) {
         if (rotation <= 90f) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(14.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -824,17 +811,14 @@ fun DeepInsightCard(
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
-                                .background(
-                                    if (insight.direction == "PUMP") CryptoGreen.copy(alpha = 0.15f)
-                                    else CryptoRedContainer,
-                                    CircleShape
-                                ),
+                                .background(OracleTileBg, CircleShape)
+                                .border(0.65.dp, directionColor.copy(alpha = 0.75f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = insight.coinSymbol,
-                                color = if (insight.direction == "PUMP") CryptoGreen else CryptoRedText,
-                                fontWeight = FontWeight.ExtraBold,
+                                color = directionColor,
+                                fontWeight = FontWeight.Black,
                                 fontSize = 11.sp
                             )
                         }
@@ -844,33 +828,32 @@ fun DeepInsightCard(
                                 text = insight.coinName,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = TextPrimary
+                                color = OracleWhite
                             )
                             Text(
                                 text = insight.timeframe,
                                 fontSize = 11.sp,
-                                color = TextMuted
+                                color = OracleTextMuted
                             )
                         }
                     }
 
-                    val badgeBg = if (insight.direction == "PUMP") CryptoGreen.copy(alpha = 0.15f) else CryptoRedContainer
-                    val badgeColor = if (insight.direction == "PUMP") CryptoGreen else CryptoRedText
                     Box(
                         modifier = Modifier
-                            .background(badgeBg, RoundedCornerShape(6.dp))
+                            .background(OracleTileBg, RoundedCornerShape(6.dp))
+                            .border(0.65.dp, directionColor.copy(alpha = 0.80f), RoundedCornerShape(6.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
                             text = "${insight.direction} +${insight.expectedChangePct}%",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
-                            color = badgeColor
+                            color = directionColor
                         )
                     }
                 }
 
-                HorizontalDivider(color = BorderColor, modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(color = OracleBorderSoft, modifier = Modifier.padding(vertical = 11.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -880,41 +863,41 @@ fun DeepInsightCard(
                     Text(
                         text = "RESEARCH PROJECTED TARGET:",
                         fontSize = 10.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = TextSecondary,
+                        fontWeight = FontWeight.Bold,
+                        color = OracleTextSecondary,
                         letterSpacing = 0.5.sp
                     )
                     Text(
                         text = if (insight.targetPrice >= 100) String.format("$%,.2f", insight.targetPrice) else String.format("$%.3f", insight.targetPrice),
                         fontFamily = FontFamily.Monospace,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = if (insight.direction == "PUMP") CryptoGreen else CryptoRedText
+                        fontWeight = FontWeight.Black,
+                        color = directionColor
                     )
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(9.dp))
 
                 Text(
                     text = "Why:",
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = CryptoCyan
+                    fontWeight = FontWeight.Black,
+                    color = OracleBlue
                 )
                 Text(
                     text = insight.whyEnglish,
                     fontSize = 13.sp,
-                    color = TextPrimary,
+                    color = OracleWhite,
                     lineHeight = 18.sp,
                     modifier = Modifier.padding(top = 2.dp)
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(7.dp))
 
                 Text(
                     text = "Tap to translate to Bengali / বাংলায় পড়তে চাপুন ➔",
                     fontSize = 10.sp,
-                    color = TextMuted,
+                    color = OracleTextMuted,
                     modifier = Modifier.align(Alignment.End)
                 )
             }
@@ -922,7 +905,7 @@ fun DeepInsightCard(
             Column(
                 modifier = Modifier
                     .graphicsLayer { rotationY = 180f }
-                    .padding(16.dp)
+                    .padding(14.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -933,17 +916,14 @@ fun DeepInsightCard(
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
-                                .background(
-                                    if (insight.direction == "PUMP") CryptoGreen.copy(alpha = 0.15f)
-                                    else CryptoRedContainer,
-                                    CircleShape
-                                ),
+                                .background(OracleTileBg, CircleShape)
+                                .border(0.65.dp, directionColor.copy(alpha = 0.75f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = insight.coinSymbol,
-                                color = if (insight.direction == "PUMP") CryptoGreen else CryptoRedText,
-                                fontWeight = FontWeight.ExtraBold,
+                                color = directionColor,
+                                fontWeight = FontWeight.Black,
                                 fontSize = 11.sp
                             )
                         }
@@ -953,7 +933,7 @@ fun DeepInsightCard(
                                 text = insight.coinName,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = TextPrimary
+                                color = OracleWhite
                             )
                             Text(
                                 text = "সময়সীমা: " + when (insight.timeframe) {
@@ -963,28 +943,27 @@ fun DeepInsightCard(
                                     else -> insight.timeframe
                                 },
                                 fontSize = 11.sp,
-                                color = TextMuted
+                                color = OracleTextMuted
                             )
                         }
                     }
 
-                    val badgeBg = if (insight.direction == "PUMP") CryptoGreen.copy(alpha = 0.15f) else CryptoRedContainer
-                    val badgeColor = if (insight.direction == "PUMP") CryptoGreen else CryptoRedText
                     Box(
                         modifier = Modifier
-                            .background(badgeBg, RoundedCornerShape(6.dp))
+                            .background(OracleTileBg, RoundedCornerShape(6.dp))
+                            .border(0.65.dp, directionColor.copy(alpha = 0.80f), RoundedCornerShape(6.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = "${if (insight.direction == "PUMP") "পাম্প" else "ডাম্প"} +${insight.expectedChangePct}%",
+                            text = "$directionText +${insight.expectedChangePct}%",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
-                            color = badgeColor
+                            color = directionColor
                         )
                     }
                 }
 
-                HorizontalDivider(color = BorderColor, modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(color = OracleBorderSoft, modifier = Modifier.padding(vertical = 11.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -994,40 +973,40 @@ fun DeepInsightCard(
                     Text(
                         text = "গবেষণা পূর্বাভাসিত লক্ষ্য:",
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = TextSecondary
+                        fontWeight = FontWeight.Bold,
+                        color = OracleTextSecondary
                     )
                     Text(
                         text = if (insight.targetPrice >= 100) String.format("$%,.2f", insight.targetPrice) else String.format("$%.3f", insight.targetPrice),
                         fontFamily = FontFamily.Monospace,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = if (insight.direction == "PUMP") CryptoGreen else CryptoRedText
+                        fontWeight = FontWeight.Black,
+                        color = directionColor
                     )
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(9.dp))
 
                 Text(
                     text = "বিশ্লেষণ কারণসমূহ:",
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = CryptoCyan
+                    fontWeight = FontWeight.Black,
+                    color = OracleBlue
                 )
                 Text(
                     text = insight.whyBengali,
                     fontSize = 13.sp,
-                    color = TextPrimary,
+                    color = OracleWhite,
                     lineHeight = 18.sp,
                     modifier = Modifier.padding(top = 2.dp)
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(7.dp))
 
                 Text(
                     text = "ইংরেজিতে পড়তে চাপুন / Tap to translate to English ➔",
                     fontSize = 10.sp,
-                    color = TextMuted,
+                    color = OracleTextMuted,
                     modifier = Modifier.align(Alignment.End)
                 )
             }
@@ -1048,19 +1027,11 @@ fun LiveCurrencyTile(
     )
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+        colors = CardDefaults.cardColors(containerColor = OracleCardBg),
         shape = RoundedCornerShape(14.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                border = androidx.compose.foundation.BorderStroke(
-                    1.dp,
-                    androidx.compose.ui.graphics.Brush.horizontalGradient(
-                        listOf(CryptoCyan.copy(alpha = 0.5f), AccentGold.copy(alpha = 0.5f))
-                    )
-                ),
-                shape = RoundedCornerShape(14.dp)
-            )
+            .border(0.75.dp, OracleYellow.copy(alpha = 0.72f), RoundedCornerShape(14.dp))
             .graphicsLayer {
                 rotationY = rotation
                 cameraDistance = 12 * density
@@ -1068,8 +1039,7 @@ fun LiveCurrencyTile(
             .clickable { onToggleLanguage() }
     ) {
         if (rotation <= 90f) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                // Header of index
+            Column(modifier = Modifier.padding(14.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1079,13 +1049,14 @@ fun LiveCurrencyTile(
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
-                                .background(AccentGold.copy(alpha = 0.15f), CircleShape),
+                                .background(OracleTileBg, CircleShape)
+                                .border(0.65.dp, OracleYellow.copy(alpha = 0.75f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Info,
                                 contentDescription = "Currency Symbol Index",
-                                tint = AccentGold,
+                                tint = OracleYellow,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -1094,20 +1065,20 @@ fun LiveCurrencyTile(
                             Text(
                                 text = "ORACLE FREE-MARKET CURRENCY INDEX",
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = AccentGold,
+                                fontWeight = FontWeight.Black,
+                                color = OracleWhite,
                                 letterSpacing = 0.5.sp
                             )
                             Text(
                                 text = buildAnnotatedString {
                                     append("P2P Crypto-Referred Rates (Real-Time ")
-                                    withStyle(SpanStyle(color = CryptoCyan, fontWeight = FontWeight.Bold)) {
+                                    withStyle(SpanStyle(color = OracleGreen, fontWeight = FontWeight.Black)) {
                                         append("LIVE")
                                     }
                                     append(")")
                                 },
                                 fontSize = 10.sp,
-                                color = TextMuted
+                                color = OracleTextMuted
                             )
                         }
                     }
@@ -1115,13 +1086,12 @@ fun LiveCurrencyTile(
                     Box(
                         modifier = Modifier
                             .size(10.dp)
-                            .background(CryptoGreen, CircleShape)
+                            .background(OracleGreen, CircleShape)
                     )
                 }
 
-                HorizontalDivider(color = BorderColor, modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(color = OracleBorderSoft, modifier = Modifier.padding(vertical = 11.dp))
 
-                // Exchange Rates Table
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     CurrencyRow(flag = "🇺🇸", code = "USD", name = "United States Dollar", rate = "118.42 BDT")
                     CurrencyRow(flag = "🇪🇺", code = "EUR", name = "Euro", rate = "128.65 BDT")
@@ -1130,12 +1100,12 @@ fun LiveCurrencyTile(
                     CurrencyRow(flag = "🇦🇪", code = "AED", name = "United Arab Dirham", rate = "32.24 BDT")
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(9.dp))
 
                 Text(
                     text = "Tap to translate to Bengali / বাংলায় পড়তে চাপুন ➔",
                     fontSize = 9.sp,
-                    color = TextMuted,
+                    color = OracleTextMuted,
                     modifier = Modifier.align(Alignment.End)
                 )
             }
@@ -1143,9 +1113,8 @@ fun LiveCurrencyTile(
             Column(
                 modifier = Modifier
                     .graphicsLayer { rotationY = 180f }
-                    .padding(16.dp)
+                    .padding(14.dp)
             ) {
-                // Header of index - Bengali
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1155,13 +1124,14 @@ fun LiveCurrencyTile(
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
-                                .background(AccentGold.copy(alpha = 0.15f), CircleShape),
+                                .background(OracleTileBg, CircleShape)
+                                .border(0.65.dp, OracleYellow.copy(alpha = 0.75f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Info,
                                 contentDescription = "Currency Symbol Index",
-                                tint = AccentGold,
+                                tint = OracleYellow,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -1170,19 +1140,19 @@ fun LiveCurrencyTile(
                             Text(
                                 text = "ওরাকল উন্মুক্ত বাজার মুদ্রা সূচক",
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = AccentGold
+                                fontWeight = FontWeight.Black,
+                                color = OracleWhite
                             )
                             Text(
                                 text = buildAnnotatedString {
                                     append("ক্রিপ্টো পিটুপি ও সরাসরি বাজার রেট (রিয়েল টাইম ")
-                                    withStyle(SpanStyle(color = CryptoCyan, fontWeight = FontWeight.Bold)) {
+                                    withStyle(SpanStyle(color = OracleGreen, fontWeight = FontWeight.Black)) {
                                         append("LIVE")
                                     }
                                     append(")")
                                 },
                                 fontSize = 10.sp,
-                                color = TextMuted
+                                color = OracleTextMuted
                             )
                         }
                     }
@@ -1190,13 +1160,12 @@ fun LiveCurrencyTile(
                     Box(
                         modifier = Modifier
                             .size(10.dp)
-                            .background(CryptoGreen, CircleShape)
+                            .background(OracleGreen, CircleShape)
                     )
                 }
 
-                HorizontalDivider(color = BorderColor, modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(color = OracleBorderSoft, modifier = Modifier.padding(vertical = 11.dp))
 
-                // Exchange Rates Table - Bengali
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     CurrencyRow(flag = "🇺🇸", code = "USD", name = "ইউএস ডলার", rate = "১১৮.৪২ টাকা")
                     CurrencyRow(flag = "🇪🇺", code = "EUR", name = "ইউরো", rate = "১২৮.৬৫ টাকা")
@@ -1205,12 +1174,12 @@ fun LiveCurrencyTile(
                     CurrencyRow(flag = "🇦🇪", code = "AED", name = "ইউএই দিরহাম", rate = "৩২.২৪ টাকা")
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(9.dp))
 
                 Text(
                     text = "ইংরেজিতে পড়তে চাপুন / Tap to translate to English ➔",
                     fontSize = 9.sp,
-                    color = TextMuted,
+                    color = OracleTextMuted,
                     modifier = Modifier.align(Alignment.End)
                 )
             }
@@ -1221,7 +1190,11 @@ fun LiveCurrencyTile(
 @Composable
 fun CurrencyRow(flag: String, code: String, name: String, rate: String) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(OracleTileBg, RoundedCornerShape(8.dp))
+            .border(0.6.dp, OracleBorderSoft, RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp, vertical = 7.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -1232,13 +1205,13 @@ fun CurrencyRow(flag: String, code: String, name: String, rate: String) {
                 Text(
                     text = code,
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    fontWeight = FontWeight.Black,
+                    color = OracleWhite
                 )
                 Text(
                     text = name,
                     fontSize = 10.sp,
-                    color = TextMuted
+                    color = OracleTextMuted
                 )
             }
         }
@@ -1246,8 +1219,8 @@ fun CurrencyRow(flag: String, code: String, name: String, rate: String) {
             text = rate,
             fontFamily = FontFamily.Monospace,
             fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
-            color = AccentGold
+            fontWeight = FontWeight.Black,
+            color = OracleYellow
         )
     }
 }
@@ -1270,7 +1243,7 @@ fun RealTimePublicMarketDashboard() {
                     val response = java.net.URL("https://api.binance.com/api/v3/ticker/24hr").readText()
                     val jsonArray = org.json.JSONArray(response)
                     val topSymbols = listOf("BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "DOGEUSDT", "ADAUSDT", "AVAXUSDT")
-                    
+
                     val parsedAssets = mutableListOf<MarketAsset>()
                     for (i in 0 until jsonArray.length()) {
                         val obj = jsonArray.getJSONObject(i)
@@ -1285,8 +1258,7 @@ fun RealTimePublicMarketDashboard() {
                             )
                         }
                     }
-                    
-                    // Sort by our predefined order
+
                     assets = parsedAssets.sortedBy { topSymbols.indexOf("${it.symbol}USDT") }
                     isLoading = false
                 } catch (e: Exception) {
@@ -1298,31 +1270,35 @@ fun RealTimePublicMarketDashboard() {
     }
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = DarkSurface),
+        colors = CardDefaults.cardColors(containerColor = OracleCardBg),
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth().border(1.dp, BorderColor, RoundedCornerShape(16.dp))
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(0.75.dp, OracleBorder, RoundedCornerShape(16.dp))
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
             Text(
                 text = "REAL-TIME PUBLIC MARKET",
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = CryptoCyan,
+                fontWeight = FontWeight.Black,
+                color = OracleWhite,
                 letterSpacing = 1.sp,
-                modifier = Modifier.padding(bottom = 12.dp)
+                modifier = Modifier.padding(bottom = 10.dp)
             )
 
             if (isLoading) {
                 CircularProgressIndicator(
-                    color = CryptoCyan,
+                    color = OracleGreen,
                     modifier = Modifier
                         .size(24.dp)
                         .align(Alignment.CenterHorizontally)
                 )
             } else {
-                assets.forEach { asset ->
+                assets.forEachIndexed { index, asset ->
                     MarketAssetRow(asset)
-                    HorizontalDivider(color = BorderColor, modifier = Modifier.padding(vertical = 12.dp))
+                    if (index != assets.lastIndex) {
+                        HorizontalDivider(color = OracleBorderSoft, modifier = Modifier.padding(vertical = 10.dp))
+                    }
                 }
             }
         }
@@ -1331,49 +1307,56 @@ fun RealTimePublicMarketDashboard() {
 
 @Composable
 fun MarketAssetRow(asset: MarketAsset) {
+    val isPositive = asset.priceChangePercent >= 0
+    val moveColor = if (isPositive) OracleGreen else OracleRed
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(OracleTileBg, RoundedCornerShape(8.dp))
+            .border(0.6.dp, OracleBorderSoft, RoundedCornerShape(8.dp))
+            .padding(horizontal = 7.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(36.dp)
-                    .background(CryptoCyan.copy(alpha = 0.15f), CircleShape),
+                    .size(34.dp)
+                    .background(OracleTileBgElevated, CircleShape)
+                    .border(0.65.dp, OracleBlue.copy(alpha = 0.70f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = asset.symbol.take(1),
-                    color = CryptoCyan,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    color = OracleBlue,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 15.sp
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(11.dp))
             Text(
                 text = asset.symbol,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
-                color = TextPrimary
+                color = OracleWhite
             )
         }
-        
+
         Column(horizontalAlignment = Alignment.End) {
             Text(
                 text = if (asset.price >= 100) String.format("$%,.2f", asset.price) else String.format("$%.3f", asset.price),
                 fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Black,
                 fontSize = 15.sp,
-                color = TextPrimary
+                color = OracleWhite
             )
-            
-            val isPositive = asset.priceChangePercent >= 0
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = if (isPositive) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = if (isPositive) "Price up" else "Price down",
-                    tint = if (isPositive) CryptoGreen else CryptoRed,
+                    tint = moveColor,
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -1381,10 +1364,11 @@ fun MarketAssetRow(asset: MarketAsset) {
                     text = "${if (isPositive) "+" else ""}${String.format("%.2f", asset.priceChangePercent)}%",
                     fontFamily = FontFamily.Monospace,
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isPositive) CryptoGreen else CryptoRed
+                    fontWeight = FontWeight.Black,
+                    color = moveColor
                 )
             }
         }
     }
 }
+
