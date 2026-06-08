@@ -479,28 +479,11 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = if (isBengali) "ওরাকল কোয়ান্ট বিশ্লেষণ" else "ORACLE ANALYTIC METADATA",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AccentGold,
-                        letterSpacing = 1.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    OracleAnalyticMetadataGrid(
+                    AiOracleAnalyticMetadataSection(
+                        title = if (isBengali) "এআই ওরাকল অ্যানালিটিক্যাল মেটাডাটা" else "AI ORACLE ANALYTICAL METADATA",
                         details = details,
-                        isBengali = isBengali
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = if (isBengali) details["desc_bn"]!! else details["desc"]!!,
-                        fontSize = 11.sp,
-                        color = TextSecondary,
-                        lineHeight = 16.sp
+                        isBengali = isBengali,
+                        sectionColor = AccentGold
                     )
 
                     OpportunisticSignalAdornmentSection(
@@ -611,28 +594,11 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = if (isBengali) "ওরাকল কোয়ান্ট ফিউচার লং বিশ্লেষণ" else "ORACLE FUTURES LONG METADATA",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = CryptoGreen,
-                        letterSpacing = 1.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    OracleAnalyticMetadataGrid(
+                    AiOracleAnalyticMetadataSection(
+                        title = if (isBengali) "এআই ওরাকল ফিউচার লং মেটাডাটা" else "AI ORACLE FUTURES LONG METADATA",
                         details = details,
-                        isBengali = isBengali
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = if (isBengali) details["desc_bn"]!! else details["desc"]!!,
-                        fontSize = 11.sp,
-                        color = TextSecondary,
-                        lineHeight = 16.sp
+                        isBengali = isBengali,
+                        sectionColor = CryptoGreen
                     )
 
                     OpportunisticSignalAdornmentSection(
@@ -743,28 +709,11 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = if (isBengali) "ওরাকল কোয়ান্ট ফিউচার শর্ট বিশ্লেষণ" else "ORACLE FUTURES SHORT METADATA",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFFF3F60),
-                        letterSpacing = 1.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    OracleAnalyticMetadataGrid(
+                    AiOracleAnalyticMetadataSection(
+                        title = if (isBengali) "এআই ওরাকল ফিউচার শর্ট মেটাডাটা" else "AI ORACLE FUTURES SHORT METADATA",
                         details = details,
-                        isBengali = isBengali
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = if (isBengali) details["desc_bn"]!! else details["desc"]!!,
-                        fontSize = 11.sp,
-                        color = TextSecondary,
-                        lineHeight = 16.sp
+                        isBengali = isBengali,
+                        sectionColor = Color(0xFFFF3F60)
                     )
 
                     OpportunisticSignalAdornmentSection(
@@ -922,18 +871,21 @@ fun OpportunisticSignalAdornmentSection(
         TakeProfitTargetTile(
             label = "TP1 (25%)",
             value = "$${formatPrice(tp1)}",
+            accent = themeColor,
             modifier = Modifier.weight(1f)
         )
 
         TakeProfitTargetTile(
             label = "TP2 (50%)",
             value = "$${formatPrice(tp2)}",
+            accent = themeColor,
             modifier = Modifier.weight(1f)
         )
 
         TakeProfitTargetTile(
             label = "TP3 (100%)",
             value = "$${formatPrice(tp3)}",
+            accent = themeColor,
             modifier = Modifier.weight(1f)
         )
     }
@@ -957,18 +909,21 @@ fun OpportunisticSignalAdornmentSection(
     ) {
         ConsensusEngineTile(
             name = "Gemini Pro AI",
+            accent = themeColor,
             score = "94/100",
             modifier = Modifier.weight(1f)
         )
 
         ConsensusEngineTile(
             name = "GPT-4Q Quant",
+            accent = themeColor,
             score = "90/100",
             modifier = Modifier.weight(1f)
         )
 
         ConsensusEngineTile(
             name = "Claude Sentient",
+            accent = themeColor,
             score = "93/100",
             modifier = Modifier.weight(1f)
         )
@@ -994,21 +949,21 @@ fun OpportunisticSignalAdornmentSection(
         AllocationSizingTile(
             label = "CONSERVATIVE",
             value = "2.0% Cap",
-            accent = AccentGold,
+            accent = themeColor,
             modifier = Modifier.weight(1f)
         )
 
         AllocationSizingTile(
             label = "BALANCED",
             value = "5.0% Cap",
-            accent = AccentGold,
+            accent = themeColor,
             modifier = Modifier.weight(1f)
         )
 
         AllocationSizingTile(
             label = "AGGRESSIVE",
             value = "10.0% Max",
-            accent = AccentGold,
+            accent = themeColor,
             modifier = Modifier.weight(1f)
         )
     }
@@ -1016,10 +971,14 @@ fun OpportunisticSignalAdornmentSection(
 
 
 // ============================================================================
-// LIVE RADAR — DIRECT UI ALIGNMENT + TYPOGRAPHY PATCH
-// Scope: MarketRadarScreen.kt expanded Live Radar cards only.
+// LIVE RADAR — DIRECT UI READABILITY + COLOR CONSISTENCY PATCH
+// Scope: expanded Live Radar cards only.
 // Signal Pro, Mission Center, trade execution, and repository logic untouched.
 // ============================================================================
+
+private val LiveRadarPanelDark = Color(0xFF050A13)
+private val LiveRadarTileDark = Color(0xFF050A13)
+private val LiveRadarDangerRed = Color(0xFFFF3045)
 
 private enum class LiveRadarGuardSeverity {
     CLEAR,
@@ -1049,26 +1008,53 @@ private data class LiveRadarBetaGuardUiState(
 )
 
 @Composable
-private fun OracleAnalyticMetadataGrid(
+private fun AiOracleAnalyticMetadataSection(
+    title: String,
     details: Map<String, String>,
-    isBengali: Boolean
+    isBengali: Boolean,
+    sectionColor: Color
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        Color(0xFF051016),
-                        CryptoGreen.copy(alpha = 0.050f),
-                        Color(0xFF050812)
-                    )
-                ),
-                RoundedCornerShape(12.dp)
-            )
-            .border(0.85.dp, CryptoGreen.copy(alpha = 0.42f), RoundedCornerShape(12.dp))
+            .background(LiveRadarPanelDark, RoundedCornerShape(12.dp))
+            .border(0.9.dp, sectionColor.copy(alpha = 0.50f), RoundedCornerShape(12.dp))
             .padding(horizontal = 9.dp, vertical = 9.dp)
     ) {
+        Text(
+            text = title,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Black,
+            color = sectionColor,
+            letterSpacing = 0.85.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OracleAnalyticMetadataGrid(
+            details = details,
+            isBengali = isBengali,
+            sectionColor = sectionColor
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OracleMetadataDescriptionTile(
+            text = if (isBengali) details["desc_bn"].orEmpty() else details["desc"].orEmpty(),
+            borderColor = sectionColor
+        )
+    }
+}
+
+@Composable
+private fun OracleAnalyticMetadataGrid(
+    details: Map<String, String>,
+    isBengali: Boolean,
+    sectionColor: Color
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1077,14 +1063,20 @@ private fun OracleAnalyticMetadataGrid(
             OracleMetadataTile(
                 title = if (isBengali) "প্যাটার্ন" else "PATTERN DETECTED",
                 value = if (isBengali) details["pattern_bn"].orEmpty() else details["pattern"].orEmpty(),
-                accent = TextPrimary,
+                titleColor = sectionColor,
+                valueColor = TextPrimary,
+                borderColor = sectionColor,
+                valueSizeSp = 9.6f,
                 modifier = Modifier.weight(1f)
             )
 
             OracleMetadataTile(
                 title = if (isBengali) "অর্ডারবুক রেশিও" else "ORDERBOOK RATIO",
                 value = if (isBengali) details["bid_ask_bn"].orEmpty() else details["bid_ask"].orEmpty(),
-                accent = TextPrimary,
+                titleColor = sectionColor,
+                valueColor = TextPrimary,
+                borderColor = sectionColor,
+                valueSizeSp = 9.8f,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -1099,20 +1091,21 @@ private fun OracleAnalyticMetadataGrid(
             OracleMetadataTile(
                 title = if (isBengali) "স্টপ লস" else "SUGGESTED STOP LOSS",
                 value = details["sl"].orEmpty(),
-                accent = Color(0xFFFF1744),
-                titleSizeSp = 10.8f,
+                titleColor = LiveRadarDangerRed,
+                valueColor = LiveRadarDangerRed,
+                borderColor = LiveRadarDangerRed,
                 valueSizeSp = 15.2f,
-                strongRisk = true,
+                showRiskDot = true,
                 modifier = Modifier.weight(1f)
             )
 
             OracleMetadataTile(
                 title = if (isBengali) "সম্ভাব্যতা স্কোর" else "PROBABILITY SCORE",
                 value = details["prob"].orEmpty(),
-                accent = CryptoGreen,
-                titleSizeSp = 10.8f,
+                titleColor = sectionColor,
+                valueColor = probabilityScoreColor(details["prob"].orEmpty()),
+                borderColor = sectionColor,
                 valueSizeSp = 15.8f,
-                showDot = true,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -1123,54 +1116,41 @@ private fun OracleAnalyticMetadataGrid(
 private fun OracleMetadataTile(
     title: String,
     value: String,
-    accent: Color,
+    titleColor: Color,
+    valueColor: Color,
+    borderColor: Color,
     modifier: Modifier = Modifier,
-    titleSizeSp: Float = 10.4f,
-    valueSizeSp: Float = 13.4f,
-    showDot: Boolean = false,
-    strongRisk: Boolean = false
+    titleSizeSp: Float = 8.9f,
+    valueSizeSp: Float = 13.2f,
+    showRiskDot: Boolean = false
 ) {
-    val borderColor = if (strongRisk) Color(0xFFFF1744) else CryptoGreen.copy(alpha = 0.46f)
-    val backgroundAccent = if (strongRisk) Color(0xFFFF1744) else CryptoGreen
-
     Column(
         modifier = modifier
             .heightIn(min = 58.dp)
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        Color(0xFF060B14),
-                        backgroundAccent.copy(alpha = if (strongRisk) 0.105f else 0.060f),
-                        Color(0xFF050812)
-                    )
-                ),
-                RoundedCornerShape(10.dp)
-            )
-            .border(0.9.dp, borderColor.copy(alpha = if (strongRisk) 0.82f else 0.54f), RoundedCornerShape(10.dp))
-            .padding(horizontal = 9.dp, vertical = 8.dp),
+            .background(LiveRadarTileDark, RoundedCornerShape(10.dp))
+            .border(0.9.dp, borderColor.copy(alpha = 0.68f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.Top
     ) {
         Text(
             text = title,
             fontSize = titleSizeSp.sp,
             fontWeight = FontWeight.Black,
-            color = if (strongRisk) Color(0xFFFF1744) else CryptoGreen,
-            letterSpacing = 0.35.sp,
-            lineHeight = 12.sp,
-            maxLines = 2,
+            color = titleColor,
+            letterSpacing = 0.12.sp,
+            lineHeight = 10.4.sp,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
 
         Spacer(modifier = Modifier.height(5.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (strongRisk) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (showRiskDot) {
                 Box(
                     modifier = Modifier
-                        .size(7.dp)
-                        .background(Color(0xFFFF1744), CircleShape)
+                        .size(6.dp)
+                        .background(LiveRadarDangerRed, CircleShape)
                 )
                 Spacer(modifier = Modifier.width(5.dp))
             }
@@ -1179,21 +1159,34 @@ private fun OracleMetadataTile(
                 text = value,
                 fontSize = valueSizeSp.sp,
                 fontWeight = FontWeight.Black,
-                color = accent,
-                lineHeight = (valueSizeSp + 2f).sp,
+                color = valueColor,
+                lineHeight = (valueSizeSp + 1.7f).sp,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-
-            if (showDot) {
-                Spacer(modifier = Modifier.width(6.dp))
-                Box(
-                    modifier = Modifier
-                        .size(7.dp)
-                        .background(accent, CircleShape)
-                )
-            }
         }
+    }
+}
+
+@Composable
+private fun OracleMetadataDescriptionTile(
+    text: String,
+    borderColor: Color
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(LiveRadarTileDark, RoundedCornerShape(10.dp))
+            .border(0.8.dp, borderColor.copy(alpha = 0.38f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 9.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TextPrimary,
+            lineHeight = 16.sp
+        )
     }
 }
 
@@ -1213,22 +1206,13 @@ private fun LiveRadarBetaDivergenceGuard(
     }
 
     val statusColor = liveRadarGuardColor(state.readinessSeverity)
-    val penaltyColor = Color(0xFFFF1744)
+    val penaltyColor = LiveRadarDangerRed
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        Color(0xFF040812),
-                        statusColor.copy(alpha = 0.060f),
-                        Color(0xFF02050D)
-                    )
-                ),
-                RoundedCornerShape(13.dp)
-            )
-            .border(0.85.dp, statusColor.copy(alpha = 0.46f), RoundedCornerShape(13.dp))
+            .background(LiveRadarPanelDark, RoundedCornerShape(13.dp))
+            .border(0.9.dp, statusColor.copy(alpha = 0.62f), RoundedCornerShape(13.dp))
             .padding(horizontal = 10.dp, vertical = 10.dp)
     ) {
         Text(
@@ -1246,8 +1230,8 @@ private fun LiveRadarBetaDivergenceGuard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF060B14), RoundedCornerShape(10.dp))
-                .border(0.8.dp, statusColor.copy(alpha = 0.42f), RoundedCornerShape(10.dp))
+                .background(LiveRadarTileDark, RoundedCornerShape(10.dp))
+                .border(0.85.dp, statusColor.copy(alpha = 0.56f), RoundedCornerShape(10.dp))
                 .padding(horizontal = 10.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -1286,7 +1270,7 @@ private fun LiveRadarBetaDivergenceGuard(
 
                 Text(
                     text = "-${state.penaltyPoints} pts",
-                    fontSize = 13.sp,
+                    fontSize = 13.4.sp,
                     fontWeight = FontWeight.Black,
                     color = penaltyColor,
                     maxLines = 1
@@ -1407,17 +1391,8 @@ private fun BetaGuardMiniTile(
     Column(
         modifier = modifier
             .heightIn(min = 64.dp)
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        Color(0xFF050A13),
-                        baseColor.copy(alpha = 0.070f),
-                        Color(0xFF050812)
-                    )
-                ),
-                RoundedCornerShape(9.dp)
-            )
-            .border(0.85.dp, baseColor.copy(alpha = 0.58f), RoundedCornerShape(9.dp))
+            .background(LiveRadarTileDark, RoundedCornerShape(9.dp))
+            .border(0.85.dp, baseColor.copy(alpha = 0.68f), RoundedCornerShape(9.dp))
             .padding(horizontal = 7.dp, vertical = 7.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -1462,13 +1437,14 @@ private fun BetaGuardMiniTile(
 private fun TakeProfitTargetTile(
     label: String,
     value: String,
+    accent: Color,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .heightIn(min = 56.dp)
-            .background(CryptoGreen.copy(alpha = 0.060f), RoundedCornerShape(9.dp))
-            .border(0.8.dp, CryptoGreen.copy(alpha = 0.42f), RoundedCornerShape(9.dp))
+            .background(LiveRadarTileDark, RoundedCornerShape(9.dp))
+            .border(0.8.dp, accent.copy(alpha = 0.46f), RoundedCornerShape(9.dp))
             .padding(horizontal = 7.dp, vertical = 7.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -1477,7 +1453,7 @@ private fun TakeProfitTargetTile(
             text = label,
             fontSize = 11.4.sp,
             fontWeight = FontWeight.Black,
-            color = CryptoGreen,
+            color = accent,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -1501,13 +1477,14 @@ private fun TakeProfitTargetTile(
 private fun ConsensusEngineTile(
     name: String,
     score: String,
+    accent: Color,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .heightIn(min = 58.dp)
-            .background(CryptoGreen.copy(alpha = 0.050f), RoundedCornerShape(9.dp))
-            .border(0.75.dp, CryptoGreen.copy(alpha = 0.34f), RoundedCornerShape(9.dp))
+            .background(LiveRadarTileDark, RoundedCornerShape(9.dp))
+            .border(0.75.dp, accent.copy(alpha = 0.46f), RoundedCornerShape(9.dp))
             .padding(horizontal = 7.dp, vertical = 7.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -1516,7 +1493,7 @@ private fun ConsensusEngineTile(
             text = name,
             fontSize = 9.4.sp,
             fontWeight = FontWeight.Black,
-            color = CryptoGreen,
+            color = accent,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -1545,8 +1522,8 @@ private fun AllocationSizingTile(
     Column(
         modifier = modifier
             .heightIn(min = 52.dp)
-            .background(accent.copy(alpha = 0.060f), RoundedCornerShape(9.dp))
-            .border(0.75.dp, accent.copy(alpha = 0.36f), RoundedCornerShape(9.dp))
+            .background(LiveRadarTileDark, RoundedCornerShape(9.dp))
+            .border(0.75.dp, accent.copy(alpha = 0.46f), RoundedCornerShape(9.dp))
             .padding(horizontal = 6.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -1572,6 +1549,15 @@ private fun AllocationSizingTile(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+    }
+}
+
+private fun probabilityScoreColor(rawValue: String): Color {
+    val score = rawValue.filter { it.isDigit() }.toIntOrNull() ?: return TextPrimary
+    return when {
+        score <= 60 -> LiveRadarDangerRed
+        score <= 80 -> Color(0xFFFFC247)
+        else -> CryptoGreen
     }
 }
 
@@ -1771,3 +1757,4 @@ private fun safeRadarHash(value: String): Int {
     val hash = value.hashCode()
     return if (hash == Int.MIN_VALUE) 0 else if (hash < 0) -hash else hash
 }
+
