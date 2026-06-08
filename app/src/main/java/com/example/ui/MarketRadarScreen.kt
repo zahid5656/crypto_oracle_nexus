@@ -31,11 +31,6 @@ import com.example.model.RadarAlert
 import com.example.ui.theme.*
 import com.example.viewmodel.CryptoViewModel
 import kotlin.random.Random
-import androidx.compose.runtime.Immutable
-import kotlin.math.absoluteValue
-import androidx.compose.runtime.remember
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.width
 
 @Composable
 fun MarketRadarScreen(
@@ -484,26 +479,32 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    LiveRadarAiOracleMetadataTile(
-                        patternText = if (isBengali) details["pattern_bn"]!! else details["pattern"]!!,
-                        orderbookText = if (isBengali) details["bid_ask_bn"]!! else details["bid_ask"]!!,
-                        stopLossText = details["sl"]!!,
-                        probabilityText = details["prob"]!!,
-                        descriptionText = if (isBengali) details["desc_bn"]!! else details["desc"]!!,
-                        isBengali = isBengali,
-                        themeColor = if (target >= basePrice) CryptoGreen else Color(0xFFFF3F60)
+                    Text(
+                        text = if (isBengali) "ওরাকল কোয়ান্ট বিশ্লেষণ" else "ORACLE ANALYTIC METADATA",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AccentGold,
+                        letterSpacing = 1.sp
                     )
 
-                    LiveRadarBetaDivergenceGuard(
-                        symbol = symbol,
-                        timeframe = timeframe,
-                        isLong = target >= basePrice,
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    OracleAnalyticMetadataGrid(
+                        details = details,
                         isBengali = isBengali
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    Text(
+                        text = if (isBengali) details["desc_bn"]!! else details["desc"]!!,
+                        fontSize = 11.sp,
+                        color = TextSecondary,
+                        lineHeight = 16.sp
+                    )
+
                     OpportunisticSignalAdornmentSection(
+                        symbol = symbol,
                         basePrice = basePrice,
                         isLong = true,
                         potential = potential,
@@ -527,7 +528,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                             aiStatusBengali = "রাডার স্পট সেটআপ সক্রিয়।"
                         )
                     }
-                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = basePrice)
+                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission)
                 }
             }
         }
@@ -610,26 +611,32 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    LiveRadarAiOracleMetadataTile(
-                        patternText = if (isBengali) details["pattern_bn"]!! else details["pattern"]!!,
-                        orderbookText = if (isBengali) details["bid_ask_bn"]!! else details["bid_ask"]!!,
-                        stopLossText = details["sl"]!!,
-                        probabilityText = details["prob"]!!,
-                        descriptionText = if (isBengali) details["desc_bn"]!! else details["desc"]!!,
-                        isBengali = isBengali,
-                        themeColor = if (target >= basePrice) CryptoGreen else Color(0xFFFF3F60)
+                    Text(
+                        text = if (isBengali) "ওরাকল কোয়ান্ট ফিউচার লং বিশ্লেষণ" else "ORACLE FUTURES LONG METADATA",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = CryptoGreen,
+                        letterSpacing = 1.sp
                     )
 
-                    LiveRadarBetaDivergenceGuard(
-                        symbol = symbol,
-                        timeframe = timeframe,
-                        isLong = target >= basePrice,
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    OracleAnalyticMetadataGrid(
+                        details = details,
                         isBengali = isBengali
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    Text(
+                        text = if (isBengali) details["desc_bn"]!! else details["desc"]!!,
+                        fontSize = 11.sp,
+                        color = TextSecondary,
+                        lineHeight = 16.sp
+                    )
+
                     OpportunisticSignalAdornmentSection(
+                        symbol = symbol,
                         basePrice = basePrice,
                         isLong = true,
                         potential = potential,
@@ -653,7 +660,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                             aiStatusBengali = "রাডার লং সেটআপ সক্রিয়।"
                         )
                     }
-                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = basePrice)
+                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission)
                 }
             }
         }
@@ -736,26 +743,32 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    LiveRadarAiOracleMetadataTile(
-                        patternText = if (isBengali) details["pattern_bn"]!! else details["pattern"]!!,
-                        orderbookText = if (isBengali) details["bid_ask_bn"]!! else details["bid_ask"]!!,
-                        stopLossText = details["sl"]!!,
-                        probabilityText = details["prob"]!!,
-                        descriptionText = if (isBengali) details["desc_bn"]!! else details["desc"]!!,
-                        isBengali = isBengali,
-                        themeColor = if (target >= basePrice) CryptoGreen else Color(0xFFFF3F60)
+                    Text(
+                        text = if (isBengali) "ওরাকল কোয়ান্ট ফিউচার শর্ট বিশ্লেষণ" else "ORACLE FUTURES SHORT METADATA",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFF3F60),
+                        letterSpacing = 1.sp
                     )
 
-                    LiveRadarBetaDivergenceGuard(
-                        symbol = symbol,
-                        timeframe = timeframe,
-                        isLong = target >= basePrice,
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    OracleAnalyticMetadataGrid(
+                        details = details,
                         isBengali = isBengali
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    Text(
+                        text = if (isBengali) details["desc_bn"]!! else details["desc"]!!,
+                        fontSize = 11.sp,
+                        color = TextSecondary,
+                        lineHeight = 16.sp
+                    )
+
                     OpportunisticSignalAdornmentSection(
+                        symbol = symbol,
                         basePrice = basePrice,
                         isLong = false,
                         potential = potential,
@@ -779,7 +792,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                             aiStatusBengali = "রাডার শর্ট সেটআপ সক্রিয়।"
                         )
                     }
-                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = basePrice)
+                    com.example.ui.StartTradeFlow(viewModel = viewModel, mission = mission)
                 }
             }
         }
@@ -858,6 +871,7 @@ fun RadarAlertCard(alert: RadarAlert, isBengali: Boolean) {
 
 @Composable
 fun OpportunisticSignalAdornmentSection(
+    symbol: String,
     basePrice: Double,
     isLong: Boolean,
     potential: Double,
@@ -867,6 +881,7 @@ fun OpportunisticSignalAdornmentSection(
     val tp1 = if (isLong) basePrice * (1.0 + potential * 0.25 / 100.0) else basePrice * (1.0 - potential * 0.25 / 100.0)
     val tp2 = if (isLong) basePrice * (1.0 + potential * 0.50 / 100.0) else basePrice * (1.0 - potential * 0.50 / 100.0)
     val tp3 = if (isLong) basePrice * (1.0 + potential * 1.00 / 100.0) else basePrice * (1.0 - potential * 1.00 / 100.0)
+    val ecosystemLeaderName = remember(symbol) { ecosystemLeaderNameFor(symbol) }
 
     val formatPrice = { price: Double ->
         when {
@@ -880,53 +895,45 @@ fun OpportunisticSignalAdornmentSection(
     HorizontalDivider(color = BorderColor.copy(alpha = 0.4f))
     Spacer(modifier = Modifier.height(10.dp))
 
+    LiveRadarBetaDivergenceGuard(
+        symbol = symbol,
+        ecosystemLeaderName = ecosystemLeaderName,
+        isLong = isLong,
+        isBengali = isBengali
+    )
+
+    Spacer(modifier = Modifier.height(10.dp))
+    HorizontalDivider(color = BorderColor.copy(alpha = 0.4f))
+    Spacer(modifier = Modifier.height(10.dp))
+
+    // 1. Take Profit Matrix
     Text(
         text = if (isBengali) "টার্গেট প্রফিট ম্যাট্রিক্স" else "TAKE PROFIT TARGET MATRIX",
-        fontSize = 9.sp,
-        fontWeight = FontWeight.Bold,
+        fontSize = 10.4.sp,
+        fontWeight = FontWeight.Black,
         color = themeColor,
         letterSpacing = 1.sp
     )
-
     Spacer(modifier = Modifier.height(7.dp))
-
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+        horizontalArrangement = Arrangement.spacedBy(7.dp)
     ) {
-        LiveRadarAdornmentMiniTile(
+        TakeProfitTargetTile(
             label = "TP1 (25%)",
             value = "$${formatPrice(tp1)}",
-            valueColor = Color.White,
-            labelColor = CryptoGreen,
-            borderColor = themeColor,
-            labelSize = 8.5f,
-            valueSize = 10.8f,
-            minHeight = 58,
             modifier = Modifier.weight(1f)
         )
 
-        LiveRadarAdornmentMiniTile(
+        TakeProfitTargetTile(
             label = "TP2 (50%)",
             value = "$${formatPrice(tp2)}",
-            valueColor = Color.White,
-            labelColor = CryptoGreen,
-            borderColor = themeColor,
-            labelSize = 8.5f,
-            valueSize = 10.8f,
-            minHeight = 58,
             modifier = Modifier.weight(1f)
         )
 
-        LiveRadarAdornmentMiniTile(
+        TakeProfitTargetTile(
             label = "TP3 (100%)",
             value = "$${formatPrice(tp3)}",
-            valueColor = Color.White,
-            labelColor = CryptoGreen,
-            borderColor = themeColor,
-            labelSize = 8.5f,
-            valueSize = 10.8f,
-            minHeight = 58,
             modifier = Modifier.weight(1f)
         )
     }
@@ -935,53 +942,34 @@ fun OpportunisticSignalAdornmentSection(
     HorizontalDivider(color = BorderColor.copy(alpha = 0.4f))
     Spacer(modifier = Modifier.height(10.dp))
 
+    // 2. Multi-AI Consensus Engines
     Text(
         text = if (isBengali) "মাল্টি-এআই কনসেনসাস স্কোর" else "MULTI-AI CONSENSUS ENGINES",
-        fontSize = 9.sp,
+        fontSize = 9.8.sp,
         fontWeight = FontWeight.Bold,
         color = themeColor,
         letterSpacing = 1.sp
     )
-
     Spacer(modifier = Modifier.height(7.dp))
-
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+        horizontalArrangement = Arrangement.spacedBy(7.dp)
     ) {
-        LiveRadarAdornmentMiniTile(
-            label = "Gemini Pro AI",
-            value = "94/100",
-            valueColor = Color.White,
-            labelColor = TextPrimary,
-            borderColor = themeColor,
-            labelSize = 8.2f,
-            valueSize = 10.6f,
-            minHeight = 58,
+        ConsensusEngineTile(
+            name = "Gemini Pro AI",
+            score = "94/100",
             modifier = Modifier.weight(1f)
         )
 
-        LiveRadarAdornmentMiniTile(
-            label = "GPT-4Q Quant",
-            value = "90/100",
-            valueColor = Color.White,
-            labelColor = TextPrimary,
-            borderColor = themeColor,
-            labelSize = 8.2f,
-            valueSize = 10.6f,
-            minHeight = 58,
+        ConsensusEngineTile(
+            name = "GPT-4Q Quant",
+            score = "90/100",
             modifier = Modifier.weight(1f)
         )
 
-        LiveRadarAdornmentMiniTile(
-            label = "Claude Sentient",
-            value = "93/100",
-            valueColor = Color.White,
-            labelColor = TextPrimary,
-            borderColor = themeColor,
-            labelSize = 8.2f,
-            valueSize = 10.6f,
-            minHeight = 58,
+        ConsensusEngineTile(
+            name = "Claude Sentient",
+            score = "93/100",
             modifier = Modifier.weight(1f)
         )
     }
@@ -990,152 +978,242 @@ fun OpportunisticSignalAdornmentSection(
     HorizontalDivider(color = BorderColor.copy(alpha = 0.4f))
     Spacer(modifier = Modifier.height(10.dp))
 
+    // 3. Recommended Position Sizing
     Text(
         text = if (isBengali) "পজিশন সাইজিং পোর্টফোলিও কন্ট্রোল" else "RECOMMENDED POSITION ALLOCATION SIZING",
-        fontSize = 9.sp,
+        fontSize = 9.8.sp,
         fontWeight = FontWeight.Bold,
         color = themeColor,
         letterSpacing = 1.sp
     )
-
     Spacer(modifier = Modifier.height(7.dp))
-
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+        horizontalArrangement = Arrangement.spacedBy(7.dp)
     ) {
-        LiveRadarAdornmentMiniTile(
-            label = "Conservative",
+        AllocationSizingTile(
+            label = "CONSERVATIVE",
             value = "2.0% Cap",
-            valueColor = AccentGold,
-            labelColor = Color.White,
-            borderColor = themeColor,
-            labelSize = 8.9f,
-            valueSize = 10.6f,
-            minHeight = 62,
+            accent = AccentGold,
             modifier = Modifier.weight(1f)
         )
 
-        LiveRadarAdornmentMiniTile(
-            label = "Balanced",
+        AllocationSizingTile(
+            label = "BALANCED",
             value = "5.0% Cap",
-            valueColor = AccentGold,
-            labelColor = Color.White,
-            borderColor = themeColor,
-            labelSize = 8.9f,
-            valueSize = 10.6f,
-            minHeight = 62,
+            accent = AccentGold,
             modifier = Modifier.weight(1f)
         )
 
-        LiveRadarAdornmentMiniTile(
-            label = "Aggressive",
+        AllocationSizingTile(
+            label = "AGGRESSIVE",
             value = "10.0% Max",
-            valueColor = AccentGold,
-            labelColor = Color.White,
-            borderColor = themeColor,
-            labelSize = 8.9f,
-            valueSize = 10.6f,
-            minHeight = 62,
+            accent = AccentGold,
             modifier = Modifier.weight(1f)
         )
     }
 }
 
-// ============================================================================
-// LIVE RADAR — BETA DIVERGENCE GUARD
-// Scope: Live Radar expanded signal card only.
-// Signal Pro / Mission Center / StartTradeFlow / Accept Signal are untouched.
-// ============================================================================
-
 
 // ============================================================================
-// LIVE RADAR — BETA DIVERGENCE GUARD FINAL ENGINE
-// Scope: Live Radar expanded signal card only.
-// Signal Pro / Mission Center / StartTradeFlow / Accept Signal are untouched.
+// LIVE RADAR — DIRECT UI ALIGNMENT + TYPOGRAPHY PATCH
+// Scope: MarketRadarScreen.kt expanded Live Radar cards only.
+// Signal Pro, Mission Center, trade execution, and repository logic untouched.
 // ============================================================================
 
-
-// ============================================================================
-// LIVE RADAR — BETA DIVERGENCE GUARD FINAL COMPACT ENGINE
-// Scope: Live Radar expanded signal cards only.
-// Applied to: Hot Spot Top 3, Futures Long Top 3, Futures Short Top 3.
-// Signal Pro / Mission Center / StartTradeFlow / Accept Signal are untouched.
-// ============================================================================
-
-enum class DivergenceState {
-    STABLE,
+private enum class LiveRadarGuardSeverity {
+    CLEAR,
     WARNING,
     DANGER,
     BLIND
 }
 
-enum class ExecutionGuardStatus {
-    GO,
-    CAUTION,
-    DANGER,
-    BLIND
-}
-
-@Immutable
-data class LiveRadarMarketSnapshot(
-    val exchangeLatencyMs: Int,
-    val lastTickAgeMs: Int,
-    val btcDelta5mPct: Double,
-    val ecosystemLeaderName: String,
-    val ecosystemLeaderDelta5mPct: Double,
-    val usdtDominanceVelocityPct: Double,
-    val total3VelocityPct: Double,
-    val openInterestSpikePct: Double,
-    val fundingBiasPct: Double,
-    val liquidationPressurePct: Double,
-    val spreadBps: Double,
-    val takerFeeBps: Double,
-    val orderBookDepthScore: Int,
-    val assetVolume1mMultiple: Double,
-    val assetAtr1mMultiple: Double
-)
-
-@Immutable
-data class BetaDivergenceGuardState(
-    val snapshot: LiveRadarMarketSnapshot,
-    val latencyState: DivergenceState,
-    val btcDeltaState: DivergenceState,
-    val ecosystemLeaderState: DivergenceState,
-    val marketOutflowState: DivergenceState,
-    val derivativesStressState: DivergenceState,
-    val spreadLiquidityState: DivergenceState,
-    val assetVelocityShockState: DivergenceState,
-    val finalGuardStatus: ExecutionGuardStatus,
-    val executionReadinessPenalty: Int,
-    val adjustedReadinessScore: Int,
-    val narrativeEnglish: String,
-    val narrativeBengali: String
+private data class LiveRadarBetaGuardUiState(
+    val dataSyncSeverity: LiveRadarGuardSeverity,
+    val btcDeltaSeverity: LiveRadarGuardSeverity,
+    val ecosystemSeverity: LiveRadarGuardSeverity,
+    val marketFlowSeverity: LiveRadarGuardSeverity,
+    val derivativesSeverity: LiveRadarGuardSeverity,
+    val spreadSeverity: LiveRadarGuardSeverity,
+    val assetShockSeverity: LiveRadarGuardSeverity,
+    val readinessSeverity: LiveRadarGuardSeverity,
+    val latencyMs: Int,
+    val btcDeltaText: String,
+    val ecosystemDeltaText: String,
+    val marketFlowText: String,
+    val derivativesText: String,
+    val spreadText: String,
+    val assetShockText: String,
+    val readinessScore: Int,
+    val penaltyPoints: Int
 )
 
 @Composable
-fun LiveRadarBetaDivergenceGuard(
+private fun OracleAnalyticMetadataGrid(
+    details: Map<String, String>,
+    isBengali: Boolean
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFF051016),
+                        CryptoGreen.copy(alpha = 0.050f),
+                        Color(0xFF050812)
+                    )
+                ),
+                RoundedCornerShape(12.dp)
+            )
+            .border(0.85.dp, CryptoGreen.copy(alpha = 0.42f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 9.dp, vertical = 9.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            OracleMetadataTile(
+                title = if (isBengali) "প্যাটার্ন" else "PATTERN DETECTED",
+                value = if (isBengali) details["pattern_bn"].orEmpty() else details["pattern"].orEmpty(),
+                accent = TextPrimary,
+                modifier = Modifier.weight(1f)
+            )
+
+            OracleMetadataTile(
+                title = if (isBengali) "অর্ডারবুক রেশিও" else "ORDERBOOK RATIO",
+                value = if (isBengali) details["bid_ask_bn"].orEmpty() else details["bid_ask"].orEmpty(),
+                accent = TextPrimary,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            OracleMetadataTile(
+                title = if (isBengali) "স্টপ লস" else "SUGGESTED STOP LOSS",
+                value = details["sl"].orEmpty(),
+                accent = Color(0xFFFF1744),
+                titleSizeSp = 10.8f,
+                valueSizeSp = 15.2f,
+                strongRisk = true,
+                modifier = Modifier.weight(1f)
+            )
+
+            OracleMetadataTile(
+                title = if (isBengali) "সম্ভাব্যতা স্কোর" else "PROBABILITY SCORE",
+                value = details["prob"].orEmpty(),
+                accent = CryptoGreen,
+                titleSizeSp = 10.8f,
+                valueSizeSp = 15.8f,
+                showDot = true,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun OracleMetadataTile(
+    title: String,
+    value: String,
+    accent: Color,
+    modifier: Modifier = Modifier,
+    titleSizeSp: Float = 10.4f,
+    valueSizeSp: Float = 13.4f,
+    showDot: Boolean = false,
+    strongRisk: Boolean = false
+) {
+    val borderColor = if (strongRisk) Color(0xFFFF1744) else CryptoGreen.copy(alpha = 0.46f)
+    val backgroundAccent = if (strongRisk) Color(0xFFFF1744) else CryptoGreen
+
+    Column(
+        modifier = modifier
+            .heightIn(min = 58.dp)
+            .background(
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFF060B14),
+                        backgroundAccent.copy(alpha = if (strongRisk) 0.105f else 0.060f),
+                        Color(0xFF050812)
+                    )
+                ),
+                RoundedCornerShape(10.dp)
+            )
+            .border(0.9.dp, borderColor.copy(alpha = if (strongRisk) 0.82f else 0.54f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 9.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text(
+            text = title,
+            fontSize = titleSizeSp.sp,
+            fontWeight = FontWeight.Black,
+            color = if (strongRisk) Color(0xFFFF1744) else CryptoGreen,
+            letterSpacing = 0.35.sp,
+            lineHeight = 12.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (strongRisk) {
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .background(Color(0xFFFF1744), CircleShape)
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+            }
+
+            Text(
+                text = value,
+                fontSize = valueSizeSp.sp,
+                fontWeight = FontWeight.Black,
+                color = accent,
+                lineHeight = (valueSizeSp + 2f).sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            if (showDot) {
+                Spacer(modifier = Modifier.width(6.dp))
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .background(accent, CircleShape)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LiveRadarBetaDivergenceGuard(
     symbol: String,
-    timeframe: String,
+    ecosystemLeaderName: String,
     isLong: Boolean,
     isBengali: Boolean
 ) {
-    val snapshot = remember(symbol, timeframe, isLong) {
-        buildLiveRadarMarketSnapshot(
+    val state = remember(symbol, ecosystemLeaderName, isLong) {
+        buildLiveRadarBetaGuardUiState(
             symbol = symbol,
-            timeframe = timeframe,
+            ecosystemLeaderName = ecosystemLeaderName,
             isLong = isLong
         )
     }
 
-    val guardState = remember(snapshot, isLong) {
-        buildBetaDivergenceGuardState(
-            snapshot = snapshot,
-            isLong = isLong
-        )
-    }
-
-    val accentColor = executionGuardColor(guardState.finalGuardStatus)
+    val statusColor = liveRadarGuardColor(state.readinessSeverity)
+    val penaltyColor = Color(0xFFFF1744)
 
     Column(
         modifier = Modifier
@@ -1143,792 +1221,99 @@ fun LiveRadarBetaDivergenceGuard(
             .background(
                 Brush.linearGradient(
                     listOf(
-                        Color(0xFF02050D),
-                        accentColor.copy(alpha = 0.026f),
+                        Color(0xFF040812),
+                        statusColor.copy(alpha = 0.060f),
                         Color(0xFF02050D)
                     )
                 ),
-                RoundedCornerShape(11.dp)
+                RoundedCornerShape(13.dp)
             )
-            .border(0.65.dp, accentColor.copy(alpha = 0.32f), RoundedCornerShape(11.dp))
-            .padding(horizontal = 10.dp, vertical = 9.dp)
+            .border(0.85.dp, statusColor.copy(alpha = 0.46f), RoundedCornerShape(13.dp))
+            .padding(horizontal = 10.dp, vertical = 10.dp)
     ) {
+        Text(
+            text = "BETA DIVERGENCE GUARD",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Black,
+            color = statusColor,
+            letterSpacing = 0.90.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.height(7.dp))
+
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF060B14), RoundedCornerShape(10.dp))
+                .border(0.8.dp, statusColor.copy(alpha = 0.42f), RoundedCornerShape(10.dp))
+                .padding(horizontal = 10.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "BETA DIVERGENCE GUARD",
-                    fontSize = 8.6.sp,
+                    text = "AI GUARD IMPACT",
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Black,
-                    color = accentColor,
-                    letterSpacing = 0.85.sp,
+                    color = statusColor,
+                    letterSpacing = 0.45.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(3.dp))
 
                 Text(
-                    text = if (isBengali) {
-                        "Market + Asset Shock + Data Safety"
-                    } else {
-                        "Market + Asset Shock + Data Safety"
-                    },
-                    fontSize = 8.7.sp,
+                    text = "Validity Entry",
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextSecondary,
+                    color = TextPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .background(accentColor.copy(alpha = 0.115f), RoundedCornerShape(7.dp))
-                    .border(0.65.dp, accentColor.copy(alpha = 0.40f), RoundedCornerShape(7.dp))
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            ) {
+            Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = guardStatusLabel(guardState.finalGuardStatus, isBengali),
-                    fontSize = 9.2.sp,
+                    text = "${state.readinessScore}/100",
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Black,
-                    color = accentColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    color = statusColor,
+                    maxLines = 1
+                )
+
+                Text(
+                    text = "-${state.penaltyPoints} pts",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black,
+                    color = penaltyColor,
+                    maxLines = 1
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(7.dp))
-
-        BetaGuardAiImpactTile(
-            status = guardState.finalGuardStatus,
-            readiness = guardState.adjustedReadinessScore,
-            penalty = guardState.executionReadinessPenalty,
-            isBengali = isBengali
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             BetaGuardMiniTile(
                 label = "Data Sync",
-                state = guardState.latencyState,
-                value = dataSyncStateLabel(guardState.latencyState, guardState.snapshot, isBengali),
+                value = "${state.latencyMs}ms",
+                stat = dataSyncLabel(state.dataSyncSeverity),
+                severity = state.dataSyncSeverity,
+                forceAmberWarning = true,
                 modifier = Modifier.weight(1f)
             )
 
             BetaGuardMiniTile(
                 label = "BTC Delta",
-                state = guardState.btcDeltaState,
-                value = btcDeltaStateLabel(guardState.btcDeltaState, guardState.snapshot, isBengali),
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(5.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            BetaGuardMiniTile(
-                label = guardState.snapshot.ecosystemLeaderName,
-                state = guardState.ecosystemLeaderState,
-                value = ecosystemStateLabel(guardState.ecosystemLeaderState, guardState.snapshot, isBengali),
-                modifier = Modifier.weight(1f)
-            )
-
-            BetaGuardMiniTile(
-                label = "Market Flow",
-                state = guardState.marketOutflowState,
-                value = marketFlowStateLabel(guardState.marketOutflowState, guardState.snapshot, isBengali),
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(5.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            BetaGuardMiniTile(
-                label = "Derivatives",
-                state = guardState.derivativesStressState,
-                value = derivativesStateLabel(guardState.derivativesStressState, guardState.snapshot, isBengali),
-                modifier = Modifier.weight(1f)
-            )
-
-            BetaGuardMiniTile(
-                label = "Spread Risk",
-                state = guardState.spreadLiquidityState,
-                value = spreadStateLabel(guardState.spreadLiquidityState, guardState.snapshot, isBengali),
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(5.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            BetaGuardMiniTile(
-                label = "Asset Shock",
-                state = guardState.assetVelocityShockState,
-                value = assetShockStateLabel(guardState.assetVelocityShockState, guardState.snapshot, isBengali),
-                modifier = Modifier.weight(1f)
-            )
-
-            BetaGuardPenaltyTile(
-                penalty = guardState.executionReadinessPenalty,
-                readiness = guardState.adjustedReadinessScore,
-                status = guardState.finalGuardStatus,
-                isBengali = isBengali,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(7.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.linearGradient(
-                        listOf(
-                            Color(0xFF02050D),
-                            accentColor.copy(alpha = 0.040f),
-                            Color(0xFF02050D)
-                        )
-                    ),
-                    RoundedCornerShape(8.dp)
-                )
-                .border(0.58.dp, accentColor.copy(alpha = 0.30f), RoundedCornerShape(8.dp))
-                .padding(horizontal = 9.dp, vertical = 7.dp)
-        ) {
-            Text(
-                text = if (isBengali) guardState.narrativeBengali else guardState.narrativeEnglish,
-                fontSize = 9.8.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-                lineHeight = 13.sp,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-@Composable
-fun BetaGuardAiImpactTile(
-    status: ExecutionGuardStatus,
-    readiness: Int,
-    penalty: Int,
-    isBengali: Boolean
-) {
-    val color = executionGuardColor(status)
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        Color(0xFF02050D),
-                        Color(0xFF050B15),
-                        Color(0xFF02050D)
-                    )
-                ),
-                RoundedCornerShape(8.dp)
-            )
-            .border(0.58.dp, color.copy(alpha = 0.32f), RoundedCornerShape(8.dp))
-            .padding(horizontal = 8.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "AI GUARD IMPACT",
-                fontSize = 7.6.sp,
-                fontWeight = FontWeight.Black,
-                color = color,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            Text(
-                text = readinessActionLabel(status, isBengali),
-                fontSize = 9.4.sp,
-                fontWeight = FontWeight.Black,
-                color = Color.White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        Spacer(modifier = Modifier.width(7.dp))
-
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = "$readiness/100",
-                fontSize = 13.2.sp,
-                fontWeight = FontWeight.Black,
-                color = color,
-                maxLines = 1
-            )
-
-            if (penalty > 0) {
-                Text(
-                    text = "-$penalty pts",
-                    fontSize = 7.6.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFE95772),
-                    maxLines = 1
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun BetaGuardMiniTile(
-    label: String,
-    state: DivergenceState,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    val color = divergenceStateColor(state)
-
-    Column(
-        modifier = modifier
-            .heightIn(min = 43.dp)
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        Color(0xFF02050D),
-                        Color(0xFF050B15),
-                        Color(0xFF02050D)
-                    )
-                ),
-                RoundedCornerShape(7.dp)
-            )
-            .border(0.56.dp, color.copy(alpha = 0.30f), RoundedCornerShape(7.dp))
-            .padding(horizontal = 7.dp, vertical = 5.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = label,
-            fontSize = 7.0.sp,
-            fontWeight = FontWeight.Black,
-            color = TextMuted,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Spacer(modifier = Modifier.height(2.dp))
-
-        Text(
-            text = value,
-            fontSize = 8.6.sp,
-            fontWeight = FontWeight.Black,
-            color = color,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
-fun BetaGuardPenaltyTile(
-    penalty: Int,
-    readiness: Int,
-    status: ExecutionGuardStatus,
-    isBengali: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val color = executionGuardColor(status)
-    val currentScore = readiness.coerceIn(0, 100)
-
-    Column(
-        modifier = modifier
-            .heightIn(min = 43.dp)
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        Color(0xFF02050D),
-                        Color(0xFF050B15),
-                        Color(0xFF02050D)
-                    )
-                ),
-                RoundedCornerShape(7.dp)
-            )
-            .border(0.56.dp, color.copy(alpha = 0.30f), RoundedCornerShape(7.dp))
-            .padding(horizontal = 7.dp, vertical = 5.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Readiness",
-            fontSize = 7.0.sp,
-            fontWeight = FontWeight.Black,
-            color = TextMuted,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Spacer(modifier = Modifier.height(2.dp))
-
-        Text(
-            text = "$currentScore/100",
-            fontSize = 8.8.sp,
-            fontWeight = FontWeight.Black,
-            color = color,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        if (penalty > 0) {
-            Text(
-                text = "-$penalty pts",
-                fontSize = 7.6.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFE95772),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-fun buildLiveRadarMarketSnapshot(
-    symbol: String,
-    timeframe: String,
-    isLong: Boolean
-): LiveRadarMarketSnapshot {
-    val seed = safeAbsHash(symbol) + safeAbsHash(timeframe) + if (isLong) 101 else 211
-    val ecosystemLeader = resolveEcosystemLeaderName(symbol)
-
-    // Real-data-ready binding contract:
-    // Replace these deterministic placeholders later with Binance Sync / WebSocket / orderbook / OI / funding feeds.
-    val exchangeLatencyMs = 120 + (seed % 620)
-    val lastTickAgeMs = 80 + ((seed / 2) % 620)
-
-    val rareBlind = seed % 97 == 0
-    val adjustedExchangeLatency = if (rareBlind) 1550 else exchangeLatencyMs
-    val adjustedLastTickAge = if (rareBlind) 1510 else lastTickAgeMs
-
-    val btcDelta = (((seed / 3) % 13) - 6) / 12.0
-    val leaderDelta = (((seed / 5) % 13) - 6) / 12.0
-
-    val rareOutflow = seed % 43 == 0
-    val usdtVelocity = if (rareOutflow) 0.72 else (((seed / 7) % 8) - 2) / 12.0
-    val total3Velocity = if (rareOutflow) -0.58 else (((seed / 11) % 9) - 4) / 12.0
-
-    val rareDerivativeStress = seed % 47 == 0
-    val oiSpike = if (rareDerivativeStress) 30.0 else 3.0 + ((seed / 13) % 18)
-    val fundingBias = if (rareDerivativeStress) 0.08 else (((seed / 17) % 13) - 6) / 180.0
-    val liquidationPressure = if (rareDerivativeStress) 31.0 else ((seed / 19) % 22).toDouble()
-
-    val rarePoorLiquidity = seed % 53 == 0
-    val spreadBps = if (rarePoorLiquidity) 30.0 else 2.0 + ((seed / 23) % 17)
-    val takerFeeBps = 6.0
-    val depthScore = if (rarePoorLiquidity) 58 else (72 + ((seed / 29) % 24)).coerceIn(0, 100)
-
-    val rareAssetShock = seed % 41 == 0
-    val volumeMultiple = if (rareAssetShock) 3.2 else 0.8 + (((seed / 31) % 18) / 10.0)
-    val atrMultiple = if (rareAssetShock) 3.1 else 0.8 + (((seed / 37) % 17) / 10.0)
-
-    return LiveRadarMarketSnapshot(
-        exchangeLatencyMs = adjustedExchangeLatency,
-        lastTickAgeMs = adjustedLastTickAge,
-        btcDelta5mPct = btcDelta,
-        ecosystemLeaderName = ecosystemLeader,
-        ecosystemLeaderDelta5mPct = leaderDelta,
-        usdtDominanceVelocityPct = usdtVelocity,
-        total3VelocityPct = total3Velocity,
-        openInterestSpikePct = oiSpike,
-        fundingBiasPct = fundingBias,
-        liquidationPressurePct = liquidationPressure,
-        spreadBps = spreadBps,
-        takerFeeBps = takerFeeBps,
-        orderBookDepthScore = depthScore,
-        assetVolume1mMultiple = volumeMultiple,
-        assetAtr1mMultiple = atrMultiple
-    )
-}
-
-fun buildBetaDivergenceGuardState(
-    snapshot: LiveRadarMarketSnapshot,
-    isLong: Boolean
-): BetaDivergenceGuardState {
-    val latencyState = latencyStateFromSnapshot(snapshot)
-
-    val btcDeltaState = directionalDivergenceState(
-        deltaPct = snapshot.btcDelta5mPct,
-        isLong = isLong,
-        warningAbs = 0.42,
-        dangerAbs = 0.78
-    )
-
-    val ecosystemLeaderState = directionalDivergenceState(
-        deltaPct = snapshot.ecosystemLeaderDelta5mPct,
-        isLong = isLong,
-        warningAbs = 0.38,
-        dangerAbs = 0.74
-    )
-
-    val marketOutflowState = marketOutflowStateFromSnapshot(snapshot)
-    val derivativesStressState = derivativesStressStateFromSnapshot(snapshot)
-    val spreadLiquidityState = spreadLiquidityStateFromSnapshot(snapshot)
-    val assetVelocityShockState = assetVelocityShockStateFromSnapshot(snapshot)
-
-    val allStates = listOf(
-        latencyState,
-        btcDeltaState,
-        ecosystemLeaderState,
-        marketOutflowState,
-        derivativesStressState,
-        spreadLiquidityState,
-        assetVelocityShockState
-    )
-
-    val penalty = allStates.sumOf { state ->
-        when (state) {
-            DivergenceState.STABLE -> 0
-            DivergenceState.WARNING -> 4
-            DivergenceState.DANGER -> 10
-            DivergenceState.BLIND -> 24
-        }
-    }.coerceIn(0, 52)
-
-    val finalStatus = when {
-        latencyState == DivergenceState.BLIND -> ExecutionGuardStatus.BLIND
-        allStates.any { it == DivergenceState.DANGER } -> ExecutionGuardStatus.DANGER
-        penalty >= 16 -> ExecutionGuardStatus.CAUTION
-        else -> ExecutionGuardStatus.GO
-    }
-
-    val adjustedReadiness = (100 - penalty).coerceIn(0, 100)
-
-    val narrativeEnglish = when (finalStatus) {
-        ExecutionGuardStatus.GO ->
-            "Guard clear. Market, liquidity and asset-shock layers support validation."
-
-        ExecutionGuardStatus.CAUTION ->
-            "Caution: some safety layers weakened. Verify entry and reduce size."
-
-        ExecutionGuardStatus.DANGER ->
-            "Warning: divergence or execution risk detected. Readiness reduced."
-
-        ExecutionGuardStatus.BLIND ->
-            "Data sync drift detected. Wait for fresh market data."
-    }
-
-    val narrativeBengali = when (finalStatus) {
-        ExecutionGuardStatus.GO ->
-            "Guard clear. Market, liquidity এবং asset-shock layer validation support করছে।"
-
-        ExecutionGuardStatus.CAUTION ->
-            "সতর্কতা: কিছু safety layer দুর্বল। entry verify করুন এবং size কমান।"
-
-        ExecutionGuardStatus.DANGER ->
-            "সতর্কতা: divergence অথবা execution risk ধরা পড়েছে। readiness কমেছে।"
-
-        ExecutionGuardStatus.BLIND ->
-            "ডেটা sync drift ধরা পড়েছে। fresh market data অপেক্ষা করুন।"
-    }
-
-    return BetaDivergenceGuardState(
-        snapshot = snapshot,
-        latencyState = latencyState,
-        btcDeltaState = btcDeltaState,
-        ecosystemLeaderState = ecosystemLeaderState,
-        marketOutflowState = marketOutflowState,
-        derivativesStressState = derivativesStressState,
-        spreadLiquidityState = spreadLiquidityState,
-        assetVelocityShockState = assetVelocityShockState,
-        finalGuardStatus = finalStatus,
-        executionReadinessPenalty = penalty,
-        adjustedReadinessScore = adjustedReadiness,
-        narrativeEnglish = narrativeEnglish,
-        narrativeBengali = narrativeBengali
-    )
-}
-
-fun safeAbsHash(value: String): Int {
-    val hash = value.hashCode()
-    return if (hash == Int.MIN_VALUE) 0 else hash.absoluteValue
-}
-
-fun directionalDivergenceState(
-    deltaPct: Double,
-    isLong: Boolean,
-    warningAbs: Double,
-    dangerAbs: Double
-): DivergenceState {
-    val adverseMove = if (isLong) -deltaPct else deltaPct
-
-    return when {
-        adverseMove >= dangerAbs -> DivergenceState.DANGER
-        adverseMove >= warningAbs -> DivergenceState.WARNING
-        else -> DivergenceState.STABLE
-    }
-}
-
-fun latencyStateFromSnapshot(snapshot: LiveRadarMarketSnapshot): DivergenceState {
-    val maxDelay = maxOf(snapshot.exchangeLatencyMs, snapshot.lastTickAgeMs)
-
-    return when {
-        maxDelay > 1500 -> DivergenceState.BLIND
-        maxDelay > 500 -> DivergenceState.WARNING
-        else -> DivergenceState.STABLE
-    }
-}
-
-fun marketOutflowStateFromSnapshot(snapshot: LiveRadarMarketSnapshot): DivergenceState {
-    val outflowPressure = snapshot.usdtDominanceVelocityPct > 0.45 && snapshot.total3VelocityPct < -0.35
-
-    return when {
-        snapshot.usdtDominanceVelocityPct > 0.70 && snapshot.total3VelocityPct < -0.55 -> DivergenceState.DANGER
-        outflowPressure -> DivergenceState.WARNING
-        else -> DivergenceState.STABLE
-    }
-}
-
-fun derivativesStressStateFromSnapshot(snapshot: LiveRadarMarketSnapshot): DivergenceState {
-    val fundingStress = snapshot.fundingBiasPct.absoluteValue >= 0.07
-    val liquidationStress = snapshot.liquidationPressurePct >= 28.0
-    val oiStress = snapshot.openInterestSpikePct >= 25.0
-
-    return when {
-        (fundingStress && liquidationStress) || (oiStress && liquidationStress) -> DivergenceState.DANGER
-        fundingStress || liquidationStress || oiStress -> DivergenceState.WARNING
-        else -> DivergenceState.STABLE
-    }
-}
-
-fun spreadLiquidityStateFromSnapshot(snapshot: LiveRadarMarketSnapshot): DivergenceState {
-    val totalCostBps = snapshot.spreadBps + snapshot.takerFeeBps
-    val depthWeak = snapshot.orderBookDepthScore < 68
-
-    return when {
-        totalCostBps >= 34.0 || snapshot.orderBookDepthScore < 62 -> DivergenceState.DANGER
-        totalCostBps >= 22.0 || depthWeak -> DivergenceState.WARNING
-        else -> DivergenceState.STABLE
-    }
-}
-
-fun assetVelocityShockStateFromSnapshot(snapshot: LiveRadarMarketSnapshot): DivergenceState {
-    return when {
-        snapshot.assetVolume1mMultiple >= 3.0 || snapshot.assetAtr1mMultiple >= 3.0 -> DivergenceState.DANGER
-        snapshot.assetVolume1mMultiple >= 2.2 || snapshot.assetAtr1mMultiple >= 2.2 -> DivergenceState.WARNING
-        else -> DivergenceState.STABLE
-    }
-}
-
-fun resolveEcosystemLeaderName(symbol: String): String {
-    val upper = symbol.uppercase()
-
-    return when {
-        upper.contains("ARB") || upper.contains("OP") || upper.contains("MATIC") || upper.contains("UNI") || upper.contains("LINK") -> "ETH Leader"
-        upper.contains("SOL") || upper.contains("BONK") || upper.contains("JUP") || upper.contains("RAY") || upper.contains("PYTH") -> "SOL Leader"
-        upper.contains("BNB") || upper.contains("CAKE") || upper.contains("TWT") -> "BNB Leader"
-        upper.contains("AVAX") || upper.contains("JOE") -> "AVAX Leader"
-        else -> "BTC Leader"
-    }
-}
-
-fun divergenceStateColor(state: DivergenceState): Color {
-    return when (state) {
-        DivergenceState.STABLE -> CryptoGreen.copy(alpha = 0.90f)
-        DivergenceState.WARNING -> AccentGold.copy(alpha = 0.88f)
-        DivergenceState.DANGER -> Color(0xFFE95772)
-        DivergenceState.BLIND -> Color(0xFFE96B82)
-    }
-}
-
-fun executionGuardColor(status: ExecutionGuardStatus): Color {
-    return when (status) {
-        ExecutionGuardStatus.GO -> CryptoGreen.copy(alpha = 0.90f)
-        ExecutionGuardStatus.CAUTION -> AccentGold.copy(alpha = 0.88f)
-        ExecutionGuardStatus.DANGER -> Color(0xFFE95772)
-        ExecutionGuardStatus.BLIND -> Color(0xFFE96B82)
-    }
-}
-
-fun guardStatusLabel(status: ExecutionGuardStatus, isBengali: Boolean): String {
-    return when (status) {
-        ExecutionGuardStatus.GO -> "GO"
-        ExecutionGuardStatus.CAUTION -> "CAUTION"
-        ExecutionGuardStatus.DANGER -> "DANGER"
-        ExecutionGuardStatus.BLIND -> "BLIND"
-    }
-}
-
-fun dataSyncStateLabel(
-    state: DivergenceState,
-    snapshot: LiveRadarMarketSnapshot,
-    isBengali: Boolean
-): String {
-    val maxDelay = maxOf(snapshot.exchangeLatencyMs, snapshot.lastTickAgeMs)
-
-    return when (state) {
-        DivergenceState.STABLE -> "${maxDelay}ms OK"
-        DivergenceState.WARNING -> "${maxDelay}ms Delay"
-        DivergenceState.DANGER -> "${maxDelay}ms Drift"
-        DivergenceState.BLIND -> "${maxDelay}ms Blind"
-    }
-}
-
-fun btcDeltaStateLabel(
-    state: DivergenceState,
-    snapshot: LiveRadarMarketSnapshot,
-    isBengali: Boolean
-): String {
-    return String.format("%.2f%%", snapshot.btcDelta5mPct)
-}
-
-fun ecosystemStateLabel(
-    state: DivergenceState,
-    snapshot: LiveRadarMarketSnapshot,
-    isBengali: Boolean
-): String {
-    return String.format("%.2f%%", snapshot.ecosystemLeaderDelta5mPct)
-}
-
-fun marketFlowStateLabel(
-    state: DivergenceState,
-    snapshot: LiveRadarMarketSnapshot,
-    isBengali: Boolean
-): String {
-    return when (state) {
-        DivergenceState.STABLE -> "Neutral"
-        DivergenceState.WARNING -> "Outflow"
-        DivergenceState.DANGER -> "Drain"
-        DivergenceState.BLIND -> "Blind"
-    }
-}
-
-fun derivativesStateLabel(
-    state: DivergenceState,
-    snapshot: LiveRadarMarketSnapshot,
-    isBengali: Boolean
-): String {
-    return when (state) {
-        DivergenceState.STABLE -> "Normal"
-        DivergenceState.WARNING -> "Crowded"
-        DivergenceState.DANGER -> "Squeeze"
-        DivergenceState.BLIND -> "Blind"
-    }
-}
-
-fun spreadStateLabel(
-    state: DivergenceState,
-    snapshot: LiveRadarMarketSnapshot,
-    isBengali: Boolean
-): String {
-    val cost = snapshot.spreadBps + snapshot.takerFeeBps
-
-    return when (state) {
-        DivergenceState.STABLE -> String.format("%.1fbps OK", cost)
-        DivergenceState.WARNING -> String.format("%.1fbps Drag", cost)
-        DivergenceState.DANGER -> String.format("%.1fbps Poor", cost)
-        DivergenceState.BLIND -> "Blind"
-    }
-}
-
-fun assetShockStateLabel(
-    state: DivergenceState,
-    snapshot: LiveRadarMarketSnapshot,
-    isBengali: Boolean
-): String {
-    val maxShock = maxOf(snapshot.assetVolume1mMultiple, snapshot.assetAtr1mMultiple)
-
-    return when (state) {
-        DivergenceState.STABLE -> String.format("%.1fx Clear", maxShock)
-        DivergenceState.WARNING -> String.format("%.1fx Fast", maxShock)
-        DivergenceState.DANGER -> String.format("%.1fx Shock", maxShock)
-        DivergenceState.BLIND -> "Blind"
-    }
-}
-
-fun readinessActionLabel(
-    status: ExecutionGuardStatus,
-    isBengali: Boolean
-): String {
-    return when (status) {
-        ExecutionGuardStatus.GO -> "Validate entry"
-        ExecutionGuardStatus.CAUTION -> "Reduce size; verify"
-        ExecutionGuardStatus.DANGER -> "Avoid chase; wait"
-        ExecutionGuardStatus.BLIND -> "Wait for fresh data"
-    }
-}
-
-
-@Composable
-fun LiveRadarAiOracleMetadataTile(
-    patternText: String,
-    orderbookText: String,
-    stopLossText: String,
-    probabilityText: String,
-    descriptionText: String,
-    isBengali: Boolean,
-    themeColor: Color
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        Color(0xFF02050D),
-                        Color(0xFF050B15),
-                        Color(0xFF02050D)
-                    )
-                ),
-                RoundedCornerShape(11.dp)
-            )
-            .border(0.72.dp, themeColor.copy(alpha = 0.38f), RoundedCornerShape(11.dp))
-            .padding(horizontal = 11.dp, vertical = 10.dp)
-    ) {
-        Text(
-            text = if (isBengali) "এআই ওরাকল অ্যানালিটিক্যাল মেটাডেটা" else "AI ORACLE ANALYTICAL METADATA",
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Black,
-            color = themeColor,
-            letterSpacing = if (isBengali) 0.sp else 1.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            LiveRadarMetadataMiniTile(
-                label = if (isBengali) "প্যাটার্ন" else "PATTERN DETECTED",
-                value = patternText,
-                valueColor = Color.White,
-                borderColor = themeColor,
-                modifier = Modifier.weight(1f)
-            )
-
-            LiveRadarMetadataMiniTile(
-                label = if (isBengali) "অর্ডারবুক রেশিও" else "ORDERBOOK RATIO",
-                value = orderbookText,
-                valueColor = Color.White,
-                borderColor = themeColor,
+                value = state.btcDeltaText,
+                stat = deltaLabel(state.btcDeltaSeverity),
+                severity = state.btcDeltaSeverity,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -1939,82 +1324,110 @@ fun LiveRadarAiOracleMetadataTile(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            LiveRadarMetadataMiniTile(
-                label = if (isBengali) "স্টপ লস" else "SUGGESTED STOP LOSS",
-                value = stopLossText,
-                valueColor = Color(0xFFFF6F86),
-                borderColor = Color(0xFFFF6F86),
+            BetaGuardMiniTile(
+                label = ecosystemLeaderName,
+                value = state.ecosystemDeltaText,
+                stat = deltaLabel(state.ecosystemSeverity),
+                severity = state.ecosystemSeverity,
                 modifier = Modifier.weight(1f)
             )
 
-            LiveRadarMetadataMiniTile(
-                label = if (isBengali) "সম্ভাব্যতা স্কোর" else "PROBABILITY SCORE",
-                value = probabilityText,
-                valueColor = CryptoGreen,
-                borderColor = CryptoGreen,
+            BetaGuardMiniTile(
+                label = "Market Flow",
+                value = state.marketFlowText,
+                stat = flowLabel(state.marketFlowSeverity),
+                severity = state.marketFlowSeverity,
                 modifier = Modifier.weight(1f)
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.linearGradient(
-                        listOf(
-                            Color(0xFF02050D),
-                            Color(0xFF060D18),
-                            Color(0xFF02050D)
-                        )
-                    ),
-                    RoundedCornerShape(8.dp)
-                )
-                .border(0.58.dp, themeColor.copy(alpha = 0.28f), RoundedCornerShape(8.dp))
-                .padding(horizontal = 9.dp, vertical = 8.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Text(
-                text = descriptionText,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.White,
-                lineHeight = 17.sp
+            BetaGuardMiniTile(
+                label = "Derivatives",
+                value = state.derivativesText,
+                stat = stressLabel(state.derivativesSeverity),
+                severity = state.derivativesSeverity,
+                modifier = Modifier.weight(1f)
+            )
+
+            BetaGuardMiniTile(
+                label = "Spread Risk",
+                value = state.spreadText,
+                stat = spreadLabel(state.spreadSeverity),
+                severity = state.spreadSeverity,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            BetaGuardMiniTile(
+                label = "Asset Shock",
+                value = state.assetShockText,
+                stat = shockLabel(state.assetShockSeverity),
+                severity = state.assetShockSeverity,
+                modifier = Modifier.weight(1f)
+            )
+
+            BetaGuardMiniTile(
+                label = "Readiness",
+                value = "${state.readinessScore}/100",
+                stat = "-${state.penaltyPoints} pts",
+                severity = state.readinessSeverity,
+                modifier = Modifier.weight(1f)
             )
         }
     }
 }
 
 @Composable
-fun LiveRadarMetadataMiniTile(
+private fun BetaGuardMiniTile(
     label: String,
     value: String,
-    valueColor: Color,
-    borderColor: Color,
-    modifier: Modifier = Modifier
+    stat: String,
+    severity: LiveRadarGuardSeverity,
+    modifier: Modifier = Modifier,
+    forceAmberWarning: Boolean = false
 ) {
+    val baseColor = if (forceAmberWarning && severity != LiveRadarGuardSeverity.CLEAR) {
+        Color(0xFFFF9F0A)
+    } else {
+        liveRadarGuardColor(severity)
+    }
+
     Column(
         modifier = modifier
-            .heightIn(min = 52.dp)
+            .heightIn(min = 64.dp)
             .background(
                 Brush.linearGradient(
                     listOf(
-                        Color(0xFF02050D),
-                        Color(0xFF050B15),
-                        Color(0xFF02050D)
+                        Color(0xFF050A13),
+                        baseColor.copy(alpha = 0.070f),
+                        Color(0xFF050812)
                     )
                 ),
-                RoundedCornerShape(8.dp)
+                RoundedCornerShape(9.dp)
             )
-            .border(0.58.dp, borderColor.copy(alpha = 0.34f), RoundedCornerShape(8.dp))
-            .padding(horizontal = 7.dp, vertical = 6.dp),
+            .border(0.85.dp, baseColor.copy(alpha = 0.58f), RoundedCornerShape(9.dp))
+            .padding(horizontal = 7.dp, vertical = 7.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = label,
-            fontSize = 7.3.sp,
+            fontSize = 10.2.sp,
             fontWeight = FontWeight.Black,
-            color = TextMuted,
+            color = baseColor,
+            textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -2023,72 +1436,338 @@ fun LiveRadarMetadataMiniTile(
 
         Text(
             text = value,
-            fontSize = 9.6.sp,
+            fontSize = 12.8.sp,
             fontWeight = FontWeight.Black,
-            color = valueColor,
-            maxLines = 2,
-            lineHeight = 12.sp,
+            color = TextPrimary,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        Text(
+            text = stat,
+            fontSize = 9.6.sp,
+            fontWeight = FontWeight.Bold,
+            color = baseColor,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
     }
 }
 
 @Composable
-fun LiveRadarAdornmentMiniTile(
+private fun TakeProfitTargetTile(
     label: String,
     value: String,
-    valueColor: Color,
-    labelColor: Color,
-    borderColor: Color,
-    labelSize: Float,
-    valueSize: Float,
-    minHeight: Int,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
-            .heightIn(min = minHeight.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        Color(0xFF02050D),
-                        Color(0xFF050B15),
-                        Color(0xFF02050D)
-                    )
-                )
-            )
-            .border(
-                0.75.dp,
-                borderColor.copy(alpha = 0.46f),
-                RoundedCornerShape(8.dp)
-            )
-            .padding(horizontal = 5.dp, vertical = 7.dp),
+            .heightIn(min = 56.dp)
+            .background(CryptoGreen.copy(alpha = 0.060f), RoundedCornerShape(9.dp))
+            .border(0.8.dp, CryptoGreen.copy(alpha = 0.42f), RoundedCornerShape(9.dp))
+            .padding(horizontal = 7.dp, vertical = 7.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = label,
-            fontSize = labelSize.sp,
+            fontSize = 11.4.sp,
             fontWeight = FontWeight.Black,
-            color = labelColor,
+            color = CryptoGreen,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(3.dp))
 
         Text(
             text = value,
-            fontSize = valueSize.sp,
+            fontSize = 12.sp,
             fontWeight = FontWeight.Black,
-            color = valueColor,
+            color = TextPrimary,
             textAlign = TextAlign.Center,
             maxLines = 1,
-            softWrap = false,
             overflow = TextOverflow.Ellipsis
         )
     }
 }
 
+@Composable
+private fun ConsensusEngineTile(
+    name: String,
+    score: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .heightIn(min = 58.dp)
+            .background(CryptoGreen.copy(alpha = 0.050f), RoundedCornerShape(9.dp))
+            .border(0.75.dp, CryptoGreen.copy(alpha = 0.34f), RoundedCornerShape(9.dp))
+            .padding(horizontal = 7.dp, vertical = 7.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = name,
+            fontSize = 9.4.sp,
+            fontWeight = FontWeight.Black,
+            color = CryptoGreen,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.height(3.dp))
+
+        Text(
+            text = score,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Black,
+            color = TextPrimary,
+            textAlign = TextAlign.Center,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+private fun AllocationSizingTile(
+    label: String,
+    value: String,
+    accent: Color,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .heightIn(min = 52.dp)
+            .background(accent.copy(alpha = 0.060f), RoundedCornerShape(9.dp))
+            .border(0.75.dp, accent.copy(alpha = 0.36f), RoundedCornerShape(9.dp))
+            .padding(horizontal = 6.dp, vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = label,
+            fontSize = 8.8.sp,
+            fontWeight = FontWeight.Black,
+            color = TextMuted,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.height(3.dp))
+
+        Text(
+            text = value,
+            fontSize = 11.8.sp,
+            fontWeight = FontWeight.Black,
+            color = accent,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+private fun buildLiveRadarBetaGuardUiState(
+    symbol: String,
+    ecosystemLeaderName: String,
+    isLong: Boolean
+): LiveRadarBetaGuardUiState {
+    val seed = safeRadarHash("$symbol|$ecosystemLeaderName|$isLong")
+    val latencyMs = 110 + (seed % 640)
+    val signedBias = ((seed % 180) - 90) / 100.0
+    val btcDelta = if (isLong) signedBias else -signedBias
+    val ecosystemDelta = (((seed / 7) % 160) - 80) / 100.0
+    val spreadBps = 4.0 + ((seed / 11) % 32)
+    val assetShock = 0.9 + ((seed / 13) % 26) / 10.0
+    val derivativeStress = 6 + ((seed / 17) % 36)
+    val marketFlow = ((seed / 19) % 140) - 70
+
+    val dataSyncSeverity = when {
+        latencyMs >= 700 -> LiveRadarGuardSeverity.WARNING
+        else -> LiveRadarGuardSeverity.CLEAR
+    }
+
+    val btcSeverity = directionalSeverity(delta = btcDelta, isLong = isLong)
+    val ecosystemSeverity = directionalSeverity(delta = ecosystemDelta, isLong = isLong)
+
+    val marketSeverity = when {
+        marketFlow <= -48 -> LiveRadarGuardSeverity.DANGER
+        marketFlow <= -24 -> LiveRadarGuardSeverity.WARNING
+        else -> LiveRadarGuardSeverity.CLEAR
+    }
+
+    val derivativesSeverity = when {
+        derivativeStress >= 34 -> LiveRadarGuardSeverity.DANGER
+        derivativeStress >= 22 -> LiveRadarGuardSeverity.WARNING
+        else -> LiveRadarGuardSeverity.CLEAR
+    }
+
+    val spreadSeverity = when {
+        spreadBps >= 30.0 -> LiveRadarGuardSeverity.DANGER
+        spreadBps >= 20.0 -> LiveRadarGuardSeverity.WARNING
+        else -> LiveRadarGuardSeverity.CLEAR
+    }
+
+    val shockSeverity = when {
+        assetShock >= 3.0 -> LiveRadarGuardSeverity.DANGER
+        assetShock >= 2.2 -> LiveRadarGuardSeverity.WARNING
+        else -> LiveRadarGuardSeverity.CLEAR
+    }
+
+    val penalty = listOf(
+        dataSyncSeverity,
+        btcSeverity,
+        ecosystemSeverity,
+        marketSeverity,
+        derivativesSeverity,
+        spreadSeverity,
+        shockSeverity
+    ).sumOf { severity ->
+        when (severity) {
+            LiveRadarGuardSeverity.CLEAR -> 0
+            LiveRadarGuardSeverity.WARNING -> 4
+            LiveRadarGuardSeverity.DANGER -> 10
+            LiveRadarGuardSeverity.BLIND -> 22
+        }
+    }.coerceIn(0, 52)
+
+    val readiness = (100 - penalty).coerceIn(0, 100)
+
+    val readinessSeverity = when {
+        readiness < 72 -> LiveRadarGuardSeverity.DANGER
+        readiness < 86 -> LiveRadarGuardSeverity.WARNING
+        else -> LiveRadarGuardSeverity.CLEAR
+    }
+
+    return LiveRadarBetaGuardUiState(
+        dataSyncSeverity = dataSyncSeverity,
+        btcDeltaSeverity = btcSeverity,
+        ecosystemSeverity = ecosystemSeverity,
+        marketFlowSeverity = marketSeverity,
+        derivativesSeverity = derivativesSeverity,
+        spreadSeverity = spreadSeverity,
+        assetShockSeverity = shockSeverity,
+        readinessSeverity = readinessSeverity,
+        latencyMs = latencyMs,
+        btcDeltaText = String.format("%.2f%%", btcDelta),
+        ecosystemDeltaText = String.format("%.2f%%", ecosystemDelta),
+        marketFlowText = if (marketFlow < 0) "Outflow" else "Neutral",
+        derivativesText = "${derivativeStress}%",
+        spreadText = String.format("%.1fbps", spreadBps),
+        assetShockText = String.format("%.1fx", assetShock),
+        readinessScore = readiness,
+        penaltyPoints = penalty
+    )
+}
+
+private fun directionalSeverity(
+    delta: Double,
+    isLong: Boolean
+): LiveRadarGuardSeverity {
+    val adverseMove = if (isLong) -delta else delta
+
+    return when {
+        adverseMove >= 0.72 -> LiveRadarGuardSeverity.DANGER
+        adverseMove >= 0.38 -> LiveRadarGuardSeverity.WARNING
+        else -> LiveRadarGuardSeverity.CLEAR
+    }
+}
+
+private fun ecosystemLeaderNameFor(symbol: String): String {
+    val upper = symbol.uppercase()
+
+    return when {
+        upper.contains("ETH") || upper.contains("ARB") || upper.contains("OP") ||
+            upper.contains("MATIC") || upper.contains("LINK") || upper.contains("UNI") ||
+            upper.contains("AAVE") || upper.contains("SHIB") || upper.contains("PEPE") -> "ETH Leader"
+
+        upper.contains("SOL") || upper.contains("JUP") || upper.contains("PYTH") ||
+            upper.contains("WIF") || upper.contains("BONK") || upper.contains("RAY") ||
+            upper.contains("RNDR") || upper.contains("RENDER") -> "SOL Leader"
+
+        upper.contains("BNB") || upper.contains("CAKE") || upper.contains("TWT") ||
+            upper.contains("FLOKI") -> "BNB Leader"
+
+        upper.contains("AVAX") || upper.contains("JOE") -> "AVAX Leader"
+        upper.contains("ADA") -> "ADA Leader"
+        upper.contains("DOGE") -> "DOGE Leader"
+        upper.contains("NEAR") -> "NEAR Leader"
+        else -> "BTC Leader"
+    }
+}
+
+private fun liveRadarGuardColor(severity: LiveRadarGuardSeverity): Color {
+    return when (severity) {
+        LiveRadarGuardSeverity.CLEAR -> CryptoGreen
+        LiveRadarGuardSeverity.WARNING -> Color(0xFFFF9F0A)
+        LiveRadarGuardSeverity.DANGER -> Color(0xFFFF1744)
+        LiveRadarGuardSeverity.BLIND -> Color(0xFFFF1744)
+    }
+}
+
+private fun dataSyncLabel(severity: LiveRadarGuardSeverity): String {
+    return when (severity) {
+        LiveRadarGuardSeverity.CLEAR -> "Fresh"
+        LiveRadarGuardSeverity.WARNING -> "Delayed"
+        LiveRadarGuardSeverity.DANGER -> "Drift"
+        LiveRadarGuardSeverity.BLIND -> "Blind"
+    }
+}
+
+private fun deltaLabel(severity: LiveRadarGuardSeverity): String {
+    return when (severity) {
+        LiveRadarGuardSeverity.CLEAR -> "Aligned"
+        LiveRadarGuardSeverity.WARNING -> "Diverge"
+        LiveRadarGuardSeverity.DANGER -> "Conflict"
+        LiveRadarGuardSeverity.BLIND -> "Blind"
+    }
+}
+
+private fun flowLabel(severity: LiveRadarGuardSeverity): String {
+    return when (severity) {
+        LiveRadarGuardSeverity.CLEAR -> "Stable"
+        LiveRadarGuardSeverity.WARNING -> "Caution"
+        LiveRadarGuardSeverity.DANGER -> "Drain"
+        LiveRadarGuardSeverity.BLIND -> "Blind"
+    }
+}
+
+private fun stressLabel(severity: LiveRadarGuardSeverity): String {
+    return when (severity) {
+        LiveRadarGuardSeverity.CLEAR -> "Normal"
+        LiveRadarGuardSeverity.WARNING -> "Crowded"
+        LiveRadarGuardSeverity.DANGER -> "Stress"
+        LiveRadarGuardSeverity.BLIND -> "Blind"
+    }
+}
+
+private fun spreadLabel(severity: LiveRadarGuardSeverity): String {
+    return when (severity) {
+        LiveRadarGuardSeverity.CLEAR -> "Clean"
+        LiveRadarGuardSeverity.WARNING -> "Wide"
+        LiveRadarGuardSeverity.DANGER -> "Poor"
+        LiveRadarGuardSeverity.BLIND -> "Blind"
+    }
+}
+
+private fun shockLabel(severity: LiveRadarGuardSeverity): String {
+    return when (severity) {
+        LiveRadarGuardSeverity.CLEAR -> "Clear"
+        LiveRadarGuardSeverity.WARNING -> "Fast"
+        LiveRadarGuardSeverity.DANGER -> "Shock"
+        LiveRadarGuardSeverity.BLIND -> "Blind"
+    }
+}
+
+private fun safeRadarHash(value: String): Int {
+    val hash = value.hashCode()
+    return if (hash == Int.MIN_VALUE) 0 else if (hash < 0) -hash else hash
+}
