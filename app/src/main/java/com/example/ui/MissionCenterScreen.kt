@@ -535,6 +535,13 @@ fun RunningMissionsContent(viewModel: CryptoViewModel, isBengali: Boolean) {
                     timeElapsed = String.format("%02dh %02dm", h, min),
                     targets = m.targets,
                     stopLoss = m.stopLoss,
+                    setupMode = m.setupMode,
+                    tp1 = m.tp1,
+                    tp2 = m.tp2,
+                    tp3 = m.tp3,
+                    manualStopLoss = m.manualStopLoss,
+                    leverage = m.leverage,
+                    riskProfile = m.riskProfile,
                     aiStatus = if (isBengali) m.aiStatusBengali else m.aiStatusEnglish,
                     confidence = m.confidence,
                     isNegative = isLoss,
@@ -577,6 +584,13 @@ fun HistoryMissionsContent(viewModel: CryptoViewModel, isBengali: Boolean) {
                     timeElapsed = String.format("%02dh %02dm", h, min),
                     targets = m.targets,
                     stopLoss = m.stopLoss,
+                    setupMode = m.setupMode,
+                    tp1 = m.tp1,
+                    tp2 = m.tp2,
+                    tp3 = m.tp3,
+                    manualStopLoss = m.manualStopLoss,
+                    leverage = m.leverage,
+                    riskProfile = m.riskProfile,
                     aiStatus = (if (isBengali) "মিশন সম্পন্ন হয়েছে" else "MISSION COMPLETED") + " - ${if (isLoss) "LOSS" else "PROFIT"}",
                     confidence = m.confidence,
                     isNegative = isLoss,
@@ -632,6 +646,13 @@ fun MissionTerminalCard(
     timeElapsed: String,
     targets: String,
     stopLoss: String,
+    setupMode: String?,
+    tp1: String?,
+    tp2: String?,
+    tp3: String?,
+    manualStopLoss: String?,
+    leverage: String?,
+    riskProfile: String?,
     aiStatus: String,
     confidence: Int,
     isNegative: Boolean,
@@ -731,8 +752,13 @@ fun MissionTerminalCard(
             Spacer(modifier = Modifier.height(12.dp))
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                TerminalDataField(if (isBengali) "টার্গেট স্তর" else "TARGETS", targets, T_TextPrimary)
-                TerminalDataField(if (isBengali) "স্টপ লস" else "STOP LOSS", stopLoss, T_Gold, alignEnd = true)
+                TerminalDataField(if (isBengali) "টার্গেট স্তর" else "TARGETS", listOfNotNull(tp1, tp2, tp3).takeIf { it.isNotEmpty() }?.joinToString(" / ") ?: targets, T_TextPrimary)
+                TerminalDataField(if (isBengali) "স্টপ লস" else "STOP LOSS", manualStopLoss ?: stopLoss, T_Gold, alignEnd = true)
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                TerminalDataField("SETUP MODE", setupMode ?: "Pending Manual Setup", T_Cyan)
+                TerminalDataField("LEVERAGE", leverage ?: if (marketType.equals("Spot", ignoreCase = true)) "Spot (1x)" else "Not Set", T_TextSecondary, alignEnd = true)
             }
         }
         

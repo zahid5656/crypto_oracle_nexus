@@ -926,47 +926,113 @@ fun StartTradeFlow(viewModel: CryptoViewModel, mission: com.example.model.Missio
     var step by remember { mutableStateOf(0) }
 
     if (step == 1) {
-        AlertDialog(
-            onDismissRequest = { step = 0 },
-            title = { Text("Start this trade?", color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
-            text = {
-                Text("You are about to activate this signal for personal tracking.", color = TextSecondary)
-            },
-            confirmButton = {
-                Button(onClick = { step = 2 }, colors = ButtonDefaults.buttonColors(containerColor = CryptoGreen)) {
-                    Text("Continue", fontWeight = FontWeight.Black, color = DarkBackground)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { step = 0 }) {
-                    Text("Cancel", color = TextSecondary)
-                }
-            },
-            containerColor = DarkSurface,
-            titleContentColor = TextPrimary,
-            textContentColor = TextSecondary
-        )
-    } else if (step == 2) {
         val verifiedEntryLocked = remember { livePrice }
+        var isCustomSetup by remember { mutableStateOf(false) }
         
+        var tp1 by remember { mutableStateOf("") }
+        var tp2 by remember { mutableStateOf("") }
+        var tp3 by remember { mutableStateOf("") }
+        var customStopLoss by remember { mutableStateOf("") }
+        var customLeverage by remember { mutableStateOf("") }
+        var customPositionSize by remember { mutableStateOf("") }
+
         AlertDialog(
             onDismissRequest = { step = 0 },
-            title = { Text("Confirm Trade Activation", color = CryptoCyan, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+            title = { Text("Confirm Trade Activation", color = CryptoCyan, fontSize = 16.sp, fontWeight = FontWeight.Bold) },
             text = {
-                Column {
-                    Text("Current Market Price:", color = TextSecondary, fontSize = 12.sp)
-                    Text(String.format("%.4f USDT", verifiedEntryLocked), color = TextPrimary, fontSize = 24.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("This price will be locked as your personal mission entry price.\nThe original signal entry remains unchanged for validation.", color = AccentGold, fontSize = 11.sp)
+                Column(modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp)) {
+                    Text("Current Market Price:", color = TextSecondary, fontSize = 11.sp)
+                    Text(String.format("%.4f USDT", verifiedEntryLocked), color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Box(
+                            modifier = Modifier.weight(1f).clickable { isCustomSetup = false }
+                                .background(if (!isCustomSetup) CryptoCyan.copy(alpha = 0.2f) else Color.Transparent, RoundedCornerShape(4.dp))
+                                .border(1.dp, if (!isCustomSetup) CryptoCyan else BorderColor, RoundedCornerShape(4.dp))
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("DEFAULT SETUP", color = if (!isCustomSetup) CryptoCyan else TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Box(
+                            modifier = Modifier.weight(1f).clickable { isCustomSetup = true }
+                                .background(if (isCustomSetup) AccentGold.copy(alpha = 0.2f) else Color.Transparent, RoundedCornerShape(4.dp))
+                                .border(1.dp, if (isCustomSetup) AccentGold else BorderColor, RoundedCornerShape(4.dp))
+                                .padding(vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("CUSTOM SETUP", color = if (isCustomSetup) AccentGold else TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    val textFieldColors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = CryptoCyan,
+                        unfocusedBorderColor = BorderColor,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        cursorColor = CryptoCyan
+                    )
+                    
+                    if (isCustomSetup) {
+                        LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f, false), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            item {
+                                OutlinedTextField(value = tp1, onValueChange = { tp1 = it }, label = { Text("TP1 (Optional)", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp), singleLine = true, colors = textFieldColors)
+                            }
+                            item {
+                                OutlinedTextField(value = tp2, onValueChange = { tp2 = it }, label = { Text("TP2 (Optional)", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp), singleLine = true, colors = textFieldColors)
+                            }
+                            item {
+                                OutlinedTextField(value = tp3, onValueChange = { tp3 = it }, label = { Text("TP3 (Optional)", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp), singleLine = true, colors = textFieldColors)
+                            }
+                            item {
+                                OutlinedTextField(value = customStopLoss, onValueChange = { customStopLoss = it }, label = { Text("Stop Loss (Optional)", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp), singleLine = true, colors = textFieldColors)
+                            }
+                            item {
+                                OutlinedTextField(value = customLeverage, onValueChange = { customLeverage = it }, label = { Text("Leverage (Optional)", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp), singleLine = true, colors = textFieldColors)
+                            }
+                            item {
+                                OutlinedTextField(value = customPositionSize, onValueChange = { customPositionSize = it }, label = { Text("Risk Profile / Allocation (Optional)", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), textStyle = androidx.compose.ui.text.TextStyle(fontSize = 12.sp), singleLine = true, colors = textFieldColors)
+                            }
+                        }
+                    } else {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Text("Using Original Signal Parameters", color = TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("Targets: ${mission.targets}", color = TextSecondary, fontSize = 11.sp)
+                            Text("Stop Loss: ${mission.stopLoss}", color = TextSecondary, fontSize = 11.sp)
+                            Text("Leverage: " + if(mission.marketType.equals("Futures", ignoreCase = true)) "Signal Default" else "Spot", color = TextSecondary, fontSize = 11.sp)
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("AI Copilot will run in Alert-Only mode. Auto-Execute is completely disabled.", color = AccentGold, fontSize = 10.sp, lineHeight = 14.sp)
                 }
             },
             confirmButton = {
                 Button(onClick = {
+                    val finalTp1 = tp1.ifBlank { null }
+                    val finalTp2 = tp2.ifBlank { null }
+                    val finalTp3 = tp3.ifBlank { null }
+                    val finalSl = customStopLoss.ifBlank { null }
+                    val finalLev = customLeverage.ifBlank { null }
+                    val finalAlloc = customPositionSize.ifBlank { null }
+                    
                     viewModel.startMission(mission.copy(
                         id = java.util.UUID.randomUUID().toString(),
                         entryPrice = verifiedEntryLocked, // User's personal locked entry price
                         originalSignalEntry = mission.entryPrice, // Keep original
-                        startTime = System.currentTimeMillis()
+                        startTime = System.currentTimeMillis(),
+                        setupMode = if (isCustomSetup) "Custom Setup" else "Default Setup",
+                        tp1 = if (isCustomSetup) finalTp1 else null,
+                        tp2 = if (isCustomSetup) finalTp2 else null,
+                        tp3 = if (isCustomSetup) finalTp3 else null,
+                        manualStopLoss = if (isCustomSetup) finalSl else null,
+                        leverage = if (isCustomSetup) finalLev else null,
+                        riskProfile = if (isCustomSetup) finalAlloc else null,
+                        copilotMode = "Alert-Only"
                     ))
                     viewModel.sendLocalAlert("Mission Started", "AI intelligence system successfully started monitoring ${mission.coinSymbol}")
                     step = 0
@@ -975,8 +1041,8 @@ fun StartTradeFlow(viewModel: CryptoViewModel, mission: com.example.model.Missio
                 }
             },
             dismissButton = {
-                TextButton(onClick = { step = 1 }) {
-                    Text("Back", color = TextSecondary)
+                TextButton(onClick = { step = 0 }) {
+                    Text("Cancel", color = TextSecondary)
                 }
             },
             containerColor = DarkSurface,
