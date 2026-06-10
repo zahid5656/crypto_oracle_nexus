@@ -767,7 +767,6 @@ fun MissionTerminalCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = SpacingLarge)
             .clip(RoundedCornerShape(8.dp))
             .background(T_Surface)
             .border(0.5.dp, T_BorderHigh, RoundedCornerShape(8.dp))
@@ -841,7 +840,16 @@ fun MissionTerminalCard(
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
                     Text("STATUS", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                     Spacer(modifier = Modifier.height(SpacingCompact))
-                    Text(statusText, color = T_TextPrimary, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    val statusColor = when (statusText.uppercase()) {
+                        "TP1", "TP2", "TP3", "TARGET HIT" -> T_Green
+                        "STOP LOSS", "SL", "SL1", "SL2" -> T_Red
+                        "CLOSED" -> T_TextSecondary
+                        "INVALID" -> T_Red
+                        "WARNING" -> T_Gold
+                        "FALL BACK" -> T_Cyan
+                        else -> T_TextPrimary
+                    }
+                    Text(statusText, color = statusColor, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(modifier = Modifier.height(SpacingNormal))
@@ -921,18 +929,10 @@ fun MissionTerminalCard(
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("ENTRY", String.format("%.4f", entryVal), T_TextPrimary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                CompactDataRow("SETUP", sMode.replace("OVERRIDDEN", "").replace("(", "").replace(")", "").replace("RECOMMENDED SETUP", "REC").trim(), T_Cyan)
+                CompactDataRow("SETUP", sMode.replace("OVERRIDDEN", "").replace("(", "").replace(")", "").replace("RECOMMENDED SETUP", "RECOMMENDED").trim(), T_Cyan)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                val profUpper = mission?.riskProfile?.uppercase() ?: "NOT SET"
-                val profColor = when {
-                    profUpper.contains("CONSERVATIVE") -> T_Cyan
-                    profUpper.contains("BALANCED") -> T_Green
-                    profUpper.contains("AGGRESSIVE") || profUpper.contains("CUSTOM") -> T_Gold
-                    profUpper.contains("INVALID") -> T_Red
-                    profUpper.contains("DEFAULT") -> T_Cyan
-                    else -> T_TextPrimary
-                }
-                CompactDataRow("RISK PROFILE", profUpper, profColor)
+                val overrideCount = if (sMode.contains("OVERRIDDEN") || sMode.contains("CUSTOM")) "1" else "0" // Simulated override count
+                CompactDataRow("OVERRIDE", overrideCount, T_TextPrimary)
             }
             // RIGHT COLUMN
             Column(modifier = Modifier.weight(1f).padding(start = SpacingNormal)) {
@@ -945,8 +945,16 @@ fun MissionTerminalCard(
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("ALLOCATION", mission?.positionSize?.uppercase() ?: "NOT SET", T_TextPrimary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                val overrideCount = if (sMode.contains("OVERRIDDEN") || sMode.contains("CUSTOM")) "1" else "0" // Simulated override count
-                CompactDataRow("OVERRIDE", overrideCount, T_TextPrimary)
+                val profUpper = mission?.riskProfile?.uppercase() ?: "NOT SET"
+                val profColor = when {
+                    profUpper.contains("CONSERVATIVE") -> T_Cyan
+                    profUpper.contains("BALANCED") -> T_Green
+                    profUpper.contains("AGGRESSIVE") || profUpper.contains("CUSTOM") -> T_Gold
+                    profUpper.contains("INVALID") -> T_Red
+                    profUpper.contains("DEFAULT") -> T_Cyan
+                    else -> T_TextPrimary
+                }
+                CompactDataRow("RISK PROFILE", profUpper, profColor)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 val isAutoActive = mission?.autoCloseEnabled == true
                 val isConditionValid = mission?.conditionValidity == "VALID"
@@ -1009,14 +1017,70 @@ fun MissionTerminalCard(
                 }
             }
             Spacer(modifier = Modifier.height(SpacingNormal))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("ACTION RECOMMENDATION: HOLD", color = T_Cyan, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                Text("DIRECTION: NEUTRAL     CONFIDENCE: N/A", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            
+            val actRec = "HOLD"
+            val actConf = "N/A"
+            val actRegime = "ACCUMULATING"
+            val actDir = "NEUTRAL"
+            
+            val actRecColor = when (actRec) {
+                "HOLD", "WAIT FOR CONFIRMATION" -> T_Cyan
+                "WATCH", "TIGHTEN SL" -> T_Gold
+                "CLOSE" -> T_Red
+                "TAKE PARTIAL PROFIT" -> T_Green
+                else -> T_Cyan
             }
-            Spacer(modifier = Modifier.height(SpacingCompact))
-            Text("HOLD. WAITING FOR UPDATED MISSION CONTEXT.", color = T_TextPrimary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-            Spacer(modifier = Modifier.height(SpacingCompact))
-            Text("REASON: SYSTEM INITIALIZATION / WAITING FOR MISSION DATA.", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            
+            val actConfColor = T_TextSecondary // hardcoded for N/A as per rule
+            
+            val actRegimeColor = when (actRegime) {
+                "ACCUMULATING" -> T_Cyan
+                "DISTRIBUTING" -> T_Gold
+                "TRENDING" -> T_Green
+                "CHOPPY", "SIDEWAY" -> T_Gold
+                else -> T_TextSecondary
+            }
+            
+            val actDirColor = when (actDir) {
+                "BULLISH" -> T_Green
+                "BEARISH" -> T_Red
+                "NEUTRAL" -> T_Cyan
+                "MIXED" -> T_Gold
+                else -> T_TextSecondary
+            }
+            
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(width = 0.5.dp, color = T_BorderHigh, shape = RoundedCornerShape(8.dp))
+                    .padding(8.dp)
+            ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("ACTION RECOMMENDATION: ", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Text(actRec, color = actRecColor, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("CONFIDENCE: ", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Text(actConf, color = actConfColor, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
+                }
+                Spacer(modifier = Modifier.height(SpacingCompact))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("PERSISTED REGIME: ", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Text(actRegime, color = actRegimeColor, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("DIRECTION: ", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Text(actDir, color = actDirColor, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
+                }
+                Spacer(modifier = Modifier.height(SpacingNormal))
+                Text("HOLD. WAITING FOR UPDATED MISSION CONTEXT.", color = T_TextPrimary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Spacer(modifier = Modifier.height(SpacingCompact))
+                Text("REASON: SYSTEM INITIALIZATION / WAITING FOR MISSION DATA.", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            }
         }
         
         Spacer(modifier = Modifier.height(SpacingLarge))
