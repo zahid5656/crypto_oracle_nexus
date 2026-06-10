@@ -929,7 +929,13 @@ fun MissionTerminalCard(
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("ENTRY", String.format("%.4f", entryVal), T_TextPrimary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                CompactDataRow("SETUP", sMode.replace("OVERRIDDEN", "").replace("(", "").replace(")", "").replace("RECOMMENDED SETUP", "RECOMMENDED").trim(), T_Cyan)
+                val cleanSetup = sMode.replace("OVERRIDDEN", "")
+                                      .replace("CUSTOM", "")
+                                      .replace("(", "")
+                                      .replace(")", "")
+                                      .replace("RECOMMENDED SETUP", "RECOMMENDED")
+                                      .trim()
+                CompactDataRow("SETUP", cleanSetup, T_Cyan)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 val overrideCount = if (sMode.contains("OVERRIDDEN") || sMode.contains("CUSTOM")) "1" else "0" // Simulated override count
                 CompactDataRow("OVERRIDE", overrideCount, T_TextPrimary)
@@ -976,14 +982,6 @@ fun MissionTerminalCard(
 
         // AUTO-TRADING & AI POLICY ROW
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
-            val isAutoActive = mission?.autoCloseEnabled == true
-            val isConditionValid = mission?.conditionValidity == "VALID"
-            val conditionStatus = if (isAutoActive) (if (isConditionValid) "VALID" else "INVALID") else "N/A"
-            val conditionColor = if (isAutoActive) { if (isConditionValid) T_Green else T_Red } else T_TextSecondary
-            
-            CompactDataRow("CONDITION", conditionStatus, conditionColor)
-            
-            Spacer(modifier = Modifier.height(SpacingCompact))
             val policyText = if (mission?.copilotMode?.contains("EXECUTION") == true) "ASSIST & EXECUTION" else "ASSIST ONLY"
             CompactDataRow("AI COPILOT POLICY", policyText, if (policyText == "ASSIST ONLY") T_Cyan else T_Gold)
             
@@ -1201,12 +1199,39 @@ fun MissionTerminalCard(
                             Spacer(modifier = Modifier.height(8.dp))
                             
                             val isAutoActive = mission?.autoCloseEnabled == true
-                            Text("Auto-Trading: ${if (isAutoActive) mission?.autoCloseConditions?.joinToString(" / ") else "Inactive"}", color = if (isAutoActive) T_Cyan else T_TextMuted, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
-                            if (isAutoActive) {
-                                val conditionColor = if (mission?.conditionValidity == "VALID") T_Green else T_Red
-                                Text("Condition Validity: ${mission?.conditionValidity ?: "N/A"}", color = conditionColor, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
-                                if (mission?.conditionValidity == "INVALID") {
-                                    Text("Reason: ${mission?.conditionInvalidReason ?: "Unknown"}", color = T_Red, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                            val isConditionValid = mission?.conditionValidity == "VALID"
+                            val autoTradingStatus = when {
+                                isAutoActive && isConditionValid -> "ACTIVE"
+                                isAutoActive && !isConditionValid -> "INVALID"
+                                else -> "INACTIVE"
+                            }
+                            
+                            Text("AUTO-TRADING STATUS: $autoTradingStatus", color = if (autoTradingStatus == "ACTIVE") T_Cyan else if (autoTradingStatus == "INVALID") T_Red else T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold)
+                            
+                            val selectedCondition = mission?.autoCloseConditions?.joinToString(" / ")?.takeIf { it.isNotBlank() } ?: "N/A"
+                            
+                            when (autoTradingStatus) {
+                                "ACTIVE" -> {
+                                    Text("WHY ACTIVE:\nAuto-Trading is enabled and selected condition is valid.", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text("SELECTED CONDITION:\n$selectedCondition", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text("VALIDATION:\n$selectedCondition is valid for ${mission?.type ?: "this"} mission.", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                                }
+                                "INACTIVE" -> {
+                                    Text("WHY INACTIVE:\nAuto-Trading is disabled by user.", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text("HINT:\nEnable Auto-Trading from Override Setup if you want this mission to be monitored with selected trigger conditions.", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                                }
+                                "INVALID" -> {
+                                    Text("WHY INVALID:\n${mission?.conditionInvalidReason ?: "Values do not match required direction."}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text("SELECTED CONDITION:\n$selectedCondition", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text("INVALID INPUT:\n$selectedCondition", color = T_Red, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    val isLong = mission?.type?.equals("LONG", true) == true
+                                    Text("HINT:\nFor ${if (isLong) "LONG" else "SHORT"} mission, ${if (isLong) "TARGET must be above and SL must be below" else "TARGET must be below and SL must be above"} current/live market price. Modify $selectedCondition from Override Setup to activate Auto-Trading.", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                                 }
                             }
                             Spacer(modifier = Modifier.height(8.dp))
@@ -1267,6 +1292,9 @@ fun MissionTerminalCard(
                 var overrideAlloc by remember { mutableStateOf(mission.positionSize ?: "") }
                 var overrideRemark by remember { mutableStateOf(mission.setupRemark ?: "") }
                 var aiPolicy by remember { mutableStateOf(mission.copilotMode?.takeIf { it.contains("EXECUTION") }?.let { "ASSIST & EXECUTION" } ?: "ASSIST ONLY") }
+                var overrideAutoActive by remember { mutableStateOf(mission.autoCloseEnabled) }
+                var overrideAutoCondition by remember { mutableStateOf(mission.autoCloseConditions?.firstOrNull() ?: "") }
+                if (overrideAutoCondition.isBlank()) { overrideAutoCondition = "TARGET" }
 
                 val custom1 by viewModel.customSetup1.collectAsState()
                 val custom2 by viewModel.customSetup2.collectAsState()
@@ -1330,6 +1358,39 @@ fun MissionTerminalCard(
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideRemark, onValueChange = { overrideRemark = it }, label = { Text("Remark", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item { 
                                     Spacer(modifier = Modifier.height(12.dp))
+                                    Text("Auto-Trading Control", color = T_TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Box(
+                                            modifier = Modifier.weight(1f).clickable { overrideAutoActive = true }
+                                                .background(if (overrideAutoActive) T_Green.copy(alpha = 0.2f) else Color.Transparent, RoundedCornerShape(4.dp))
+                                                .border(1.dp, if (overrideAutoActive) T_Green else T_BorderHigh, RoundedCornerShape(4.dp))
+                                                .padding(vertical = 8.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) { Text("ACTIVE", color = if (overrideAutoActive) T_Green else T_TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
+                                        Box(
+                                            modifier = Modifier.weight(1f).clickable { overrideAutoActive = false }
+                                                .background(if (!overrideAutoActive) T_TextSecondary.copy(alpha = 0.2f) else Color.Transparent, RoundedCornerShape(4.dp))
+                                                .border(1.dp, if (!overrideAutoActive) T_TextSecondary else T_BorderHigh, RoundedCornerShape(4.dp))
+                                                .padding(vertical = 8.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) { Text("INACTIVE", color = if (!overrideAutoActive) T_TextPrimary else T_TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
+                                    }
+                                }
+                                if (overrideAutoActive) {
+                                    item {
+                                        androidx.compose.material3.OutlinedTextField(
+                                            value = overrideAutoCondition,
+                                            onValueChange = { overrideAutoCondition = it },
+                                            label = { Text("Auto Condition (e.g. TARGET)", fontSize = 10.sp) },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            singleLine = true,
+                                            colors = textFieldColors
+                                        )
+                                    }
+                                }
+                                item { 
+                                    Spacer(modifier = Modifier.height(12.dp))
                                     Text("AI Copilot Policy", color = T_TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1376,6 +1437,34 @@ fun MissionTerminalCard(
                             }
                             
                             val updatedLog = (mission.missionHistoryLog + newLogs).takeLast(20)
+                            
+                            val updatedAutoConditions = if (overrideAutoCondition.isNotBlank()) listOf(overrideAutoCondition) else emptyList()
+                            var newValidity = "N/A"
+                            var newReason = "Not evaluated"
+                            if (overrideAutoActive) {
+                                val targetVal = overrideTp1.replace("[^0-9.]".toRegex(), "").toDoubleOrNull()
+                                val entryVal = mission.entryPrice
+                                val isLong = mission.type.contains("LONG", ignoreCase = true)
+                                if (overrideAutoCondition.equals("TARGET", ignoreCase = true)) {
+                                    if (targetVal != null) {
+                                        if (isLong && targetVal > entryVal) {
+                                            newValidity = "VALID"
+                                            newReason = "Target is above entry."
+                                        } else if (!isLong && targetVal < entryVal && targetVal > 0) {
+                                            newValidity = "VALID"
+                                            newReason = "Target is below entry."
+                                        } else {
+                                            newValidity = "INVALID"
+                                            newReason = "Target condition fails direction logic."
+                                        }
+                                    } else {
+                                        newValidity = "INVALID"
+                                        newReason = "Cannot parse TARGET value."
+                                    }
+                                } else {
+                                    newValidity = "VALID"
+                                }
+                            }
 
                             val updatedMission = mission.copy(
                                 setupMode = "Overridden ($selectedSetup)",
@@ -1388,6 +1477,10 @@ fun MissionTerminalCard(
                                 riskProfile = overrideRisk.ifBlank { null },
                                 positionSize = overrideAlloc.ifBlank { null },
                                 copilotMode = aiPolicy,
+                                autoCloseEnabled = overrideAutoActive,
+                                autoCloseConditions = updatedAutoConditions,
+                                conditionValidity = newValidity,
+                                conditionInvalidReason = newReason,
                                 missionHistoryLog = updatedLog
                             )
                             viewModel.updateMission(updatedMission)

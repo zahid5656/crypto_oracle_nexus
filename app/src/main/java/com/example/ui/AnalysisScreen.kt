@@ -1324,8 +1324,26 @@ fun StartTradeFlow(viewModel: CryptoViewModel, mission: com.example.model.Missio
     }
 
     if (step == 2) {
-        var localSetup1 by remember { mutableStateOf(custom1) }
-        var localSetup2 by remember { mutableStateOf(custom2) }
+        val targetsList = mission.targets.split("/").map { it.trim() }.filter { it.isNotEmpty() }
+        val tTarget = targetsList.lastOrNull() ?: ""
+        val tp1 = targetsList.getOrNull(0) ?: ""
+        val tp2 = targetsList.getOrNull(1) ?: ""
+        val tp3 = targetsList.getOrNull(2) ?: ""
+        val defaultPrefill = com.example.model.CustomSetupProfile(
+            target = tTarget,
+            tp1 = tp1,
+            tp2 = tp2,
+            tp3 = tp3,
+            stopLoss = mission.stopLoss,
+            sl2 = "",
+            leverage = if (mission.marketType.contains("Futures", true)) "NOT SET" else "SPOT",
+            positionSize = "",
+            riskProfile = "",
+            remark = "",
+            autoCloseConditions = emptyList()
+        )
+        var localSetup1 by remember { mutableStateOf(if (custom1.target.isBlank() && custom1.tp1.isBlank()) defaultPrefill else custom1) }
+        var localSetup2 by remember { mutableStateOf(if (custom2.target.isBlank() && custom2.tp1.isBlank()) defaultPrefill else custom2) }
         var localDefaultName by remember { mutableStateOf(defaultName) }
         var localDefaultPolicy by remember { mutableStateOf(defaultPolicy) }
         val recAutoCloseFlow by viewModel.recommendedAutoCloseConditions.collectAsState()
