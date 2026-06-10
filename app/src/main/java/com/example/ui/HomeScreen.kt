@@ -42,8 +42,10 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+import com.example.ui.theme.DarkBackground
+
 // Terminal Colors - Institutional Grade Apple Ecosystem Style
-private val T_Bg = Color(0xFF000000)
+private val T_Bg = DarkBackground
 private val T_Surface = Color(0xFF111112)
 private val T_Border = Color(0xFF1C1C1E)
 private val T_BorderHigh = Color(0xFF2C2C2E)
