@@ -15,3 +15,12 @@ val TextPrimary = Color(0xFFF3F4F6)
 val TextSecondary = Color(0xFF9CA3AF)
 val TextMuted = Color(0xFF6B7280)
 val BorderColor = Color(0xFF2A2A38)
+
+fun setupStatusColor(status: String?): Color {
+    return when (status?.uppercase() ?: "UNKNOWN") {
+        "READY" -> CryptoGreen
+        "INCOMPLETE SETUP" -> AccentGold
+        "INVALID", "INVALID / HIGH RISK" -> CryptoRed
+        else -> TextMuted
+    }
+}

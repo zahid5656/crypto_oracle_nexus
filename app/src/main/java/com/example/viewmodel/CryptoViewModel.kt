@@ -14,6 +14,7 @@ import com.example.data.GeminiClient
 import com.example.data.SignalEntity
 import com.example.model.OracleAnalysisResponse
 import com.example.model.RadarAlert
+import com.example.model.Mission
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -31,6 +32,7 @@ sealed interface AppScreen {
     object MarketRadar : AppScreen
     object MissionCenter : AppScreen
     object AccuracyCenter : AppScreen
+    object Chat : AppScreen
 }
 
 sealed interface AnalysisState {
@@ -92,6 +94,13 @@ class CryptoViewModel(application: Application) : AndroidViewModel(application) 
     private val _radarAlerts = MutableStateFlow<List<RadarAlert>>(emptyList())
     val radarAlerts: StateFlow<List<RadarAlert>> = _radarAlerts.asStateFlow()
 
+    private val _hasFreshRadarSignalBadge = MutableStateFlow(false)
+    val hasFreshRadarSignalBadge: StateFlow<Boolean> = _hasFreshRadarSignalBadge.asStateFlow()
+
+    fun clearRadarSignalBadge() {
+        _hasFreshRadarSignalBadge.value = false
+    }
+
     // Current general market regime conditions (Bull, Bear, Sideways, High Volatility, Low Liquidity)
     private val _marketRegime = MutableStateFlow("BULLISH TREND (STABLE VOLATILITY)")
     val marketRegime: StateFlow<String> = _marketRegime.asStateFlow()
@@ -102,6 +111,44 @@ class CryptoViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _isBengali = MutableStateFlow(false)
     val isBengali: StateFlow<Boolean> = _isBengali.asStateFlow()
+
+    data class ChatMessage(val text: String, val isUser: Boolean, val isLoading: Boolean = false)
+    private val _chatMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
+    val chatMessages: StateFlow<List<ChatMessage>> = _chatMessages.asStateFlow()
+
+    fun sendChatMessage(message: String) {
+        if (message.isBlank()) return
+        
+        val currentContext = _chatMessages.value
+        val newMessages = currentContext.toMutableList()
+        newMessages.add(ChatMessage(message, isUser = true))
+        newMessages.add(ChatMessage("", isUser = false, isLoading = true))
+        _chatMessages.value = newMessages
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val historyContents = currentContext.filter { !it.isLoading }.map {
+                com.example.data.GeminiContent(
+                    parts = listOf(com.example.data.GeminiPart(text = it.text)),
+                    role = if (it.isUser) "user" else "model"
+                )
+            }
+            
+            val responseText = com.example.data.GeminiClient.sendChatMessage(
+                historyContents,
+                message,
+                _isBengali.value
+            )
+            
+            val finalMessages = _chatMessages.value.toMutableList()
+            finalMessages.removeLastOrNull() // Remove loading message
+            finalMessages.add(ChatMessage(responseText, isUser = false))
+            _chatMessages.value = finalMessages
+        }
+    }
+
+    fun clearChat() {
+        _chatMessages.value = emptyList()
+    }
 
     fun toggleLanguage() {
         _isBengali.value = !_isBengali.value
@@ -114,8 +161,24 @@ class CryptoViewModel(application: Application) : AndroidViewModel(application) 
     private val _missionHistory = MutableStateFlow<List<com.example.model.Mission>>(emptyList())
     val missionHistory: StateFlow<List<com.example.model.Mission>> = _missionHistory.asStateFlow()
 
+    // Signal Setup Preferences
+    var customSetup1 = MutableStateFlow(com.example.model.CustomSetupProfile())
+    var customSetup2 = MutableStateFlow(com.example.model.CustomSetupProfile())
+    var defaultSetupName = MutableStateFlow("RECOMMENDED SETUP")
+    var defaultAiPolicy = MutableStateFlow("ASSIST ONLY")
+    var recommendedAutoCloseConditions = MutableStateFlow<List<String>>(emptyList())
+
     fun startMission(mission: com.example.model.Mission) {
         _activeMissions.value = _activeMissions.value + mission
+    }
+
+    fun updateMission(mission: com.example.model.Mission) {
+        val currentList = _activeMissions.value.toMutableList()
+        val index = currentList.indexOfFirst { it.id == mission.id }
+        if (index != -1) {
+            currentList[index] = mission
+            _activeMissions.value = currentList
+        }
     }
 
     fun stopMission(missionId: String, isNegativeOverride: Boolean? = null) {
@@ -123,7 +186,10 @@ class CryptoViewModel(application: Application) : AndroidViewModel(application) 
         val currentPrice = mission.currentPrice // Simulated exit
         val isLogicallyNegative = isNegativeOverride ?: (if (mission.type == "LONG") currentPrice < mission.entryPrice else currentPrice > mission.entryPrice)
         _activeMissions.value = _activeMissions.value.filter { it.id != missionId }
-        _missionHistory.value = _missionHistory.value + mission.copy(isNegative = isLogicallyNegative)
+        
+        val updatedLog = (mission.missionHistoryLog + listOf("CLOSE REQUESTED", "MISSION CLOSED BY USER")).takeLast(20)
+        
+        _missionHistory.value = _missionHistory.value + mission.copy(isNegative = isLogicallyNegative, missionHistoryLog = updatedLog)
     }
 
     // Active scan coroutine job reference to prevent race conditions
@@ -361,6 +427,7 @@ class CryptoViewModel(application: Application) : AndroidViewModel(application) 
                         currentList.removeAt(currentList.lastIndex)
                     }
                     _radarAlerts.value = currentList
+                    _hasFreshRadarSignalBadge.value = true
 
                 } catch (e: Exception) {
                     Log.e("CryptoViewModel", "Error in Live Radar generator", e)

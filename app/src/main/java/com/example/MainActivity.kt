@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.CheckCircle
@@ -31,6 +32,7 @@ import com.example.ui.AnalysisScreen
 import com.example.ui.HomeScreen
 import com.example.ui.MarketRadarScreen
 import com.example.ui.AccuracyCenterScreen
+import com.example.ui.ChatScreen
 import com.example.ui.theme.*
 import com.example.viewmodel.AppScreen
 import com.example.viewmodel.CryptoViewModel
@@ -42,13 +44,19 @@ class MainActivity : ComponentActivity() {
         setContent {
             val viewModel: CryptoViewModel = viewModel()
             val currentScreen by viewModel.currentScreen.collectAsState()
+            val hasBadge by viewModel.hasFreshRadarSignalBadge.collectAsState()
             
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 containerColor = DarkBackground,
+                topBar = {
+                    if (currentScreen is AppScreen.Chat) {}
+                },
+                floatingActionButton = {},
                 bottomBar = {
-                    NavigationBar(
-                        containerColor = DarkSurface,
+                    if (currentScreen !is AppScreen.Chat) {
+                        NavigationBar(
+                            containerColor = DarkSurface,
                         tonalElevation = 8.dp,
                         windowInsets = WindowInsets.navigationBars,
                         modifier = Modifier
@@ -107,7 +115,17 @@ class MainActivity : ComponentActivity() {
                         NavigationBarItem(
                             selected = currentScreen is AppScreen.MarketRadar,
                             onClick = { viewModel.navigateTo(AppScreen.MarketRadar) },
-                            icon = { Icon(imageVector = Icons.Default.Refresh, contentDescription = "Live indicators radar") },
+                            icon = { 
+                                BadgedBox(
+                                    badge = {
+                                        if (hasBadge) {
+                                            Badge(containerColor = Color.Red, modifier = Modifier.size(8.dp))
+                                        }
+                                    }
+                                ) {
+                                    Icon(imageVector = Icons.Default.Refresh, contentDescription = "Live indicators radar") 
+                                }
+                            },
                             label = { 
                                 Text(
                                     text = "Live Radar", 
@@ -175,6 +193,7 @@ class MainActivity : ComponentActivity() {
                             )
                         )
                     }
+                    }
                 }
             ) { innerPadding ->
                 Box(
@@ -203,6 +222,9 @@ class MainActivity : ComponentActivity() {
                         AppScreen.AccuracyCenter -> AccuracyCenterScreen(
                             viewModel = viewModel,
                             modifier = Modifier.fillMaxSize()
+                        )
+                        AppScreen.Chat -> ChatScreen(
+                            viewModel = viewModel
                         )
                     }
                 }
