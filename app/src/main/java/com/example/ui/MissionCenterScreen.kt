@@ -140,6 +140,56 @@ private fun mcSignedPct(value: Double): String {
     return sign + String.format(java.util.Locale.US, "%.2f", kotlin.math.abs(value)) + "%"
 }
 
+private fun mcCleanPriceText(value: String?): String {
+    return value
+        ?.replace("(?i)\s*/\s*SIGNAL FALLBACK".toRegex(), "")
+        ?.trim()
+        .orEmpty()
+}
+
+private fun mcFormatDisplayPrice(value: String?): String {
+    val cleaned = mcCleanPriceText(value)
+    if (cleaned.isBlank() || cleaned.equals("NOT SET", ignoreCase = true) || cleaned.equals("N/A", ignoreCase = true)) return if (cleaned.isBlank()) "NOT SET" else cleaned.uppercase()
+    val numeric = cleaned.replace("$", "").replace(",", "").toDoubleOrNull()
+    return if (numeric != null) mcFormatUsd(numeric) else cleaned
+}
+
+private fun mcRiskProfileColor(value: String?): Color {
+    val v = value?.uppercase().orEmpty()
+    return when {
+        v.contains("CONSERVATIVE") || v.contains("LOW") || v.contains("SAFE") -> T_Cyan
+        v.contains("BALANCED") || v.contains("MEDIUM") || v.contains("MODERATE") -> T_Green
+        v.contains("AGGRESSIVE") || v.contains("ELEVATED") || v.contains("CUSTOM") -> T_Gold
+        v.contains("HIGH") || v.contains("INVALID") || v.contains("CRITICAL") -> T_Red
+        else -> T_TextPrimary
+    }
+}
+
+private fun mcValidateAutoTrading(
+    enabled: Boolean,
+    conditions: List<String>,
+    entryPrice: Double,
+    target: String?,
+    stopLoss: String?,
+    isLong: Boolean
+): Pair<String, String?> {
+    if (!enabled) return "INACTIVE" to "Auto-trading disabled by user."
+    if (conditions.isEmpty()) return "INVALID" to "Auto-trading active but no condition was provided."
+    val targetValue = mcCleanPriceText(target).replace("$", "").replace(",", "").toDoubleOrNull()
+    val stopValue = mcCleanPriceText(stopLoss).replace("$", "").replace(",", "").toDoubleOrNull()
+    if (entryPrice <= 0.0) return "INVALID" to "Entry price is missing or invalid."
+    if (targetValue == null || targetValue <= 0.0) return "INVALID" to "Target price is missing or invalid."
+    if (stopValue == null || stopValue <= 0.0) return "INVALID" to "Stop loss is missing or invalid."
+    if (isLong && targetValue <= entryPrice) return "INVALID" to "LONG target must be above entry."
+    if (isLong && stopValue >= entryPrice) return "INVALID" to "LONG stop loss must be below entry."
+    if (!isLong && targetValue >= entryPrice) return "INVALID" to "SHORT target must be below entry."
+    if (!isLong && stopValue <= entryPrice) return "INVALID" to "SHORT stop loss must be above entry."
+    val allowed = listOf("TP", "TARGET", "STOP", "SL", "ROI", "PNL", "PRICE", "TRAIL", "TIME", "BREAK", "AUTO")
+    val bad = conditions.map { it.uppercase() }.firstOrNull { c -> allowed.none { c.contains(it) } }
+    if (bad != null) return "INVALID" to "Unsupported auto-trading condition: $bad"
+    return "VALID" to null
+}
+
 @Composable
 fun MissionCenterScreen(
     viewModel: CryptoViewModel,
@@ -1095,7 +1145,9 @@ fun MissionTerminalCard(
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("ENTRY", mcFormatUsd(entryVal), T_TextPrimary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                CompactDataRow("SETUP", sMode.replace("OVERRIDDEN", "").replace("CUSTOM", "").replace("(", "").replace(")", "").replace("RECOMMENDED SETUP", "RECOMMENDED").trim(), T_Cyan)
+                val setupDisplay = sMode.replace("OVERRIDDEN", "").replace("CUSTOM", "").replace("(", "").replace(")", "").replace("RECOMMENDED SETUP", "RECOMMENDED").trim()
+                val setupColor = if (setupDisplay.contains("RECOMMENDED", ignoreCase = true)) T_Green else T_Cyan
+                CompactDataRow("SETUP", setupDisplay, setupColor)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 val overrideCount = if (sMode.contains("OVERRIDDEN") || sMode.contains("CUSTOM")) "1" else "0" // Simulated override count
                 CompactDataRow("OVERRIDE", overrideCount, T_TextPrimary)
@@ -1106,7 +1158,7 @@ fun MissionTerminalCard(
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("SL2", mission?.sl2?.replace("(?i)\\s*/\\s*SIGNAL FALLBACK".toRegex(), "") ?: "NOT SET", if (mission?.sl2 != null) T_Gold else T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                val levValue = leverage?.uppercase() ?: if (isFutures) "NOT SET" else "SPOT"
+                val levValue = (leverage?.uppercase() ?: if (isFutures) "NOT SET" else "1X").replace("SPOT / 1X", "1X").replace("SPOT", "1X")
                 CompactDataRow("LEVERAGE", levValue, T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("ALLOCATION", mission?.positionSize?.uppercase() ?: "NOT SET", T_TextPrimary)
@@ -1344,7 +1396,7 @@ fun MissionTerminalCard(
                             Text("Original Signal Entry: $originalEntry", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("TP1: ${tp1 ?: "Not Set"} | TP2: ${tp2 ?: "Not Set"} | TP3: ${tp3 ?: "Not Set"}", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("SL1: ${manualStopLoss ?: stopLoss} | SL2: ${mission?.sl2 ?: "Not Set"}", color = T_Red, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
-                            Text("Leverage: ${leverage ?: if (marketType.equals("Spot", ignoreCase = true)) "Spot (1x)" else "Not Set"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                            Text("Leverage: ${leverage ?: if (marketType.equals("Spot", ignoreCase = true)) "1X" else "Not Set"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Allocation: ${mission?.positionSize ?: "Not Set"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Risk Profile: ${mission?.riskProfile ?: "Not Set"}", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Remark: ${mission?.setupRemark ?: "None"}", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
@@ -1418,6 +1470,9 @@ fun MissionTerminalCard(
                 var overrideAlloc by remember { mutableStateOf(mission.positionSize ?: "") }
                 var overrideRemark by remember { mutableStateOf(mission.setupRemark ?: "") }
                 var aiPolicy by remember { mutableStateOf(mission.copilotMode?.takeIf { it.contains("EXECUTION") }?.let { "ASSIST & EXECUTION" } ?: "ASSIST ONLY") }
+                var overrideAutoTrading by remember { mutableStateOf(mission.autoCloseEnabled) }
+                var overrideAutoConditions by remember { mutableStateOf(mission.autoCloseConditions.joinToString(" / ")) }
+
 
                 val custom1 by viewModel.customSetup1.collectAsState()
                 val custom2 by viewModel.customSetup2.collectAsState()
@@ -1479,6 +1534,30 @@ fun MissionTerminalCard(
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideRisk, onValueChange = { overrideRisk = it }, label = { Text("Risk Profile", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideAlloc, onValueChange = { overrideAlloc = it }, label = { Text("Allocation", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideRemark, onValueChange = { overrideRemark = it }, label = { Text("Remark", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
+                                item {
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text("AUTO-TRADING", color = T_Cyan, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Box(
+                                            modifier = Modifier.weight(1f).clickable { overrideAutoTrading = false }
+                                                .background(if (!overrideAutoTrading) T_TextSecondary.copy(alpha = 0.16f) else Color.Transparent, RoundedCornerShape(4.dp))
+                                                .border(1.dp, if (!overrideAutoTrading) T_TextSecondary else T_BorderHigh, RoundedCornerShape(4.dp))
+                                                .padding(vertical = 8.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) { Text("INACTIVE", color = if (!overrideAutoTrading) T_TextSecondary else T_TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
+                                        Box(
+                                            modifier = Modifier.weight(1f).clickable { overrideAutoTrading = true }
+                                                .background(if (overrideAutoTrading) T_Cyan.copy(alpha = 0.18f) else Color.Transparent, RoundedCornerShape(4.dp))
+                                                .border(1.dp, if (overrideAutoTrading) T_Cyan else T_BorderHigh, RoundedCornerShape(4.dp))
+                                                .padding(vertical = 8.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) { Text("ACTIVE", color = if (overrideAutoTrading) T_Cyan else T_TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
+                                    }
+                                }
+                                if (overrideAutoTrading) {
+                                    item { androidx.compose.material3.OutlinedTextField(value = overrideAutoConditions, onValueChange = { overrideAutoConditions = it }, label = { Text("Auto-Trading Conditions", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), minLines = 2, colors = textFieldColors) }
+                                }
                                 item { 
                                     Spacer(modifier = Modifier.height(12.dp))
                                     Text("AI Copilot Policy", color = T_TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
@@ -1526,6 +1605,23 @@ fun MissionTerminalCard(
                                 }
                             }
                             
+                            val overrideConditions = overrideAutoConditions
+                                .split("\n", ";", "/")
+                                .map { it.trim() }
+                                .filter { it.isNotBlank() }
+                                .distinct()
+                            val autoValidation = mcValidateAutoTrading(
+                                enabled = overrideAutoTrading,
+                                conditions = overrideConditions,
+                                entryPrice = mission.entryPrice,
+                                target = overrideTp3.ifBlank { overrideTp2.ifBlank { overrideTp1.ifBlank { mission.target } } },
+                                stopLoss = overrideSl.ifBlank { mission.manualStopLoss ?: mission.stopLoss },
+                                isLong = isLong
+                            )
+                            if (overrideAutoTrading) {
+                                newLogs.add("AUTO-TRADING OVERRIDE: ${autoValidation.first}")
+                                autoValidation.second?.let { newLogs.add("AUTO-TRADING VALIDATION: $it") }
+                            }
                             val updatedLog = (mission.missionHistoryLog + newLogs).takeLast(20)
 
                             val updatedMission = mission.copy(
@@ -1539,6 +1635,10 @@ fun MissionTerminalCard(
                                 riskProfile = overrideRisk.ifBlank { null },
                                 positionSize = overrideAlloc.ifBlank { null },
                                 copilotMode = aiPolicy,
+                                autoCloseEnabled = overrideAutoTrading,
+                                autoCloseConditions = overrideConditions,
+                                conditionValidity = autoValidation.first,
+                                conditionInvalidReason = autoValidation.second,
                                 missionHistoryLog = updatedLog
                             )
                             viewModel.updateMission(updatedMission)

@@ -1191,12 +1191,12 @@ private fun OracleMetadataTile(
 ) {
     Column(
         modifier = modifier
-            .heightIn(min = 44.dp)
+            .heightIn(min = 58.dp)
             .background(LiveRadarTileDark, RoundedCornerShape(10.dp))
             .border(0.9.dp, borderColor, RoundedCornerShape(10.dp))
             .padding(horizontal = 8.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = title,
@@ -1477,10 +1477,10 @@ private fun BetaGuardMiniTile(
 
     Column(
         modifier = modifier
-            .heightIn(min = 64.dp)
+            .heightIn(min = 56.dp)
             .background(LiveRadarTileDark, RoundedCornerShape(9.dp))
             .border(0.85.dp, borderBrush, RoundedCornerShape(9.dp))
-            .padding(horizontal = 7.dp, vertical = 7.dp),
+            .padding(horizontal = 7.dp, vertical = 5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

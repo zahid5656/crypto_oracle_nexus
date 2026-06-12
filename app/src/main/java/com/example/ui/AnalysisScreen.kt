@@ -1089,8 +1089,8 @@ fun StartTradeFlow(
         isBengali && highConfidence && isLong -> "উচ্চ আস্থা | এন্ট্রি যাচাই"
         isBengali && highConfidence && !isLong -> "উচ্চ আস্থা | শর্ট যাচাই"
         isBengali && !highConfidence -> "সতর্কভাবে যাচাই করুন"
-        !isBengali && highConfidence -> "HIGH CONFIDENCE | VERIFY ENTRY |"
-        else -> "REVIEW CAREFULLY | VERIFY ENTRY |"
+        !isBengali && highConfidence -> "HIGH CONFIDENCE\n| VERIFY ENTRY |"
+        else -> "REVIEW CAREFULLY\n| VERIFY ENTRY |"
     }
 
     val verdictText = when {
@@ -1151,6 +1151,9 @@ fun StartTradeFlow(
     var setupAllocation by remember(mission.id) { mutableStateOf("") }
     var setupRiskProfile by remember(mission.id) { mutableStateOf(if (highConfidence) "BALANCED" else "CONSERVATIVE") }
     var setupRemark by remember(mission.id) { mutableStateOf("AUTO-FILLED FROM SIGNAL PRO") }
+    var setupAutoTradingEnabled by remember(mission.id) { mutableStateOf(false) }
+    var setupAutoConditions by remember(mission.id) { mutableStateOf("") }
+
 
     fun nullableSetupValue(value: String): String? = value.trim().takeIf { it.isNotBlank() }
     fun setupTargetsText(): String {
@@ -1161,6 +1164,45 @@ fun StartTradeFlow(
             .joinToString(" / ")
             .ifBlank { mission.targets }
     }
+
+    fun normalizedAutoConditions(): List<String> {
+        return setupAutoConditions
+            .split("\n", ";", "/")
+            .map { it.trim().uppercase() }
+            .filter { it.isNotBlank() }
+            .distinct()
+    }
+
+    fun numericSetupValue(value: String): Double? {
+        return value
+            .replace("$", "")
+            .replace(",", "")
+            .trim()
+            .toDoubleOrNull()
+    }
+
+    fun autoTradingValidation(): Pair<String, String?> {
+        if (!setupAutoTradingEnabled) return "INACTIVE" to "Auto-trading disabled by user."
+        val conditions = normalizedAutoConditions()
+        if (conditions.isEmpty()) return "INVALID" to "Auto-trading is active but no condition was provided."
+        val entry = livePrice.takeIf { it > 0.0 } ?: mission.entryPrice
+        val targetValue = numericSetupValue(setupTarget)
+        val slValue = numericSetupValue(setupSl1)
+        if (entry <= 0.0) return "INVALID" to "Entry price is missing or invalid."
+        if (targetValue == null || targetValue <= 0.0) return "INVALID" to "Target price is missing or invalid."
+        if (slValue == null || slValue <= 0.0) return "INVALID" to "SL1 / stop loss is missing or invalid."
+        val isLongSetup = mission.type.equals("LONG", ignoreCase = true) || mission.type.equals("BUY", ignoreCase = true)
+        if (isLongSetup && targetValue <= entry) return "INVALID" to "LONG target must be above entry."
+        if (isLongSetup && slValue >= entry) return "INVALID" to "LONG stop loss must be below entry."
+        if (!isLongSetup && targetValue >= entry) return "INVALID" to "SHORT target must be below entry."
+        if (!isLongSetup && slValue <= entry) return "INVALID" to "SHORT stop loss must be above entry."
+        val allowedKeywords = listOf("TP", "TARGET", "STOP", "SL", "ROI", "PNL", "PRICE", "TRAIL", "TIME", "BREAK", "AUTO")
+        val unsupported = conditions.filter { condition -> allowedKeywords.none { condition.contains(it) } }
+        if (unsupported.isNotEmpty()) return "INVALID" to "Unsupported auto-trading condition: ${unsupported.first()}"
+        return "VALID" to null
+    }
+
+    val autoValidation = autoTradingValidation()
 
     val syncedMission = mission.copy(
         targets = setupTargetsText(),
@@ -1179,10 +1221,10 @@ fun StartTradeFlow(
         setupStatus = if (setupTarget.isNotBlank() && setupSl1.isNotBlank()) "READY" else "INCOMPLETE SETUP",
         setupRiskReward = null,
         copilotMode = "ASSIST ONLY",
-        autoCloseEnabled = false,
-        autoCloseConditions = emptyList(),
-        conditionValidity = "N/A",
-        conditionInvalidReason = "Auto-close disabled by user."
+        autoCloseEnabled = setupAutoTradingEnabled,
+        autoCloseConditions = normalizedAutoConditions(),
+        conditionValidity = autoValidation.first,
+        conditionInvalidReason = autoValidation.second
     )
 
     if (showDecisionBrief) {
@@ -1250,69 +1292,24 @@ fun StartTradeFlow(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedButton(
-                            onClick = {
-                                showDecisionBrief = false
-                                step = 2
-                            },
-                            border = BorderStroke(1.dp, CryptoCyan.copy(alpha = 0.72f)),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = CryptoCyan),
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(1f).height(46.dp)
-                        ) {
-                            Text(
-                                text = if (isBengali) "সেটআপ সিগন্যাল" else "SIGNAL SETUP",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Black,
-                                maxLines = 1,
-                                softWrap = false,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-
-                        Button(
-                            onClick = {
-                                showDecisionBrief = false
-                                step = 1
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = CryptoGreen, contentColor = DarkBackground),
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(1f).height(46.dp)
-                        ) {
-                            Text(
-                                text = if (isBengali) "সিগন্যাল নিন" else "ACCEPT SIGNAL",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Black,
-                                maxLines = 1,
-                                softWrap = false,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-
-                    TextButton(
-                        onClick = { showDecisionBrief = false },
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    Button(
+                        onClick = {
+                            showDecisionBrief = false
+                            step = 1
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = CryptoGreen, contentColor = DarkBackground),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth().height(46.dp)
                     ) {
                         Text(
-                            text = if (isBengali) "বন্ধ করুন" else "CLOSE",
-                            color = TextSecondary,
+                            text = if (isBengali) "সিগন্যাল নিন" else "ACCEPT SIGNAL",
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.6.sp
+                            fontWeight = FontWeight.Black,
+                            maxLines = 1,
+                            softWrap = false,
+                            textAlign = TextAlign.Center
                         )
                     }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-            }
-        }
-    }
 
     if (step == 2) {
         ModalBottomSheet(
@@ -1353,6 +1350,52 @@ fun StartTradeFlow(
                 OutlinedTextField(value = setupAllocation, onValueChange = { setupAllocation = it }, label = { Text("ALLOCATION") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 OutlinedTextField(value = setupRiskProfile, onValueChange = { setupRiskProfile = it }, label = { Text("RISK PROFILE") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 OutlinedTextField(value = setupRemark, onValueChange = { setupRemark = it }, label = { Text("REMARK") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
+
+                Text(
+                    text = "AUTO-TRADING VALIDITY",
+                    color = CryptoCyan,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 0.7.sp
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(
+                        onClick = { setupAutoTradingEnabled = false },
+                        border = BorderStroke(1.dp, if (!setupAutoTradingEnabled) TextSecondary else BorderColor),
+                        modifier = Modifier.weight(1f)
+                    ) { Text("INACTIVE", color = if (!setupAutoTradingEnabled) TextSecondary else TextMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                    OutlinedButton(
+                        onClick = { setupAutoTradingEnabled = true },
+                        border = BorderStroke(1.dp, if (setupAutoTradingEnabled) CryptoCyan else BorderColor),
+                        modifier = Modifier.weight(1f)
+                    ) { Text("ACTIVE", color = if (setupAutoTradingEnabled) CryptoCyan else TextMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                }
+                if (setupAutoTradingEnabled) {
+                    OutlinedTextField(
+                        value = setupAutoConditions,
+                        onValueChange = { setupAutoConditions = it },
+                        label = { Text("AUTO-TRADING CONDITIONS") },
+                        placeholder = { Text("Example: TP1 / SL1 / ROI > 2 / TRAILING STOP") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 2
+                    )
+                }
+                val previewValidation = autoTradingValidation()
+                Text(
+                    text = "AUTO-TRADING STATUS: ${previewValidation.first}${previewValidation.second?.let { " — $it" } ?: ""}",
+                    color = when (previewValidation.first) {
+                        "VALID" -> CryptoGreen
+                        "INVALID" -> CryptoRedText
+                        else -> TextSecondary
+                    },
+                    fontSize = 11.sp,
+                    lineHeight = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1533,7 +1576,7 @@ fun StartTradeFlow(
                     )
                 )
                 .border(0.8.dp, CryptoCyan.copy(alpha = 0.66f), RoundedCornerShape(10.dp))
-                .clickable { showDecisionBrief = true }
+                .clickable { step = 2 }
                 .padding(horizontal = 8.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -1544,7 +1587,7 @@ fun StartTradeFlow(
                 color = Color(0xFFF4F8FF),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
-                lineHeight = 12.sp,
+                lineHeight = 12.5.sp,
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
         }
