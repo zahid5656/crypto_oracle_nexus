@@ -1034,6 +1034,7 @@ fun StartTradeFlow(
     var showDecisionBrief by remember { mutableStateOf(false) }
     val isBengali by viewModel.isBengali.collectAsState()
     val decisionBriefSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val setupSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val highConfidence = mission.confidence >= 85
     val isLong = mission.type.uppercase() == "LONG"
@@ -1042,8 +1043,8 @@ fun StartTradeFlow(
         isBengali && highConfidence && isLong -> "উচ্চ আস্থা | এন্ট্রি যাচাই"
         isBengali && highConfidence && !isLong -> "উচ্চ আস্থা | শর্ট যাচাই"
         isBengali && !highConfidence -> "সতর্কভাবে যাচাই করুন"
-        !isBengali && highConfidence -> "High Confidence | Verify Entry"
-        else -> "Review Carefully | Verify Entry"
+        !isBengali && highConfidence -> "HIGH CONFIDENCE | VERIFY ENTRY"
+        else -> "REVIEW CAREFULLY | VERIFY ENTRY"
     }
 
     val verdictText = when {
@@ -1080,6 +1081,63 @@ fun StartTradeFlow(
     } else {
         "AI assists decision-making; the final trading decision is yours."
     }
+
+    val parsedSignalTargets = remember(mission.targets) {
+        mission.targets
+            .split("/")
+            .map { it.trim() }
+            .filter { it.isNotBlank() && !it.equals("N/A", ignoreCase = true) && !it.equals("NOT SET", ignoreCase = true) }
+    }
+    val defaultTp1 = parsedSignalTargets.getOrNull(0).orEmpty()
+    val defaultTp2 = parsedSignalTargets.getOrNull(1).orEmpty()
+    val defaultTp3 = parsedSignalTargets.getOrNull(2).orEmpty()
+    val defaultTarget = parsedSignalTargets.lastOrNull().orEmpty()
+    val defaultStopLoss = mission.stopLoss.takeIf { it.isNotBlank() && !it.equals("N/A", ignoreCase = true) && !it.equals("NOT SET", ignoreCase = true) }.orEmpty()
+    val defaultLeverage = if (mission.marketType.contains("Futures", ignoreCase = true)) "NOT SET" else "SPOT / 1X"
+
+    var setupTarget by remember(mission.id, mission.targets, mission.stopLoss) { mutableStateOf(defaultTarget) }
+    var setupTp1 by remember(mission.id, mission.targets, mission.stopLoss) { mutableStateOf(defaultTp1) }
+    var setupTp2 by remember(mission.id, mission.targets, mission.stopLoss) { mutableStateOf(defaultTp2) }
+    var setupTp3 by remember(mission.id, mission.targets, mission.stopLoss) { mutableStateOf(defaultTp3) }
+    var setupSl1 by remember(mission.id, mission.targets, mission.stopLoss) { mutableStateOf(defaultStopLoss) }
+    var setupSl2 by remember(mission.id, mission.targets, mission.stopLoss) { mutableStateOf("") }
+    var setupLeverage by remember(mission.id, mission.marketType) { mutableStateOf(defaultLeverage) }
+    var setupAllocation by remember(mission.id) { mutableStateOf("") }
+    var setupRiskProfile by remember(mission.id) { mutableStateOf(if (highConfidence) "BALANCED" else "CONSERVATIVE") }
+    var setupRemark by remember(mission.id) { mutableStateOf("AUTO-FILLED FROM SIGNAL PRO") }
+
+    fun nullableSetupValue(value: String): String? = value.trim().takeIf { it.isNotBlank() }
+    fun setupTargetsText(): String {
+        return listOf(setupTp1, setupTp2, setupTp3, setupTarget)
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .distinct()
+            .joinToString(" / ")
+            .ifBlank { mission.targets }
+    }
+
+    val syncedMission = mission.copy(
+        targets = setupTargetsText(),
+        stopLoss = setupSl1.ifBlank { mission.stopLoss },
+        target = nullableSetupValue(setupTarget),
+        tp1 = nullableSetupValue(setupTp1),
+        tp2 = nullableSetupValue(setupTp2),
+        tp3 = nullableSetupValue(setupTp3),
+        manualStopLoss = nullableSetupValue(setupSl1),
+        sl2 = nullableSetupValue(setupSl2),
+        leverage = nullableSetupValue(setupLeverage),
+        positionSize = nullableSetupValue(setupAllocation),
+        riskProfile = nullableSetupValue(setupRiskProfile),
+        setupRemark = nullableSetupValue(setupRemark),
+        setupMode = if (setupTarget.isNotBlank() || setupTp1.isNotBlank() || setupSl1.isNotBlank()) "RECOMMENDED SETUP" else mission.setupMode,
+        setupStatus = if (setupTarget.isNotBlank() && setupSl1.isNotBlank()) "READY" else "INCOMPLETE SETUP",
+        setupRiskReward = null,
+        copilotMode = "ASSIST ONLY",
+        autoCloseEnabled = false,
+        autoCloseConditions = emptyList(),
+        conditionValidity = "N/A",
+        conditionInvalidReason = "Auto-close disabled by user."
+    )
 
     if (showDecisionBrief) {
         ModalBottomSheet(
@@ -1141,36 +1199,135 @@ fun StartTradeFlow(
                     lineHeight = 16.sp
                 )
 
-                Row(
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    TextButton(
-                        onClick = { showDecisionBrief = false },
-                        modifier = Modifier.weight(1f)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = if (isBengali) "বন্ধ করুন" else "Close",
-                            color = TextSecondary
-                        )
+                        OutlinedButton(
+                            onClick = {
+                                showDecisionBrief = false
+                                step = 2
+                            },
+                            border = BorderStroke(1.dp, CryptoCyan.copy(alpha = 0.72f)),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = CryptoCyan),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f).height(46.dp)
+                        ) {
+                            Text(
+                                text = if (isBengali) "সেটআপ সিগন্যাল" else "SIGNAL SETUP",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                maxLines = 1,
+                                softWrap = false,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                showDecisionBrief = false
+                                step = 1
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = CryptoGreen, contentColor = DarkBackground),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f).height(46.dp)
+                        ) {
+                            Text(
+                                text = if (isBengali) "সিগন্যাল নিন" else "ACCEPT SIGNAL",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                maxLines = 1,
+                                softWrap = false,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
 
-                    Button(
-                        onClick = {
-                            showDecisionBrief = false
-                            step = 1
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = CryptoGreen),
-                        modifier = Modifier.weight(1f)
+                    TextButton(
+                        onClick = { showDecisionBrief = false },
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
                         Text(
-                            text = if (isBengali) "সিগন্যাল নিন" else "Accept Signal",
-                            color = DarkBackground,
-                            fontWeight = FontWeight.Black
+                            text = if (isBengali) "বন্ধ করুন" else "CLOSE",
+                            color = TextSecondary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.6.sp
                         )
                     }
                 }
 
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+
+    if (step == 2) {
+        ModalBottomSheet(
+            onDismissRequest = { step = 0 },
+            sheetState = setupSheetState,
+            containerColor = Color(0xFF030712),
+            contentColor = TextPrimary
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.92f)
+                    .verticalScroll(rememberScrollState())
+                    .navigationBarsPadding()
+                    .padding(horizontal = 18.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = if (isBengali) "সিগন্যাল সেটআপ" else "SIGNAL SETUP",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Black,
+                    color = CryptoCyan
+                )
+                Text(
+                    text = if (isBengali) "বর্তমান সিগন্যাল থেকে Target, TP এবং SL অটো-ফিল করা হয়েছে।" else "Auto-filled from the current signal. Review before accepting.",
+                    fontSize = 12.sp,
+                    color = TextSecondary,
+                    lineHeight = 16.sp
+                )
+
+                OutlinedTextField(value = setupTarget, onValueChange = { setupTarget = it }, label = { Text("TARGET") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = setupTp1, onValueChange = { setupTp1 = it }, label = { Text("TP1") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = setupTp2, onValueChange = { setupTp2 = it }, label = { Text("TP2") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = setupTp3, onValueChange = { setupTp3 = it }, label = { Text("TP3") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = setupSl1, onValueChange = { setupSl1 = it }, label = { Text("SL1 / STOP LOSS") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = setupSl2, onValueChange = { setupSl2 = it }, label = { Text("SL2") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = setupLeverage, onValueChange = { setupLeverage = it }, label = { Text("LEVERAGE") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = setupAllocation, onValueChange = { setupAllocation = it }, label = { Text("ALLOCATION") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = setupRiskProfile, onValueChange = { setupRiskProfile = it }, label = { Text("RISK PROFILE") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = setupRemark, onValueChange = { setupRemark = it }, label = { Text("REMARK") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = { step = 0 },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(if (isBengali) "বন্ধ করুন" else "CLOSE", color = TextSecondary, fontWeight = FontWeight.Bold)
+                    }
+                    Button(
+                        onClick = { step = 1 },
+                        colors = ButtonDefaults.buttonColors(containerColor = CryptoGreen, contentColor = DarkBackground),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.weight(1f).height(46.dp)
+                    ) {
+                        Text(if (isBengali) "সিগন্যাল নিন" else "ACCEPT SIGNAL", fontWeight = FontWeight.Black)
+                    }
+                }
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
@@ -1225,10 +1382,13 @@ fun StartTradeFlow(
                 Button(
                     onClick = {
                         viewModel.startMission(
-                            mission.copy(
+                            syncedMission.copy(
                                 id = java.util.UUID.randomUUID().toString(),
                                 entryPrice = verifiedEntryLocked,
-                                startTime = System.currentTimeMillis()
+                                originalSignalEntry = if (mission.originalSignalEntry > 0.0) mission.originalSignalEntry else mission.entryPrice,
+                                currentPrice = livePrice,
+                                startTime = System.currentTimeMillis(),
+                                lastUpdated = System.currentTimeMillis()
                             )
                         )
                         viewModel.sendLocalAlert("Mission Started", "AI intelligence system successfully started monitoring ${mission.coinSymbol}")

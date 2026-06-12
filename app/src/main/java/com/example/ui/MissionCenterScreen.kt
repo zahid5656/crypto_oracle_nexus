@@ -32,8 +32,10 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.absoluteValue
 
+import com.example.ui.theme.DarkBackground
+
 // Terminal Colors - Institutional Grade
-private val T_Bg = Color(0xFF000000)
+private val T_Bg = DarkBackground
 private val T_Surface = Color(0xFF111112)
 private val T_Border = Color(0xFF1C1C1E)
 private val T_BorderHigh = Color(0xFF2C2C2E)
@@ -407,7 +409,7 @@ fun HeaderSummaryDashboard(viewModel: CryptoViewModel, isBengali: Boolean) {
         Spacer(modifier = Modifier.height(8.dp))
         
         Row(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.weight(1.5f)) {
                 Text("ACTIVE", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(totalActive.toString(), color = T_TextPrimary, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
@@ -929,7 +931,7 @@ fun MissionTerminalCard(
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("ENTRY", String.format("%.4f", entryVal), T_TextPrimary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                CompactDataRow("SETUP", sMode.replace("OVERRIDDEN", "").replace("(", "").replace(")", "").replace("RECOMMENDED SETUP", "RECOMMENDED").trim(), T_Cyan)
+                CompactDataRow("SETUP", sMode.replace("OVERRIDDEN", "").replace("CUSTOM", "").replace("(", "").replace(")", "").replace("RECOMMENDED SETUP", "RECOMMENDED").trim(), T_Cyan)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 val overrideCount = if (sMode.contains("OVERRIDDEN") || sMode.contains("CUSTOM")) "1" else "0" // Simulated override count
                 CompactDataRow("OVERRIDE", overrideCount, T_TextPrimary)
