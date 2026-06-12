@@ -186,7 +186,6 @@ fun AnalyzingTelemetryScreen(stepMessage: String) {
     }
 }
 
-@Composable
 private fun signalProTimeframeLabel(index: Int): String = when (index) {
     0 -> "6H"
     1 -> "12H"
@@ -195,6 +194,7 @@ private fun signalProTimeframeLabel(index: Int): String = when (index) {
     else -> "7D"
 }
 
+@Composable
 fun PredictionDashboard(
     data: OracleAnalysisResponse,
     viewModel: CryptoViewModel
