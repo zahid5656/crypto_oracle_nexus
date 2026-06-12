@@ -47,6 +47,52 @@ private val T_Red = Color(0xFFFF3B30)
 private val T_Cyan = Color(0xFF32ADE6)  
 private val T_Gold = Color(0xFFFFCC00)  
 
+
+private fun mcMissionDirectionMultiplier(mission: com.example.model.Mission): Double {
+    val isLong = mission.type.equals("LONG", ignoreCase = true) || mission.type.equals("BUY", ignoreCase = true)
+    return if (isLong) 1.0 else -1.0
+}
+
+private fun mcMissionRoiPct(mission: com.example.model.Mission): Double {
+    if (mission.entryPrice <= 0.0) return 0.0
+    val rawPct = ((mission.currentPrice - mission.entryPrice) / mission.entryPrice) * 100.0
+    return rawPct * mcMissionDirectionMultiplier(mission)
+}
+
+private fun mcMissionPnlUsd(mission: com.example.model.Mission): Double {
+    if (mission.entryPrice <= 0.0) return 0.0
+    val notional = mission.positionSize
+        ?.replace("$", "")
+        ?.replace(",", "")
+        ?.trim()
+        ?.toDoubleOrNull()
+    val quantity = if (notional != null && notional > 0.0) notional / mission.entryPrice else 1.0
+    return (mission.currentPrice - mission.entryPrice) * quantity * mcMissionDirectionMultiplier(mission)
+}
+
+private fun mcMissionRiskState(mission: com.example.model.Mission): String {
+    val roi = mcMissionRoiPct(mission)
+    return when {
+        roi <= -5.0 -> "CRITICAL"
+        roi < 0.0 -> "WARNING"
+        else -> "ACTIVE"
+    }
+}
+
+private fun mcFormatUsd(value: Double): String {
+    return "$" + String.format(java.util.Locale.US, "%,.2f", value)
+}
+
+private fun mcSignedUsd(value: Double): String {
+    val sign = if (value < 0.0) "-" else "+"
+    return sign + "$" + String.format(java.util.Locale.US, "%,.2f", kotlin.math.abs(value))
+}
+
+private fun mcSignedPct(value: Double): String {
+    val sign = if (value < 0.0) "-" else "+"
+    return sign + String.format(java.util.Locale.US, "%.2f", kotlin.math.abs(value)) + "%"
+}
+
 @Composable
 fun MissionCenterScreen(
     viewModel: CryptoViewModel,
@@ -63,11 +109,11 @@ fun MissionCenterScreen(
     ) {
         item {
             MissionTerminalHeaderBlock(viewModel)
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             HeaderSummaryDashboard(viewModel, isBengali)
-            Spacer(modifier = Modifier.height(12.dp))
-            EscalationPolicyCard(isBengali)
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            EscalationPolicyCard(viewModel, isBengali)
+            Spacer(modifier = Modifier.height(10.dp))
         }
 
         item {
@@ -93,6 +139,21 @@ fun MissionCenterScreen(
 
 @Composable
 fun MissionTerminalHeaderBlock(viewModel: CryptoViewModel) {
+    val missions by viewModel.activeMissions.collectAsState()
+    val headerWarnings = missions.count { mcMissionRiskState(it) == "WARNING" }
+    val headerCriticals = missions.count { mcMissionRiskState(it) == "CRITICAL" }
+    val guardianStatus = when {
+        missions.isEmpty() -> "STANDBY"
+        headerCriticals > 0 -> "CRITICAL"
+        headerWarnings > 0 -> "WARNING"
+        else -> "ACTIVE"
+    }
+    val guardianStatusColor = when (guardianStatus) {
+        "ACTIVE" -> T_Green
+        "WARNING" -> T_Gold
+        "CRITICAL" -> T_Red
+        else -> T_TextSecondary
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -139,15 +200,15 @@ fun MissionTerminalHeaderBlock(viewModel: CryptoViewModel) {
         ) {
             Column {
                 Text(
-                    text = "AI TRADE GUARDIAN",
+                    text = "AI COPILOT TRADE GUARDIAN",
                     color = T_TextMuted,
-                    fontSize = 9.sp,
+                    fontSize = 8.sp,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "ACTIVE",
-                    color = T_Green,
+                    text = guardianStatus,
+                    color = guardianStatusColor,
                     fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold
@@ -377,17 +438,12 @@ fun HeaderSummaryDashboard(viewModel: CryptoViewModel, isBengali: Boolean) {
             
             if (m.marketType.uppercase() == "FUTURES") futuresCount++ else spotCount++
 
-            if (diffPct <= -5.0) activeCriticals++
-            else if (diffPct < 0.0) activeWarnings++
-            
-            val positionStr = m.positionSize?.replace("$", "")?.replace(",", "")?.toDoubleOrNull()
-            if (positionStr != null) {
-                val qty = positionStr / m.entryPrice
-                val usdAmount = (m.currentPrice - m.entryPrice) * qty * typeMult
-                aggregateDollr += usdAmount
-            } else {
-                allHavePositionSize = false
+            when (mcMissionRiskState(m)) {
+                "CRITICAL" -> activeCriticals++
+                "WARNING" -> activeWarnings++
             }
+
+            aggregateDollr += mcMissionPnlUsd(m)
         }
         aggregatePct /= missions.size
     }
@@ -395,7 +451,7 @@ fun HeaderSummaryDashboard(viewModel: CryptoViewModel, isBengali: Boolean) {
     val pnlColor = if (aggregatePct > 0) T_Green else if (aggregatePct < 0) T_Red else T_TextSecondary
     val pnlSign = if (aggregatePct > 0) "+" else ""
     val dollrSign = if (aggregateDollr > 0) "+" else ""
-    val dollrString = if (allHavePositionSize && missions.isNotEmpty()) "$dollrSign$${String.format("%.2f", aggregateDollr)}" else "N/A"
+    val dollrString = mcSignedUsd(aggregateDollr)
     
     Column(
         modifier = Modifier
@@ -403,10 +459,10 @@ fun HeaderSummaryDashboard(viewModel: CryptoViewModel, isBengali: Boolean) {
             .padding(horizontal = 12.dp)
             .background(T_Surface, RoundedCornerShape(4.dp))
             .border(1.dp, T_BorderHigh, RoundedCornerShape(4.dp))
-            .padding(12.dp)
+            .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
         Text("ACTIVE MISSION SUMMARY", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         
         Row(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.weight(1.5f)) {
@@ -426,13 +482,13 @@ fun HeaderSummaryDashboard(viewModel: CryptoViewModel, isBengali: Boolean) {
             }
         }
         
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         
         Row(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.weight(1.5f)) {
                 Text("AGGREGATE PnL", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                 Spacer(modifier = Modifier.height(2.dp))
-                val pnlValText = if (missions.isEmpty()) "+$0.00 (+0.00%)" else if (dollrString == "N/A") "$pnlSign${String.format("%.2f", aggregatePct)}%" else "$dollrString ($pnlSign${String.format("%.2f", aggregatePct)}%)"
+                val pnlValText = if (missions.isEmpty()) "+$0.00 (+0.00%)" else "$dollrString (${mcSignedPct(aggregatePct)})"
                 Text(pnlValText, color = pnlColor, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -459,28 +515,76 @@ fun SummaryStatBox(label: String, value: String, valueColor: Color, modifier: Mo
 }
 
 @Composable
-fun EscalationPolicyCard(isBengali: Boolean) {
+fun EscalationPolicyCard(viewModel: CryptoViewModel, isBengali: Boolean) {
+    val missions by viewModel.activeMissions.collectAsState()
+    val warningCount = missions.count { mcMissionRiskState(it) == "WARNING" }
+    val criticalCount = missions.count { mcMissionRiskState(it) == "CRITICAL" }
+    val executionState = when {
+        missions.isEmpty() -> "STANDBY"
+        criticalCount > 0 -> "CRITICAL"
+        warningCount > 0 -> "WARNING"
+        else -> "MATCH"
+    }
+    val executionColor = when (executionState) {
+        "MATCH" -> T_Green
+        "WARNING" -> T_Gold
+        "CRITICAL" -> T_Red
+        else -> T_TextSecondary
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
             .background(T_Surface, RoundedCornerShape(4.dp))
             .border(1.dp, T_BorderHigh, RoundedCornerShape(4.dp))
-            .padding(8.dp)
+            .padding(horizontal = 8.dp, vertical = 7.dp)
     ) {
-        Text("AI COPILOT EXECUTION STATUS", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(4.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Box(modifier = Modifier.weight(1f).background(T_Green.copy(alpha = 0.1f), RoundedCornerShape(2.dp)).border(0.5.dp, T_Green, RoundedCornerShape(2.dp)).padding(4.dp), contentAlignment = Alignment.Center) {
-                Text("MATCH", color = T_Green, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            }
-            Box(modifier = Modifier.weight(1f).background(T_Gold.copy(alpha = 0.1f), RoundedCornerShape(2.dp)).border(0.5.dp, T_Gold, RoundedCornerShape(2.dp)).padding(4.dp), contentAlignment = Alignment.Center) {
-                Text("WARNING", color = T_Gold, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            }
-            Box(modifier = Modifier.weight(1f).background(T_Red.copy(alpha = 0.1f), RoundedCornerShape(2.dp)).border(0.5.dp, T_Red, RoundedCornerShape(2.dp)).padding(4.dp), contentAlignment = Alignment.Center) {
-                Text("CRITICAL", color = T_Red, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "AI COPILOT EXECUTION STATUS",
+                color = T_TextMuted,
+                fontSize = 9.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                executionState,
+                color = executionColor,
+                fontSize = 9.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold
+            )
         }
+        Spacer(modifier = Modifier.height(5.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            McExecutionStateChip("MATCH", T_Green, executionState == "MATCH", Modifier.weight(1f))
+            McExecutionStateChip("WARNING", T_Gold, executionState == "WARNING", Modifier.weight(1f))
+            McExecutionStateChip("CRITICAL", T_Red, executionState == "CRITICAL", Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun McExecutionStateChip(label: String, color: Color, isActive: Boolean, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .background(color.copy(alpha = if (isActive) 0.18f else 0.045f), RoundedCornerShape(2.dp))
+            .border(0.5.dp, if (isActive) color else T_BorderHigh, RoundedCornerShape(2.dp))
+            .padding(vertical = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            label,
+            color = if (isActive) color else T_TextMuted,
+            fontSize = 9.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
@@ -749,17 +853,11 @@ fun MissionTerminalCard(
     }
     
     // Calculate PnL if possible
-    val positionStr = mission?.positionSize?.replace("$", "")?.replace(",", "")?.toDoubleOrNull()
-    val pnlVal = if (positionStr != null && entryVal != 0.0) {
-        val typeMult = if (isLong) 1.0 else -1.0
-        val qty = positionStr / entryVal
-        (currentVal - entryVal) * qty * typeMult
-    } else null
-    val pnlText = if (pnlVal != null) {
-        val sign = if (pnlVal > 0) "+" else ""
-        "$sign$${String.format("%.2f", pnlVal)}"
-    } else "N/A"
-    val pnlTextColor = if (pnlVal != null && pnlVal > 0) T_Green else if (pnlVal != null && pnlVal < 0) T_Red else T_TextSecondary
+    val pnlVal = mission?.let { mcMissionPnlUsd(it) } ?: if (entryVal != 0.0) {
+        (currentVal - entryVal) * (if (isLong) 1.0 else -1.0)
+    } else 0.0
+    val pnlText = mcSignedUsd(pnlVal)
+    val pnlTextColor = if (pnlVal > 0.0) T_Green else if (pnlVal < 0.0) T_Red else T_TextSecondary
 
     val SpacingCompact = 4.dp
     val SpacingNormal = 8.dp
@@ -824,8 +922,8 @@ fun MissionTerminalCard(
         
         // MAIN SNAPSHOT SECTION
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingMedium)) {
-            val entryClean = String.format("%.4f", entryVal)
-            val liveClean = String.format("%.4f", currentVal)
+            val entryClean = mcFormatUsd(entryVal)
+            val liveClean = mcFormatUsd(currentVal)
             
             Row(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -902,17 +1000,31 @@ fun MissionTerminalCard(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(SpacingNormal))
+            Spacer(modifier = Modifier.height(SpacingCompact))
         }
         
         // TARGET PROGRESS
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = 4.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("TARGET PROGRESS", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 Text(targetProgressText, color = T_TextPrimary, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
-            Spacer(modifier = Modifier.height(SpacingCompact))
-            HorizontalDivider(color = T_BorderHigh, thickness = 0.5.dp)
+            Spacer(modifier = Modifier.height(3.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .clip(RoundedCornerShape(1.dp))
+                    .background(T_BorderHigh.copy(alpha = 0.65f))
+            ) {
+                val progressFraction = ((pctToTarget ?: 0).toFloat() / 100f).coerceIn(0f, 1f)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(progressFraction)
+                        .fillMaxHeight()
+                        .background(if (progressFraction >= 1f) T_Green else T_Cyan)
+                )
+            }
         }
         
         // INFO GRID
@@ -929,7 +1041,7 @@ fun MissionTerminalCard(
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("TP3", tp3?.replace("(?i)\\s*/\\s*SIGNAL FALLBACK".toRegex(), "") ?: "NOT SET", if (tp3 != null) T_Green else T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                CompactDataRow("ENTRY", String.format("%.4f", entryVal), T_TextPrimary)
+                CompactDataRow("ENTRY", mcFormatUsd(entryVal), T_TextPrimary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("SETUP", sMode.replace("OVERRIDDEN", "").replace("CUSTOM", "").replace("(", "").replace(")", "").replace("RECOMMENDED SETUP", "RECOMMENDED").trim(), T_Cyan)
                 Spacer(modifier = Modifier.height(SpacingCompact))
@@ -978,14 +1090,6 @@ fun MissionTerminalCard(
 
         // AUTO-TRADING & AI POLICY ROW
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
-            val isAutoActive = mission?.autoCloseEnabled == true
-            val isConditionValid = mission?.conditionValidity == "VALID"
-            val conditionStatus = if (isAutoActive) (if (isConditionValid) "VALID" else "INVALID") else "N/A"
-            val conditionColor = if (isAutoActive) { if (isConditionValid) T_Green else T_Red } else T_TextSecondary
-            
-            CompactDataRow("CONDITION", conditionStatus, conditionColor)
-            
-            Spacer(modifier = Modifier.height(SpacingCompact))
             val policyText = if (mission?.copilotMode?.contains("EXECUTION") == true) "ASSIST & EXECUTION" else "ASSIST ONLY"
             CompactDataRow("AI COPILOT POLICY", policyText, if (policyText == "ASSIST ONLY") T_Cyan else T_Gold)
             
@@ -1085,7 +1189,7 @@ fun MissionTerminalCard(
             }
         }
         
-        Spacer(modifier = Modifier.height(SpacingLarge))
+        Spacer(modifier = Modifier.height(SpacingMedium))
         
         if (!isHistory) {
             var showStopConfirm by remember { mutableStateOf(false) }
@@ -1148,25 +1252,25 @@ fun MissionTerminalCard(
                 horizontalArrangement = Arrangement.spacedBy(SpacingNormal)
             ) {
                 Box(
-                    modifier = Modifier.weight(1f).clickable { showDetails = true }.border(1.dp, T_BorderHigh, RoundedCornerShape(4.dp)).padding(vertical = 10.dp),
+                    modifier = Modifier.weight(1f).clickable { showDetails = true }.border(1.dp, T_BorderHigh, RoundedCornerShape(4.dp)).padding(vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(text = "DETAILS", color = T_TextPrimary, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
                 Box(
-                    modifier = Modifier.weight(1f).clickable { showOverride = true }.border(1.dp, T_BorderHigh, RoundedCornerShape(4.dp)).padding(vertical = 10.dp),
+                    modifier = Modifier.weight(1f).clickable { showOverride = true }.border(1.dp, T_BorderHigh, RoundedCornerShape(4.dp)).padding(vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(text = "OVERRIDE", color = T_TextPrimary, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
                 Box(
-                    modifier = Modifier.weight(1f).clickable { showStopConfirm = true }.background(T_TextPrimary, RoundedCornerShape(4.dp)).padding(vertical = 10.dp),
+                    modifier = Modifier.weight(1f).clickable { showStopConfirm = true }.background(T_TextPrimary, RoundedCornerShape(4.dp)).padding(vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(text = "CLOSE", color = T_Bg, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
             }
-            Spacer(modifier = Modifier.height(SpacingMedium))
+            Spacer(modifier = Modifier.height(SpacingCompact))
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium)
             ) {
@@ -1180,7 +1284,7 @@ fun MissionTerminalCard(
                     Text(text = "ABORT MISSION", color = T_Red.copy(alpha = 0.8f), fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
             }
-            Spacer(modifier = Modifier.height(SpacingMedium))
+            Spacer(modifier = Modifier.height(SpacingCompact))
             
             if (showDetails) {
                 AlertDialog(
@@ -1435,7 +1539,7 @@ fun TabButton(
             .clip(RoundedCornerShape(20.dp))
             .background(if (isSelected) T_Gold.copy(alpha = 0.2f) else Color.Transparent)
             .clickable { onClick() }
-            .padding(vertical = 10.dp),
+            .padding(vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(

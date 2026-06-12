@@ -187,6 +187,14 @@ fun AnalyzingTelemetryScreen(stepMessage: String) {
 }
 
 @Composable
+private fun signalProTimeframeLabel(index: Int): String = when (index) {
+    0 -> "6H"
+    1 -> "12H"
+    2 -> "24H"
+    3 -> "3D"
+    else -> "7D"
+}
+
 fun PredictionDashboard(
     data: OracleAnalysisResponse,
     viewModel: CryptoViewModel
@@ -952,6 +960,7 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
                             coinSymbol = coin.coinSymbol,
                             type = "LONG",
                             marketType = "Spot",
+                            signalTimeframe = signalProTimeframeLabel(timeframeIndex),
                             entryPrice = coin.currentPrice,
                             currentPrice = coin.currentPrice,
                             targets = formatPrice(projectedPrice),
@@ -1914,6 +1923,7 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoV
                             coinSymbol = coin.coinSymbol,
                             type = if (isLong) "LONG" else "SHORT",
                             marketType = "Futures",
+                            signalTimeframe = signalProTimeframeLabel(timeframeIndex),
                             entryPrice = coin.currentPrice,
                             currentPrice = coin.currentPrice,
                             targets = formatPrice(targetPrice),
@@ -2228,6 +2238,7 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int, viewModel: CryptoViewModel, 
                             coinSymbol = symbol,
                             type = if (isLong) "LONG" else "SHORT",
                             marketType = if (isFutures) "Futures" else "Spot",
+                            signalTimeframe = signalProTimeframeLabel(timeframeIndex),
                             entryPrice = entryPrice,
                             currentPrice = curPrice,
                             targets = formatPrice(projPrice),
