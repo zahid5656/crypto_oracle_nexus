@@ -1609,13 +1609,16 @@ fun StartTradeFlow(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "SIGNAL SETUP",
+                    text = recommendationText,
                     fontWeight = FontWeight.Black,
-                    fontSize = 11.sp,
+                    fontSize = 10.sp,
                     color = CryptoCyan,
-                    letterSpacing = 0.8.sp,
-                    maxLines = 1,
-                    softWrap = false
+                    letterSpacing = 0.45.sp,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    lineHeight = 12.5.sp,
+                    softWrap = true,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
             }
 

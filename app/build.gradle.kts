@@ -11,7 +11,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.aistudio.cryptooracle.pxmpzq"
+        applicationId = "com.titancryptoraclenexus.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
