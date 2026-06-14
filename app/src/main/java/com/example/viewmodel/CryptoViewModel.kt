@@ -569,4 +569,12 @@ class CryptoViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        webSocket?.cancel()
+        binanceSyncJob?.cancel()
+        radarSyncJob?.cancel()
+        scannerJob?.cancel()
+    }
 }

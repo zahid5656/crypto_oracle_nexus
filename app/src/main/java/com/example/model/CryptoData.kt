@@ -83,7 +83,7 @@ data class FuturesSignal(
     val momentumStrength: String = "HIGH",
     val liquidityStrength: String = "MEDIUM",
     val whyThisSignalEnglish: String = "Long-squeeze potential liquidations cleared at range low, leading to bullish order block validation under high buy momentum.",
-    val whyThisSignalBengali: String = "সীমার মধ্যে সর্বনিম্ন লেভেলে লং-স্কুইজ লিকুইডেশন সম্পন্ন হয়েছে, যার ফলে উচ্চ ক্রয় মোমেন্টামের অধীনে বুলিশ অর্ডার ব্লক সক্রিয় রয়েছে।",
+    val whyThisSignalBengali: String = "সীমার মধ্যে সর্বনিম্ন লেভেলে লং-স্কুইজ লিকুইডেশন সম্পন্ন হয়েছে, যার ফলে উচ্চ ক্রয় মোメントামের অধীনে বুলিশ অর্ডার ব্লক সক্রিয় রয়েছে।",
     val invalidationPrice: Double = 0.0,
     val isInvalidated: Boolean = false,
     val healthScore: Int = 75,
@@ -132,7 +132,7 @@ data class Mission(
     val stopLoss: String,
     val confidence: Int,
     val aiStatusEnglish: String = "Bullish Momentum Strong\nNo Immediate Risk Detected",
-    val aiStatusBengali: String = "বুলিশ মোমেন্টাম শক্তিশালী\nকোন তাৎক্ষণিক ঝুঁকি নেই",
+    val aiStatusBengali: String = "বুলিশ মোメントাম শক্তিশালী\nকোন তাৎক্ষণিক ঝুঁকি নেই",
     val isNegative: Boolean = false,
     val startTime: Long = System.currentTimeMillis(),
 

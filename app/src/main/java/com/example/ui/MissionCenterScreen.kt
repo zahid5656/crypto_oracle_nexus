@@ -1147,7 +1147,7 @@ fun MissionTerminalCard(
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("SL2", mission?.sl2?.replace("(?i)\\s*/\\s*SIGNAL FALLBACK".toRegex(), "") ?: "NOT SET", if (mission?.sl2 != null) T_Gold else T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                val levValue = (leverage?.uppercase() ?: if (isFutures) "NOT SET" else "1X").replace("SPOT / 1X", "1X").replace("SPOT", "1X")
+                val levValue = mcDisplayLeverage(leverage, isFutures)
                 CompactDataRow("LEVERAGE", levValue, T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("ALLOCATION", mission?.positionSize?.uppercase() ?: "NOT SET", T_TextPrimary)
