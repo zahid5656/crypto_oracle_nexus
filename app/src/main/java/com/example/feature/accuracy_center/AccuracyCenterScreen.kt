@@ -28,7 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.data.SignalEntity
+import com.example.core.database.SignalEntity
 import com.example.feature.mission_center.TabButton
 import com.example.ui.theme.*
 import com.example.viewmodel.CryptoViewModel

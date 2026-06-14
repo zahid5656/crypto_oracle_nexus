@@ -9,9 +9,9 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.data.AppDatabase
+import com.example.core.database.AppDatabase
 import com.example.data.GeminiClient
-import com.example.data.SignalEntity
+import com.example.core.database.SignalEntity
 import com.example.model.OracleAnalysisResponse
 import com.example.model.RadarAlert
 import com.example.model.Mission
