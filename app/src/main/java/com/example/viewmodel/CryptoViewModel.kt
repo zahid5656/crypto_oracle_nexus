@@ -13,7 +13,7 @@ import com.example.core.database.AppDatabase
 import com.example.data.GeminiClient
 import com.example.core.database.SignalEntity
 import com.example.model.OracleAnalysisResponse
-import com.example.model.RadarAlert
+import com.example.core.radar.RadarAlert
 import com.example.model.Mission
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

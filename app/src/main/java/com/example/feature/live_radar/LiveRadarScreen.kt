@@ -27,7 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.model.RadarAlert
+import com.example.core.radar.RadarAlert
 import com.example.feature.signal_pro.StartTradeFlow
 import com.example.ui.theme.*
 import com.example.viewmodel.CryptoViewModel

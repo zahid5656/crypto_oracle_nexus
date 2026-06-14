@@ -102,15 +102,6 @@ data class OracleAnalysisResponse(
     val deepInsights: List<DeepInsightItem> = emptyList()
 )
 
-data class RadarAlert(
-    val id: String,
-    val coinSymbol: String,
-    val eventType: String, // "VOLUME_EXPLOSION", "BREAKOUT", "MOMENTUM_SURGE", "TREND_REVERSAL"
-    val descriptionEnglish: String,
-    val descriptionBengali: String,
-    val magnitude: Double,
-    val timestamp: Long = System.currentTimeMillis()
-)
 
 data class Mission(
     val id: String = java.util.UUID.randomUUID().toString(),
