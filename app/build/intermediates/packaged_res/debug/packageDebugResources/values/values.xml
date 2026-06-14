@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Crypto Oracle Nexus</string>
+    <string name="language_bangla">বাংলা</string>
+    <string name="language_english">English</string>
+    <string name="language_show_bangla">বাংলায় দেখুন ➔</string>
+    <string name="language_show_english">Show English</string>
+</resources>

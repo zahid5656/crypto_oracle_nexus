@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.example.app-debug-43:/drawable_ic_crypto_oracle_logo_1780253119065.xml.flat",
+        "source": "com.example.app-main-45:/drawable/ic_crypto_oracle_logo_1780253119065.xml"
+    },
+    {
+        "merged": "com.example.app-debug-43:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.example.app-main-45:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.example.app-debug-43:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.example.app-main-45:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.example.app-debug-43:/drawable_ic_app_logo_ai.xml.flat",
+        "source": "com.example.app-main-45:/drawable/ic_app_logo_ai.xml"
+    }
+]

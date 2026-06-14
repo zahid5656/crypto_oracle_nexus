@@ -1,0 +1,7 @@
+com.example.app-pngs-0 /home/stranger/Desktop/refactor/package-by-feature-phase1/app/build/generated/res/pngs/debug
+com.example.app-updated_navigation_xml-1 /home/stranger/Desktop/refactor/package-by-feature-phase1/app/build/generated/updated_navigation_xml/debug
+com.example.app-packageDebugResources-2 /home/stranger/Desktop/refactor/package-by-feature-phase1/app/build/intermediates/incremental/debug/packageDebugResources/merged.dir
+com.example.app-packageDebugResources-3 /home/stranger/Desktop/refactor/package-by-feature-phase1/app/build/intermediates/incremental/debug/packageDebugResources/stripped.dir
+com.example.app-debug-4 /home/stranger/Desktop/refactor/package-by-feature-phase1/app/build/intermediates/merged_res/debug/mergeDebugResources
+com.example.app-debug-5 /home/stranger/Desktop/refactor/package-by-feature-phase1/app/src/debug/res
+com.example.app-main-6 /home/stranger/Desktop/refactor/package-by-feature-phase1/app/src/main/res

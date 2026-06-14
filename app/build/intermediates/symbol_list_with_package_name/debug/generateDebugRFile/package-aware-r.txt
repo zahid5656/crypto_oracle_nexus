@@ -1,0 +1,10 @@
+com.example
+drawable ic_app_logo_ai
+drawable ic_crypto_oracle_logo_1780253119065
+drawable ic_launcher_background
+drawable ic_launcher_foreground
+string app_name
+string language_bangla
+string language_english
+string language_show_bangla
+string language_show_english
