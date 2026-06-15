@@ -69,7 +69,7 @@ fun OracleFeedScreen(
         modifier = modifier
             .fillMaxSize()
             .background(T_Bg),
-        contentPadding = PaddingValues(bottom = 24.dp)
+        contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         item {
             TerminalHeaderBlock(viewModel)
@@ -125,7 +125,7 @@ fun TerminalHeaderBlock(viewModel: CryptoViewModel) {
         modifier = Modifier
             .fillMaxWidth()
             .background(T_Bg)
-            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -159,7 +159,7 @@ fun TerminalHeaderBlock(viewModel: CryptoViewModel) {
             TerminalClockWidget()
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -248,10 +248,10 @@ fun TopCoinsDenseTable(newsFeed: OracleAnalysisResponse, livePrices: Map<String,
         modifier = Modifier
             .fillMaxWidth()
             .background(T_Bg)
-            .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 12.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text("TICKER", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(0.3f))
@@ -302,7 +302,7 @@ fun DenseTickerRow(symbol: String, price: Double, changePct: Double) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 2.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -382,13 +382,13 @@ fun RealTimeDenseDashboard() {
         modifier = Modifier
             .fillMaxWidth()
             .background(T_Bg)
-            .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 12.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         if (isLoading) {
-            Text("CONNECTING TO BINANCE WSS...", color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.padding(vertical = 12.dp))
+            Text("CONNECTING TO BINANCE WSS...", color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.padding(vertical = 8.dp))
         } else {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text("ASSET", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(0.3f))
@@ -414,7 +414,7 @@ fun DeepInsightTerminalBlock(
             .clickable { onToggleLanguage() }
             .border(0.5.dp, T_BorderHigh, RectangleShape)
             .background(T_Bg)
-            .padding(12.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -452,7 +452,7 @@ fun DeepInsightTerminalBlock(
             )
         }
         
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
         
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -473,7 +473,7 @@ fun DeepInsightTerminalBlock(
             )
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         
         Text(
             text = if (isBengali) insight.whyBengali else insight.whyEnglish,
@@ -501,7 +501,7 @@ fun NewsTerminalBlock(article: NewsItem, isBengali: Boolean, onToggleLanguage: (
             .clickable { onToggleLanguage() }
             .border(0.5.dp, T_BorderHigh, RectangleShape)
             .background(T_Bg)
-            .padding(12.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -536,7 +536,7 @@ fun NewsTerminalBlock(article: NewsItem, isBengali: Boolean, onToggleLanguage: (
             }
         }
         
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         
         Text(
             text = title,
@@ -547,7 +547,7 @@ fun NewsTerminalBlock(article: NewsItem, isBengali: Boolean, onToggleLanguage: (
             fontFamily = FontFamily.SansSerif
         )
         
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
         
         Text(
             text = summary,
@@ -566,10 +566,10 @@ fun LiveCurrencyTerminalBlock(isBengali: Boolean, onToggleLanguage: () -> Unit) 
             .fillMaxWidth()
             .clickable { onToggleLanguage() }
             .background(T_Bg)
-            .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 12.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text("CCY", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(0.3f))
@@ -597,7 +597,7 @@ fun DenseCurrencyRow(code: String, name: String, rate: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 2.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
