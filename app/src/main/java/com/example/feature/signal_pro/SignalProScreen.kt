@@ -64,6 +64,9 @@ import kotlin.math.absoluteValue
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.shadow
 
 @Composable
 fun SignalProScreen(
@@ -355,11 +358,54 @@ fun PredictionDashboard(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_oracle_runtime_mark),
-                        contentDescription = "AI Oracle Modality Logo",
-                        modifier = Modifier.size(31.dp)
-                    )
+                    Box(
+                    modifier = Modifier
+                        .size(54.dp)
+                        .background(
+                            brush = Brush.radialGradient(
+                                colors = listOf(
+                                    Color(0x8822E6FF),
+                                    Color(0x4400D9FF),
+                                    Color(0x11080B11),
+                                    Color.Transparent
+                                )
+                            ),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .shadow(
+                                elevation = 14.dp,
+                                shape = CircleShape,
+                                clip = false
+                            )
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF1B3142),
+                                        Color(0xFF080B11),
+                                        Color(0xFF02040A)
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xCC17D6FF),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_oracle_runtime_mark),
+                            contentDescription = "AI Oracle Modality Logo",
+                            modifier = Modifier.size(44.dp)
+                        )
+                    }
+                }
                 }
                 Spacer(modifier = Modifier.width(6.dp))
                 Column {
