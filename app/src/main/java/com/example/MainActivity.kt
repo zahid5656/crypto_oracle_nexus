@@ -27,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.core.ui.theme.TitanOracleTheme
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.ui.AnalysisScreen
 import com.example.ui.HomeScreen
@@ -43,8 +42,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TitanOracleTheme {
-                val viewModel: CryptoViewModel = viewModel()
+            val viewModel: CryptoViewModel = viewModel()
             val currentScreen by viewModel.currentScreen.collectAsState()
             val hasBadge by viewModel.hasFreshRadarSignalBadge.collectAsState()
             
@@ -230,7 +228,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 }
-            }
             }
         }
     }
