@@ -118,11 +118,7 @@ internal fun ConsensusSummaryMetric(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .heightIn(min = 38.dp)
-            .background(LiveRadarTileDark, RoundedCornerShape(8.dp))
-            .border(0.45.dp, valueColor.copy(alpha = 0.36f), RoundedCornerShape(8.dp))
-            .padding(horizontal = 4.dp, vertical = 3.dp),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -191,10 +187,12 @@ internal fun AllocationSizingTile(
 internal fun allocationProfileColor(label: String): Color {
     val normalized = label.uppercase()
     return when {
-        normalized.contains("CONSERVATIVE") || normalized.contains("LOW") -> LiveRadarInstitutionalGreen
-        normalized.contains("BALANCED") || normalized.contains("MEDIUM") || normalized.contains("MODERATE") -> CryptoCyan
-        normalized.contains("AGGRESSIVE") || normalized.contains("HIGH") || normalized.contains("MAX") -> LiveRadarInstitutionalYellow
-        normalized.contains("CRITICAL") || normalized.contains("EXTREME") -> LiveRadarDangerRed
+        normalized.contains("CONSERVATIVE") -> CryptoCyan
+        normalized.contains("BALANCED") -> LiveRadarInstitutionalGreen
+        normalized.contains("AGGRESSIVE") || normalized.contains("MAX") -> LiveRadarInstitutionalYellow
+        normalized.contains("CRITICAL") || normalized.contains("EXTREME") || normalized.contains("HIGH") -> LiveRadarDangerRed
+        normalized.contains("LOW") -> LiveRadarInstitutionalGreen
+        normalized.contains("MEDIUM") || normalized.contains("MODERATE") -> LiveRadarInstitutionalYellow
         else -> LiveRadarInstitutionalYellow
     }
 }

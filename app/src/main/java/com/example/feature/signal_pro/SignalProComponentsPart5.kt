@@ -398,10 +398,8 @@ fun ConsensusMetricColumn(
 
     Column(
         modifier = modifier
-            .heightIn(min = 40.dp)
-            .background(valueColor.copy(alpha = 0.045f), RoundedCornerShape(8.dp))
-            .border(0.45.dp, valueColor.copy(alpha = 0.34f), RoundedCornerShape(8.dp))
-            .padding(horizontal = 3.dp, vertical = 3.dp),
+            .heightIn(min = 44.dp)
+            .padding(horizontal = 2.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -511,7 +509,7 @@ fun MultiAiConsensusModule(
                         )
                     )
                     .border(0.8.dp, CryptoCyan.copy(alpha = 0.62f), RoundedCornerShape(10.dp))
-                    .padding(vertical = 5.dp, horizontal = 5.dp),
+                    .padding(vertical = 6.dp, horizontal = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ConsensusMetricColumn(
