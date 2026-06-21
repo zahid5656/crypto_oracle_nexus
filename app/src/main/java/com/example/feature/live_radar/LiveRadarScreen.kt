@@ -51,103 +51,20 @@ fun LiveRadarScreen(
             .fillMaxSize()
             .background(DarkBackground)
             .padding(horizontal = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(top = 10.dp, bottom = 20.dp)
     ) {
-        // Toolbar Title Section
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = "LIVE QUANT RADAR",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = CryptoCyan,
-                        letterSpacing = 2.sp
-                    )
-                    Text(
-                        text = "Market Intelligence",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = LiveRadarSoftWhite
-                    )
-                }
-
-                // Inline language switcher
-                Button(
-                    onClick = { viewModel.toggleLanguage() },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = DarkSurface,
-                        contentColor = CryptoCyan
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, BorderColor),
-                    modifier = Modifier.height(36.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = if (isBengali) "English" else "বাংলা",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp
-                    )
-                }
-            }
-        }
-
-        // Market Regime Status Card
-        item {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = DarkSurface),
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, CryptoCyan.copy(alpha = 0.3f)),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .background(LiveRadarInstitutionalGreen, CircleShape)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = if (isBengali) "অন-চেইন বাজার পরিস্থিতি" else "CURRENT MARKET REGIME",
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextSecondary,
-                            letterSpacing = 1.sp
-                        )
-                        Text(
-                            text = marketRegime,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = LiveRadarInstitutionalGreen,
-                            fontFamily = FontFamily.Monospace,
-                            modifier = Modifier.padding(top = 2.dp)
-                        )
-                    }
-                }
-            }
-        }
-
         val intervals = listOf("1M", "5M", "15M", "30M", "45M", "1H")
         val displayWindow = intervals.getOrElse(shortTermInterval) { "15M" }
 
-        // Sticky scalp oracle header + timeframe selector.
-        stickyHeader(key = "short_term_scalp_oracle_header") {
-            ShortTermScalpOracleStickyHeader(
+        // Sticky Live Radar control cluster: title, regime, scalp oracle header, and timeframe selector.
+        stickyHeader(key = "live_radar_control_cluster") {
+            LiveRadarStickyControlCluster(
                 intervals = intervals,
                 selectedIndex = shortTermInterval,
                 isBengali = isBengali,
+                marketRegime = marketRegime,
+                onLanguageToggle = { viewModel.toggleLanguage() },
                 onSelect = { idx -> viewModel.setShortTermTimeframe(idx) }
             )
         }
@@ -215,24 +132,116 @@ fun LiveRadarScreen(
 }
 
 @Composable
-private fun ShortTermScalpOracleStickyHeader(
+private fun LiveRadarStickyControlCluster(
     intervals: List<String>,
     selectedIndex: Int,
     isBengali: Boolean,
+    marketRegime: String,
+    onLanguageToggle: () -> Unit,
     onSelect: (Int) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(DarkBackground)
-            .padding(top = 2.dp, bottom = 8.dp)
+            .padding(top = 2.dp, bottom = 3.dp)
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "LIVE QUANT RADAR",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = CryptoCyan,
+                    letterSpacing = 2.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = if (isBengali) "মার্কেট ইন্টেলিজেন্স" else "Market Intelligence",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = LiveRadarSoftWhite,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Button(
+                onClick = onLanguageToggle,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = DarkSurface,
+                    contentColor = CryptoCyan
+                ),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, BorderColor),
+                modifier = Modifier.height(34.dp),
+                contentPadding = PaddingValues(horizontal = 11.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = if (isBengali) "English" else "বাংলা",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Card(
+            colors = CardDefaults.cardColors(containerColor = DarkSurface),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(0.85.dp, CryptoCyan.copy(alpha = 0.28f)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .background(LiveRadarInstitutionalGreen, CircleShape)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = if (isBengali) "অন-চেইন বাজার পরিস্থিতি" else "CURRENT MARKET REGIME",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextSecondary,
+                        letterSpacing = 1.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = marketRegime,
+                        fontSize = 13.2.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = LiveRadarInstitutionalGreen,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.padding(top = 1.dp),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(DarkSurface, RoundedCornerShape(14.dp))
                 .border(0.85.dp, BorderColor, RoundedCornerShape(14.dp))
-                .padding(horizontal = 10.dp, vertical = 9.dp)
+                .padding(horizontal = 10.dp, vertical = 7.dp)
         ) {
             Text(
                 text = if (isBengali) "সংক্ষিপ্ত সময়ের ওরাকল স্ক্যাল্পস" else "SHORT-TERM SCALP ORACLE",
@@ -244,14 +253,14 @@ private fun ShortTermScalpOracleStickyHeader(
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(DarkBackground, RoundedCornerShape(8.dp))
-                    .padding(3.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    .padding(2.dp),
+                horizontalArrangement = Arrangement.spacedBy(3.dp)
             ) {
                 intervals.forEachIndexed { idx, label ->
                     Box(
@@ -260,12 +269,12 @@ private fun ShortTermScalpOracleStickyHeader(
                             .clip(RoundedCornerShape(6.dp))
                             .background(if (selectedIndex == idx) CryptoCyan.copy(alpha = 0.15f) else Color.Transparent)
                             .border(
-                                1.dp,
+                                0.85.dp,
                                 if (selectedIndex == idx) CryptoCyan else Color.Transparent,
                                 RoundedCornerShape(6.dp)
                             )
                             .clickable { onSelect(idx) }
-                            .padding(vertical = 7.dp),
+                            .padding(vertical = 6.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(

@@ -275,7 +275,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
     val visibleLongScalps = if (expandedLong) longScalps.take(10) else longScalps.take(3)
     val visibleShortScalps = if (expandedShort) shortScalps.take(10) else shortScalps.take(3)
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         // --- 1. SPOT SECTIONS ---
         RadarTriggerSectionHeader(
             title = if (isBengali) "🔥 তাত্ক্ষণিক স্পট টার্গেট (${if (expandedHotSpot) "সেরা ১০" else "সেরা ৩"})" else "🔥 HOT SPOT TRIGGERS (${if (expandedHotSpot) "TOP 10" else "TOP 3"})",
@@ -299,7 +299,6 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         if (isExpanded) LiveRadarInstitutionalYellow.copy(alpha = 0.6f) else BorderColor,
                         RoundedCornerShape(8.dp)
                     )
-                    .animateContentSize()
                     .padding(8.dp)
             ) {
                 Row(
@@ -324,12 +323,14 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         Column {
                             Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LiveRadarSoftWhite)
                             Text(text = "Live: $${formatPrice(basePrice)}", fontSize = 10.sp, color = TextSecondary)
-                            Text(
-                                text = if (isBengali) "বিশ্লেষণ দেখতে ট্যাপ করুন" else "Tap for Deep Quant Info",
-                                fontSize = 8.sp,
-                                color = LiveRadarInstitutionalYellow,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            if (!isExpanded) {
+                                Text(
+                                    text = if (isBengali) "বিশ্লেষণ দেখতে ট্যাপ করুন" else "Tap for Deep Quant Info",
+                                    fontSize = 8.sp,
+                                    color = LiveRadarInstitutionalYellow,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
                     }
 
@@ -349,9 +350,9 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                 }
 
                 if (isExpanded) {
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(7.dp))
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     AiOracleAnalyticMetadataSection(
                         title = if (isBengali) "এআই ওরাকল অ্যানালিটিক্যাল মেটাডাটা" else "AI ORACLE ANALYTICAL METADATA",
@@ -369,7 +370,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         themeColor = LiveRadarInstitutionalGreen
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     val mission = remember(symbol, target, timeframe) {
                         com.example.model.Mission(
@@ -391,7 +392,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
         // --- 2. FUTURES LONG SECTIONS ---
         RadarTriggerSectionHeader(
@@ -416,7 +417,6 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         if (isExpanded) LiveRadarInstitutionalGreen.copy(alpha = 0.6f) else BorderColor,
                         RoundedCornerShape(8.dp)
                     )
-                    .animateContentSize()
                     .padding(8.dp)
             ) {
                 Row(
@@ -441,12 +441,14 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         Column {
                             Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LiveRadarSoftWhite)
                             Text(text = "Live: $${formatPrice(basePrice)}", fontSize = 10.sp, color = TextSecondary)
-                            Text(
-                                text = if (isBengali) "বিশ্লেষণ দেখতে ট্যাপ করুন" else "Tap for Deep Quant Info",
-                                fontSize = 8.sp,
-                                color = LiveRadarInstitutionalGreen,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            if (!isExpanded) {
+                                Text(
+                                    text = if (isBengali) "বিশ্লেষণ দেখতে ট্যাপ করুন" else "Tap for Deep Quant Info",
+                                    fontSize = 8.sp,
+                                    color = LiveRadarInstitutionalGreen,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
                     }
 
@@ -466,9 +468,9 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                 }
 
                 if (isExpanded) {
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(7.dp))
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     AiOracleAnalyticMetadataSection(
                         title = if (isBengali) "এআই ওরাকল ফিউচার লং মেটাডাটা" else "AI ORACLE FUTURES LONG METADATA",
@@ -486,7 +488,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         themeColor = CryptoCyan
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     val mission = remember(symbol, target, timeframe) {
                         com.example.model.Mission(
@@ -508,7 +510,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
         // --- 3. FUTURES SHORT SECTIONS ---
         RadarTriggerSectionHeader(
@@ -533,7 +535,6 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         if (isExpanded) LiveRadarDangerRed.copy(alpha = 0.6f) else BorderColor,
                         RoundedCornerShape(8.dp)
                     )
-                    .animateContentSize()
                     .padding(8.dp)
             ) {
                 Row(
@@ -558,12 +559,14 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         Column {
                             Text(text = name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = LiveRadarSoftWhite)
                             Text(text = "Live: $${formatPrice(basePrice)}", fontSize = 10.sp, color = TextSecondary)
-                            Text(
-                                text = if (isBengali) "বিশ্লেষণ দেখতে ট্যাপ করুন" else "Tap for Deep Quant Info",
-                                fontSize = 8.sp,
-                                color = LiveRadarDangerRed,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            if (!isExpanded) {
+                                Text(
+                                    text = if (isBengali) "বিশ্লেষণ দেখতে ট্যাপ করুন" else "Tap for Deep Quant Info",
+                                    fontSize = 8.sp,
+                                    color = LiveRadarDangerRed,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
                     }
 
@@ -583,9 +586,9 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                 }
 
                 if (isExpanded) {
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(7.dp))
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     AiOracleAnalyticMetadataSection(
                         title = if (isBengali) "এআই ওরাকল ফিউচার শর্ট মেটাডাটা" else "AI ORACLE FUTURES SHORT METADATA",
@@ -603,7 +606,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         themeColor = CryptoCyan
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     val mission = remember(symbol, target, timeframe) {
                         com.example.model.Mission(

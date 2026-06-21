@@ -120,7 +120,7 @@ internal fun ConsensusSummaryMetric(
     Column(
         modifier = modifier
             .heightIn(min = 38.dp)
-            .background(valueColor.copy(alpha = 0.045f), RoundedCornerShape(8.dp))
+            .background(LiveRadarTileDark, RoundedCornerShape(8.dp))
             .border(0.45.dp, valueColor.copy(alpha = 0.36f), RoundedCornerShape(8.dp))
             .padding(horizontal = 4.dp, vertical = 3.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -159,7 +159,7 @@ internal fun AllocationSizingTile(
     Column(
         modifier = modifier
             .heightIn(min = 39.dp)
-            .background(allocationProfileColor(label).copy(alpha = 0.045f), RoundedCornerShape(9.dp))
+            .background(LiveRadarTileDark, RoundedCornerShape(9.dp))
             .border(0.55.dp, allocationProfileColor(label).copy(alpha = 0.56f), RoundedCornerShape(9.dp))
             .padding(horizontal = 6.dp, vertical = 3.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
