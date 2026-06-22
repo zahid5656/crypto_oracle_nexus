@@ -498,7 +498,7 @@ fun MetricDonutChart(modifier: Modifier = Modifier, winRate: Float) {
     Canvas(modifier = modifier) {
         val stroke = androidx.compose.ui.graphics.drawscope.Stroke(width = 40f)
         drawArc(
-            color = Color(0xFFFF3B30),
+            color = CryptoRedText,
             startAngle = 0f,
             sweepAngle = 360f,
             useCenter = false,

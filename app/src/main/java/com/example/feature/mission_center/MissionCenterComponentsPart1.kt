@@ -33,6 +33,8 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.absoluteValue
 
 import com.example.ui.theme.DarkBackground
+import com.example.ui.theme.CryptoGreen
+import com.example.ui.theme.CryptoRedText
 
 // Terminal Colors - Institutional Grade
 
@@ -44,8 +46,8 @@ internal val T_BorderHigh = Color(0xFF2C2C2E)
 internal val T_TextPrimary = Color(0xFFFFFFFF)
 internal val T_TextSecondary = Color(0xFF8E8E93)
 internal val T_TextMuted = Color(0xFF636366)
-internal val T_Green = Color(0xFF34C785)
-internal val T_Red = Color(0xFFF6465D)
+internal val T_Green = CryptoGreen
+internal val T_Red = CryptoRedText
 internal val T_Cyan = Color(0xFF32ADE6)
 internal val T_Gold = Color(0xFFFFCC00)
 internal val mcTimeframeDurationMinutes = mapOf(

@@ -183,7 +183,7 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoV
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Column 1: ENTRY (LOCKED)
+                // Column 1: ENTRY
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.Start
@@ -210,7 +210,7 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoV
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // Column 2: CURRENT PRICE
+                // Column 2: CURRENT
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -237,7 +237,7 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoV
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // Column 3: EXPECTED GAIN/DROP
+                // Column 3: EXPECTED
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally

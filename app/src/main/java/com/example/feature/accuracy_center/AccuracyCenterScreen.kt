@@ -226,7 +226,7 @@ fun AccuracyCenterScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     StatCard("Best Trade", bestTradeStr, CryptoGreen, modifier = Modifier.weight(1f))
-                    StatCard("Worst Trade", worstTradeStr, Color(0xFFFF3B30), modifier = Modifier.weight(1f))
+                    StatCard("Worst Trade", worstTradeStr, CryptoRedText, modifier = Modifier.weight(1f))
                     StatCard("Avg ROI", avgRoiStr, CryptoGreen, modifier = Modifier.weight(1f))
                 }
             }
@@ -332,7 +332,7 @@ fun AccuracyCenterScreen(
                             Text(" ($winsFallback)", color = TextSecondary, fontSize = 14.sp)
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(modifier = Modifier.size(12.dp).clip(CircleShape).background(Color(0xFFFF3B30)))
+                            Box(modifier = Modifier.size(12.dp).clip(CircleShape).background(CryptoRedText))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Loss", color = TextSecondary, fontSize = 14.sp)
                             Spacer(modifier = Modifier.width(16.dp))

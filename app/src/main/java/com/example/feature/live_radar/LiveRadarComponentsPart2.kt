@@ -216,9 +216,9 @@ fun OpportunisticSignalAdornmentSection(
 internal val LiveRadarPanelDark = Color(0xFF050A13)
 internal val LiveRadarTileDark = Color(0xFF050A13)
 internal val LiveRadarSoftWhite = Color(0xFFF5F5F5)
-internal val LiveRadarInstitutionalGreen = Color(0xFF34C785)
+internal val LiveRadarInstitutionalGreen = CryptoGreen
 internal val LiveRadarInstitutionalYellow = Color(0xFFFFD60A)
-internal val LiveRadarDangerRed = Color(0xFFF6465D)
+internal val LiveRadarDangerRed = CryptoRedText
 internal enum class LiveRadarGuardSeverity {
     CLEAR,
     WARNING,
