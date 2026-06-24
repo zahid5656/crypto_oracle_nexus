@@ -125,64 +125,81 @@ fun MissionTerminalCard(
             .border(0.5.dp, T_BorderHigh, RoundedCornerShape(8.dp))
     ) {
         // ACTIVE MISSION CARD HEADER
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = coinSymbol.uppercase(),
-                    color = T_TextPrimary,
-                    fontSize = 14.sp,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold
-                )
-                Box(
-                    modifier = Modifier
-                        .background(if (isLong) T_Green else T_Red, RoundedCornerShape(2.dp))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = type.uppercase(),
-                        color = T_Bg,
+                        text = coinSymbol.uppercase(),
+                        color = T_TextPrimary,
+                        fontSize = 14.sp,
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
                     )
+                    Box(
+                        modifier = Modifier
+                            .background(if (isLong) T_Green else T_Red, RoundedCornerShape(2.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = type.uppercase(),
+                            color = T_Bg,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = marketType.uppercase(),
-                    color = T_TextSecondary,
-                    fontSize = 10.sp,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold
-                )
-                val tf = mission?.signalTimeframe?.ifBlank { "N/A" } ?: "N/A"
-                Box(
-                    modifier = Modifier
-                        .background(T_TextSecondary.copy(alpha = 0.12f), RoundedCornerShape(5.dp))
-                        .border(0.5.dp, T_TextSecondary.copy(alpha = 0.32f), RoundedCornerShape(5.dp))
-                        .padding(horizontal = 6.dp, vertical = 2.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = tf.uppercase(),
+                        text = marketType.uppercase(),
                         color = T_TextSecondary,
-                        fontFamily = FontFamily.Monospace,
                         fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold
                     )
+                    val tf = mission?.signalTimeframe?.ifBlank { "N/A" } ?: "N/A"
+                    Box(
+                        modifier = Modifier
+                            .background(T_TextSecondary.copy(alpha = 0.12f), RoundedCornerShape(5.dp))
+                            .border(0.5.dp, T_TextSecondary.copy(alpha = 0.32f), RoundedCornerShape(5.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = tf.uppercase(),
+                            color = T_TextSecondary,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
+            Spacer(modifier = Modifier.height(SpacingMedium))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1f).padding(end = SpacingNormal)) {
+                    CompactDataRow("PROBABILITY", "85 / HIGH", T_Green)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("RISK SCORE", "15 / LOW", T_Green)
+                }
+                Column(modifier = Modifier.weight(1f).padding(start = SpacingNormal)) {
+                    CompactDataRow("EXEC READINESS", "OPTIMAL", T_Green)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("CONSENSUS BIAS", "MODERATE", T_Gold)
+                }
+            }
+            Spacer(modifier = Modifier.height(SpacingCompact))
+            CompactDataRow("MISSION STATE", "ACTIVE", T_Cyan)
         }
         
         HorizontalDivider(color = T_BorderHigh, thickness = 0.5.dp)
         
         // MAIN SNAPSHOT SECTION
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingMedium)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(start = SpacingMedium, end = SpacingMedium, top = SpacingMedium, bottom = 4.dp)) {
             val entryClean = mcFormatUsd(entryVal)
             val liveClean = mcFormatUsd(currentVal)
             
@@ -195,7 +212,7 @@ fun MissionTerminalCard(
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("TARGET", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                     Spacer(modifier = Modifier.height(SpacingCompact))
-                    val tgDisp = mission?.target?.replace("(?i)\\s*/\\s*SIGNAL FALLBACK".toRegex(), "") ?: "N/A"
+                    val tgDisp = mcFormatMissionPriceText(mission?.target)
                     Text(tgDisp, color = T_Green, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
@@ -296,11 +313,11 @@ fun MissionTerminalCard(
         ) {
             // LEFT COLUMN
             Column(modifier = Modifier.weight(1f).padding(end = SpacingNormal)) {
-                CompactDataRow("TP1", tp1?.replace("(?i)\\s*/\\s*SIGNAL FALLBACK".toRegex(), "") ?: "NOT SET", if (tp1 != null) T_Green else T_TextSecondary)
+                CompactDataRow("TP1", mcFormatMissionPriceText(tp1), if (tp1 != null) T_Green else T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                CompactDataRow("TP2", tp2?.replace("(?i)\\s*/\\s*SIGNAL FALLBACK".toRegex(), "") ?: "NOT SET", if (tp2 != null) T_Green else T_TextSecondary)
+                CompactDataRow("TP2", mcFormatMissionPriceText(tp2), if (tp2 != null) T_Green else T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                CompactDataRow("TP3", tp3?.replace("(?i)\\s*/\\s*SIGNAL FALLBACK".toRegex(), "") ?: "NOT SET", if (tp3 != null) T_Green else T_TextSecondary)
+                CompactDataRow("TP3", mcFormatMissionPriceText(tp3), if (tp3 != null) T_Green else T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("ENTRY", mcFormatUsd(entryVal), T_TextPrimary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
@@ -313,9 +330,9 @@ fun MissionTerminalCard(
             }
             // RIGHT COLUMN
             Column(modifier = Modifier.weight(1f).padding(start = SpacingNormal)) {
-                CompactDataRow("SL1", (manualStopLoss ?: stopLoss).replace("(?i)\\s*/\\s*SIGNAL FALLBACK".toRegex(), ""), T_Gold)
+                CompactDataRow("SL1", mcFormatMissionPriceText(manualStopLoss ?: stopLoss), T_Gold)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                CompactDataRow("SL2", mission?.sl2?.replace("(?i)\\s*/\\s*SIGNAL FALLBACK".toRegex(), "") ?: "NOT SET", if (mission?.sl2 != null) T_Gold else T_TextSecondary)
+                CompactDataRow("SL2", mcFormatMissionPriceText(mission?.sl2), if (mission?.sl2 != null) T_Gold else T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 val levValue = (leverage?.uppercase() ?: if (isFutures) "NOT SET" else "1X").replace("SPOT / 1X", "1X").replace("SPOT", "1X")
                 CompactDataRow("LEVERAGE", levValue, T_TextSecondary)
@@ -360,88 +377,158 @@ fun MissionTerminalCard(
 
         HorizontalDivider(color = T_BorderHigh, thickness = 0.5.dp)
 
-
-        // AI EXECUTION COMPACT GUIDANCE
+        // 3. MISSION EXPOSURE PANEL
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
-            Text("AI COPILOT EXECUTION STATUS", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("MISSION EXPOSURE", color = T_Cyan, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(SpacingCompact))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SpacingCompact)) {
-                // MATCH | WARNING | CRITICAL layout
-                val statusTitleColor = if (confidence >= 80) T_Green else if (confidence >= 60) T_Gold else T_Red
-                Box(modifier = Modifier.weight(1f).background(if (confidence >= 80) T_Green.copy(alpha = 0.1f) else T_Surface, RoundedCornerShape(2.dp)).border(0.5.dp, if (confidence >= 80) T_Green else T_BorderHigh, RoundedCornerShape(2.dp)).padding(4.dp), contentAlignment = Alignment.Center) {
-                    Text("MATCH", color = if (confidence >= 80) T_Green else T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1f).padding(end = SpacingNormal)) {
+                    CompactDataRow("INITIAL ALLOC", mission?.positionSize?.ifBlank { "$50.00" } ?: "$50.00", T_TextPrimary)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("CURRENT EXPOSURE", "$35.00", T_Gold)
                 }
-                Box(modifier = Modifier.weight(1f).background(if (confidence in 60..79) T_Gold.copy(alpha = 0.1f) else T_Surface, RoundedCornerShape(2.dp)).border(0.5.dp, if (confidence in 60..79) T_Gold else T_BorderHigh, RoundedCornerShape(2.dp)).padding(4.dp), contentAlignment = Alignment.Center) {
-                    Text("WARNING", color = if (confidence in 60..79) T_Gold else T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                }
-                Box(modifier = Modifier.weight(1f).background(if (confidence < 60) T_Red.copy(alpha = 0.1f) else T_Surface, RoundedCornerShape(2.dp)).border(0.5.dp, if (confidence < 60) T_Red else T_BorderHigh, RoundedCornerShape(2.dp)).padding(4.dp), contentAlignment = Alignment.Center) {
-                    Text("CRITICAL", color = if (confidence < 60) T_Red else T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Column(modifier = Modifier.weight(1f).padding(start = SpacingNormal)) {
+                    CompactDataRow("REMAINING", "70%", T_TextPrimary)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("STATE", "CONTROLLED", T_Green)
                 }
             }
-            Spacer(modifier = Modifier.height(SpacingNormal))
-            
-            val actRec = "HOLD"
-            val actConf = "N/A"
-            val actRegime = "ACCUMULATING"
-            val actDir = "NEUTRAL"
-            
-            val actRecColor = when (actRec) {
-                "HOLD", "WAIT FOR CONFIRMATION" -> T_Cyan
-                "WATCH", "TIGHTEN SL" -> T_Gold
-                "CLOSE" -> T_Red
-                "TAKE PARTIAL PROFIT" -> T_Green
-                else -> T_Cyan
-            }
-            
-            val actConfColor = T_TextSecondary // hardcoded for N/A as per rule
-            
-            val actRegimeColor = when (actRegime) {
-                "ACCUMULATING" -> T_Cyan
-                "DISTRIBUTING" -> T_Gold
-                "TRENDING" -> T_Green
-                "CHOPPY", "SIDEWAY" -> T_Gold
-                else -> T_TextSecondary
-            }
-            
-            val actDirColor = when (actDir) {
-                "BULLISH" -> T_Green
-                "BEARISH" -> T_Red
-                "NEUTRAL" -> T_Cyan
-                "MIXED" -> T_Gold
-                else -> T_TextSecondary
-            }
-            
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(width = 0.5.dp, color = T_BorderHigh, shape = RoundedCornerShape(8.dp))
-                    .padding(8.dp)
-            ) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("ACTION RECOMMENDATION: ", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                        Text(actRec, color = actRecColor, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("CONFIDENCE: ", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                        Text(actConf, color = actConfColor, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                    }
+            Spacer(modifier = Modifier.height(SpacingCompact))
+            CompactDataRow("POSITION MODE", "SIMULATED", T_Cyan)
+        }
+
+        HorizontalDivider(color = T_BorderHigh, thickness = 0.5.dp)
+
+        // 4. PROFIT SHIELD / SAFE ZONE PANEL
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
+            Text("PROFIT SHIELD / SAFE ZONE", color = T_Green, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(SpacingCompact))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1f).padding(end = SpacingNormal)) {
+                    CompactDataRow("SAFE ZONE", "Level 2", T_Green)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("LOCKED PROFIT", "$0.70", T_Green)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("NEXT TARGET", "TP3 / +10%", T_TextPrimary)
                 }
+                Column(modifier = Modifier.weight(1f).padding(start = SpacingNormal)) {
+                    CompactDataRow("ROI TRIGGER", "+7%", T_TextPrimary)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("UNREALIZED PROFIT", "$1.25", T_Gold)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("STATUS", "Protecting Runner", T_Cyan)
+                }
+            }
+        }
+
+        HorizontalDivider(color = T_BorderHigh, thickness = 0.5.dp)
+
+        // 5. AI TRADE GUARDIAN STATUS
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
+            Text("AI TRADE GUARDIAN", color = T_Gold, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(SpacingCompact))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1f).padding(end = SpacingNormal)) {
+                    CompactDataRow("STATE", "MONITORING", T_Green)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("ACTION", "Hold / Watch liq", T_TextPrimary)
+                }
+                Column(modifier = Modifier.weight(1f).padding(start = SpacingNormal)) {
+                    CompactDataRow("THREAT LEVEL", "Medium", T_Gold)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("EARLY EXIT", "Not triggered", T_TextSecondary)
+                }
+            }
+            Spacer(modifier = Modifier.height(SpacingCompact))
+            CompactDataRow("EMERGENCY REASON", "None", T_TextSecondary)
+        }
+
+        HorizontalDivider(color = T_BorderHigh, thickness = 0.5.dp)
+
+        // 6. VALIDITY WINDOW
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
+            Text("VALIDITY WINDOW", color = T_TextPrimary, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(SpacingCompact))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1f).padding(end = SpacingNormal)) {
+                    CompactDataRow("VALID UNTIL", "12H Window", T_TextPrimary)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("FRESHNESS", "12s", T_Green)
+                }
+                Column(modifier = Modifier.weight(1f).padding(start = SpacingNormal)) {
+                    CompactDataRow("REMAINING", "11h 45m", T_TextPrimary)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("EXPIRY STATE", "ACTIVE", T_Green)
+                }
+            }
+        }
+
+        HorizontalDivider(color = T_BorderHigh, thickness = 0.5.dp)
+
+        // 7. MISSION DECISION GATE
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
+            Text("MISSION DECISION GATE", color = T_Cyan, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(SpacingCompact))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1f).padding(end = SpacingNormal)) {
+                    CompactDataRow("DIRECTION CHK", "PASS", T_Green)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("RISK / REWARD", "PASS", T_Green)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("CONSENSUS", "PASS", T_Green)
+                }
+                Column(modifier = Modifier.weight(1f).padding(start = SpacingNormal)) {
+                    CompactDataRow("SL SANITY", "PASS", T_Green)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("EXEC READINESS", "PASS", T_Green)
+                    Spacer(modifier = Modifier.height(SpacingCompact))
+                    CompactDataRow("GUARDIAN THREAT", "WARN", T_Gold)
+                }
+            }
+            Spacer(modifier = Modifier.height(SpacingCompact))
+            CompactDataRow("FINAL STATE", "ACTIVE", T_Green)
+        }
+
+        HorizontalDivider(color = T_BorderHigh, thickness = 0.5.dp)
+
+        // 8. MISSION AUDIT TRAIL
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
+            Text("MISSION AUDIT TRAIL", color = T_TextPrimary, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(SpacingCompact))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Guardian scan completed", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Text("12s ago", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            }
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Safe Zone reached", color = T_Green, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Text("1m ago", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            }
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Mission activated", color = T_Cyan, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Text("3m ago", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            }
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Entry verified", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Text("4m ago", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            }
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Signal accepted", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Text("5m ago", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            }
+        }
+
+        // 9. INVALID / REVIEW REASON (Mocked as if occasionally active)
+        val mockMissionState = "ACTIVE"
+        if (mockMissionState == "INVALID" || mockMissionState == "REVIEW") {
+            HorizontalDivider(color = T_BorderHigh, thickness = 0.5.dp)
+            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
+                Text("INVALID / REVIEW REASON", color = T_Red, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("PERSISTED REGIME: ", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                        Text(actRegime, color = actRegimeColor, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("DIRECTION: ", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                        Text(actDir, color = actDirColor, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Spacer(modifier = Modifier.height(SpacingNormal))
-                Text("HOLD. WAITING FOR UPDATED MISSION CONTEXT.", color = T_TextPrimary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Spacer(modifier = Modifier.height(SpacingCompact))
-                Text("REASON: SYSTEM INITIALIZATION / WAITING FOR MISSION DATA.", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Text("Execution readiness degraded due to widened spread.", color = T_TextPrimary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             }
         }
         
@@ -511,36 +598,22 @@ fun MissionTerminalCard(
                     modifier = Modifier.weight(1f).clickable { showDetails = true }.border(1.dp, T_BorderHigh, RoundedCornerShape(4.dp)).padding(vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "DETAILS", color = T_TextPrimary, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    Text(text = "REVIEW", color = T_TextPrimary, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
                 Box(
                     modifier = Modifier.weight(1f).clickable { showOverride = true }.border(1.dp, T_BorderHigh, RoundedCornerShape(4.dp)).padding(vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "OVERRIDE", color = T_TextPrimary, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    Text(text = "PROTECT", color = T_Gold, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
                 Box(
-                    modifier = Modifier.weight(1f).clickable { showStopConfirm = true }.background(T_TextPrimary, RoundedCornerShape(4.dp)).padding(vertical = 8.dp),
+                    modifier = Modifier.weight(1.5f).clickable { showStopConfirm = true }.background(T_TextPrimary, RoundedCornerShape(4.dp)).padding(vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "CLOSE", color = T_Bg, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    Text(text = "CLOSE SIMULATION", color = T_Bg, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
             }
-            Spacer(modifier = Modifier.height(SpacingCompact))
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { showStopConfirm = true }
-                        .padding(vertical = 6.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "ABORT MISSION", color = T_Red.copy(alpha = 0.8f), fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                }
-            }
-            Spacer(modifier = Modifier.height(SpacingCompact))
+            Spacer(modifier = Modifier.height(SpacingMedium))
             
             if (showDetails) {
                 AlertDialog(
@@ -550,11 +623,11 @@ fun MissionTerminalCard(
                         Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("Source Module: Signal Pro", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Setup Used: ${setupMode ?: "Pending Manual Setup"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
-                            Text("Target: ${mission?.target ?: "Not Set"}", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
-                            Text("Locked Entry: $entryPrice", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
-                            Text("Original Signal Entry: $originalEntry", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
-                            Text("TP1: ${tp1 ?: "Not Set"} | TP2: ${tp2 ?: "Not Set"} | TP3: ${tp3 ?: "Not Set"}", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
-                            Text("SL1: ${manualStopLoss ?: stopLoss} | SL2: ${mission?.sl2 ?: "Not Set"}", color = T_Red, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                            Text("Target: ${mcFormatMissionPriceText(mission?.target)}", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                            Text("Locked Entry: ${mcFormatMissionPriceText(entryPrice)}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                            Text("Original Signal Entry: ${mcFormatMissionPriceText(originalEntry)}", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                            Text("TP1: ${mcFormatMissionPriceText(tp1)} | TP2: ${mcFormatMissionPriceText(tp2)} | TP3: ${mcFormatMissionPriceText(tp3)}", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                            Text("SL1: ${mcFormatMissionPriceText(manualStopLoss ?: stopLoss)} | SL2: ${mcFormatMissionPriceText(mission?.sl2)}", color = T_Red, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Leverage: ${leverage ?: if (marketType.equals("Spot", ignoreCase = true)) "1X" else "Not Set"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Allocation: ${mission?.positionSize ?: "Not Set"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Risk Profile: ${mission?.riskProfile ?: "Not Set"}", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)

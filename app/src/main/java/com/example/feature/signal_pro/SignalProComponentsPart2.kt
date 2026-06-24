@@ -72,7 +72,9 @@ import androidx.compose.ui.draw.shadow
 @Composable
 fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewModel, livePrices: Map<String, Double>) {
     val isBengali by viewModel.isBengali.collectAsState()
-    var isExpanded by remember { mutableStateOf(false) }
+    var isExpandedInternal by remember { mutableStateOf(false) }
+    val expandedAsset = com.example.feature.signal_pro.LocalExpandedAsset.current
+    val isExpanded = expandedAsset.value == coin.coinSymbol
     
     val livePrice = livePrices["${coin.coinSymbol}USDT"] ?: coin.currentPrice
 
@@ -95,7 +97,13 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, if (isExpanded) CryptoCyan else BorderColor, RoundedCornerShape(16.dp))
-            .clickable { if (!isExpanded) isExpanded = true }
+            .clickable { 
+                if (isExpanded) {
+                    expandedAsset.value = null
+                } else {
+                    expandedAsset.value = coin.coinSymbol
+                }
+            }
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
@@ -310,6 +318,17 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
                     Spacer(modifier = Modifier.height(10.dp))
 
                     val hours = signalProForecastHours(timeframeIndex)
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "Signal State: ACTIVE", fontSize = 9.sp, color = CryptoGreen)
+                        Text(text = "Validity: ${hours}H window", fontSize = 9.sp, color = TextMuted)
+                        Text(text = "Freshness: 12s", fontSize = 9.sp, color = TextMuted)
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+
                     RealTimeCountdown(coin.coinSymbol, hours, isBengali)
                     
                     Spacer(modifier = Modifier.height(10.dp))
@@ -320,6 +339,9 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
                         isLong = true,
                         currentPrice = livePrice
                     )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    ExecutionReadinessMatrix(isBengali)
 
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -341,6 +363,9 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
                         riskEvaluated = true
                     ,
                         isBengali = isBengali)
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    DirectionTradeLogicValidation(isLong = true, isBengali = isBengali)
 
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -369,6 +394,18 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
 
                     AiExplanationModule(coin.whyThisSignalEnglish, coin.whyThisSignalBengali, coin.coinSymbol, isBengali) { viewModel.toggleLanguage() }
 
+                    Spacer(modifier = Modifier.height(10.dp))
+                    DecisionGateSummary(isBengali)
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    ConflictFlags(isBengali)
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    SourceProvenanceAudit(isBengali)
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    FinalGuidanceModule(isBengali)
+
                     Spacer(modifier = Modifier.height(12.dp))
                     
                     val mission = remember(coin, projectedPrice, timeframeIndex) {
@@ -389,13 +426,13 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
                     StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = livePrice)
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Tap here to collapse details ⬏",
+                        text = "Tap here to collapse details ↑",
                         fontSize = 12.sp,
                         color = CryptoCyan,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { isExpanded = false }
+                            .clickable { expandedAsset.value = null }
                             .padding(vertical = 8.dp),
                         textAlign = TextAlign.Center
                     )

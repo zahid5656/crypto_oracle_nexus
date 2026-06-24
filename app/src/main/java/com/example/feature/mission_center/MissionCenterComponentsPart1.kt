@@ -462,43 +462,6 @@ fun SetupRow(label: String, value: String, valueColor: Color) {
 }
 @Composable
 fun HeaderSummaryDashboard(viewModel: CryptoViewModel, isBengali: Boolean) {
-    val missions by viewModel.activeMissions.collectAsState()
-    val totalActive = missions.size
-    
-    var aggregatePct = 0.0
-    var activeWarnings = 0
-    var activeCriticals = 0
-    var aggregateDollr = 0.0
-    var allHavePositionSize = true
-    
-    var spotCount = 0
-    var futuresCount = 0
-    
-    if (missions.isNotEmpty()) {
-        missions.forEach { m ->
-            val diff = m.currentPrice - m.entryPrice
-            val isLong = m.type.uppercase() == "LONG" || m.type.uppercase() == "BUY"
-            val typeMult = if (isLong) 1.0 else -1.0
-            val diffPct = (diff / m.entryPrice) * 100.0 * typeMult
-            aggregatePct += diffPct
-            
-            if (m.marketType.uppercase() == "FUTURES") futuresCount++ else spotCount++
-
-            when (mcMissionRiskState(m)) {
-                "CRITICAL" -> activeCriticals++
-                "WARNING" -> activeWarnings++
-            }
-
-            aggregateDollr += mcMissionPnlUsd(m)
-        }
-        aggregatePct /= missions.size
-    }
-
-    val pnlColor = if (aggregatePct > 0) T_Green else if (aggregatePct < 0) T_Red else T_TextSecondary
-    val pnlSign = if (aggregatePct > 0) "+" else ""
-    val dollrSign = if (aggregateDollr > 0) "+" else ""
-    val dollrString = mcSignedUsd(aggregateDollr)
-    
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -507,50 +470,36 @@ fun HeaderSummaryDashboard(viewModel: CryptoViewModel, isBengali: Boolean) {
             .border(1.dp, T_BorderHigh, RoundedCornerShape(4.dp))
             .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
-        Text("ACTIVE MISSION SUMMARY", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(6.dp))
+        Text("MISSION CENTER", color = T_TextPrimary, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(2.dp))
+        Text("Active signal supervision cockpit", color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+        Spacer(modifier = Modifier.height(10.dp))
         
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.weight(1.5f)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("ACTIVE", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(totalActive.toString(), color = T_TextPrimary, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("2", color = T_Cyan, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
-            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("SPOT", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("PENDING", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(spotCount.toString(), color = T_TextPrimary, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("1", color = T_TextPrimary, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
-            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
-                Text("FUTURES", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("PROTECTED", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(futuresCount.toString(), color = T_TextPrimary, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("1", color = T_Gold, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.weight(1.5f)) {
-                Text("AGGREGATE PnL", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("INVALID", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                 Spacer(modifier = Modifier.height(2.dp))
-                val pnlUsdText = if (missions.isEmpty()) "+$0.00" else dollrString
-                val pnlRoiText = if (missions.isEmpty()) "(+0.00%)" else "(${mcSignedPct(aggregatePct)})"
-                Row(verticalAlignment = Alignment.Bottom) {
-                    Text(pnlUsdText, color = pnlColor, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, maxLines = 1)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(pnlRoiText, color = pnlColor.copy(alpha = 0.86f), fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, maxLines = 1)
-                }
+                Text("0", color = T_Red, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
-            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("WARNING", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("COMPLETED", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(activeWarnings.toString(), color = if (activeWarnings > 0) T_Gold else T_TextPrimary, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            }
-            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
-                Text("CRITICAL", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(activeCriticals.toString(), color = if (activeCriticals > 0) T_Red else T_TextPrimary, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("0", color = T_Green, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
         }
     }

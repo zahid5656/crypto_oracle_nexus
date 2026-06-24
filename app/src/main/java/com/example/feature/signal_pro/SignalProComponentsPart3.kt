@@ -492,6 +492,17 @@ fun StartTradeFlow(
         label = "RecommendationSweepX"
     )
 
+    var showMockupUi by remember { mutableStateOf(false) }
+
+    if (showMockupUi) {
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { showMockupUi = false },
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            SignalProMockupScreen(viewModel = viewModel)
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -612,6 +623,18 @@ fun StartTradeFlow(
                     )
                 }
             }
+        }
+        
+        TextButton(
+            onClick = { showMockupUi = true },
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 4.dp).height(24.dp)
+        ) {
+            Text(
+                text = "VIEW SIGNAL PRO MOCKUP",
+                color = CryptoCyan.copy(alpha = 0.7f),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

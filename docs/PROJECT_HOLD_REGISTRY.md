@@ -56,6 +56,10 @@ Internal flow must keep:
 - ACCEPT SIGNAL
 - CLOSE
 
+**Expanded Institutional Matrix Hold:**
+Keep the Gemini Validation Cockpit / Institutional Matrix details added between the "Tap to unfold deep institutional matrix ➔" (or ↑) and the final Accept Signal / Verify Entry buttons. Do NOT remove this long expanded portion unless explicitly and clearly requested at a later time. Even if it looks awkward or dense, it is required for research.
+*Future Architecture Plan (Logged for Context):* The user plans to eventually condense this dense matrix and move it behind a new "See Details" or "Summary" button placed between Setup Signal and Accept Signal. When clicked, it will pop up a concise version of this validation cockpit. *Status: PLANNING PHASE ONLY. Do not implement this popup or remove the inline matrix until the user explicitly commands it.*
+
 ## Mission Center Holds
 
 Preserve:

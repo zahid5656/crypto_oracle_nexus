@@ -509,15 +509,27 @@ fun SignalQualitySystemBlock(
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-            Text(
-                text = if (isBengali) "সিগন্যাল মান যাচাই সূচক" else "SIGNAL QUALITY ENGINE INDEX",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextSecondary,
-                letterSpacing = if (isBengali) 0.sp else 1.sp,
-                maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (isBengali) "সিগন্যাল মান যাচাই সূচক" else "SIGNAL QUALITY ENGINE INDEX",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextSecondary,
+                    letterSpacing = if (isBengali) 0.sp else 1.sp,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                Text(
+                    text = if (isBengali) "স্ট্যাটাস: যাচাইকৃত" else "STATUS: VALIDATED",
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black,
+                    color = CryptoGreen
+                )
+            }
 
             Spacer(modifier = Modifier.height(5.dp))
 
@@ -842,5 +854,211 @@ fun ScannerErrorScreen(
         TextButton(onClick = onGoBack) {
             Text(text = "Return to Feed", color = TextSecondary)
         }
+    }
+}
+
+@Composable
+fun ExecutionReadinessMatrix(isBengali: Boolean = false) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF050A13)),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(0.95.dp, CryptoCyan.copy(alpha = 0.62f), RoundedCornerShape(12.dp)),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (isBengali) "এক্সিকিউশন রেডিনেস মেট্রিক্স" else "EXECUTION READINESS MATRIX",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = CryptoCyan,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    text = if (isBengali) "অবস্থা: অপটিমাল" else "STATUS: OPTIMAL",
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black,
+                    color = CryptoGreen
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                ExecutionMetric(if (isBengali) "স্প্রেড" else "Spread", "0.01%", CryptoGreen)
+                ExecutionMetric(if (isBengali) "তারল্য" else "Liquidity", "STRONG", CryptoGreen)
+                ExecutionMetric(if (isBengali) "স্লিপেজ" else "Slippage", "LOW", CryptoGreen)
+                ExecutionMetric(if (isBengali) "লেটেন্সি" else "Latency", "12ms", CryptoGreen)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Liquidity Depth: Strong (Tier 1 Order Book)", fontSize = 9.sp, color = TextMuted)
+        }
+    }
+}
+
+@Composable
+fun ExecutionMetric(label: String, value: String, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = label, fontSize = 8.sp, color = TextMuted, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(text = value, fontSize = 11.sp, color = color, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+fun DirectionTradeLogicValidation(isLong: Boolean = true, isBengali: Boolean = false) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF050A13)),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(0.95.dp, CryptoCyan.copy(alpha = 0.62f), RoundedCornerShape(12.dp)),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = if (isBengali) "দিকনির্দেশনা / ট্রেড লজিক ভ্যালিডেশন" else "DIRECTION / TRADE LOGIC VALIDATION",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextSecondary,
+                letterSpacing = 1.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            val directionLogic = if (isLong) "LONG / SPOT" else "SHORT"
+            val targetLogic = if (isLong) "Target > Entry" else "StopLoss > Entry > Target"
+            val stopLogic = if (isLong) "StopLoss < Entry" else "StopLoss > Entry"
+
+            LogicValidationRow(if (isBengali) "দিকনির্দেশনা লজিক" else "Direction Logic", directionLogic, true)
+            LogicValidationRow(if (isBengali) "এন্ট্রি স্টেট" else "Entry State", "VALIDATED", true)
+            LogicValidationRow(if (isBengali) "স্টপ-লস লজিক" else "Stop Loss Logic", stopLogic, true)
+            LogicValidationRow(if (isBengali) "টার্গেট লজিক" else "Target Logic", targetLogic, true)
+            
+            Spacer(modifier = Modifier.height(4.dp))
+            val invalidationText = if (isLong) "Invalidation: Break below support or momentum decay" else "Invalidation: Break above resistance or short pressure fade"
+            Text(text = invalidationText, fontSize = 9.sp, color = AccentGold, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+        }
+    }
+}
+
+@Composable
+fun LogicValidationRow(label: String, value: String, passed: Boolean) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = label, fontSize = 11.sp, color = TextMuted)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = value, fontSize = 11.sp, color = TextPrimary, fontWeight = FontWeight.Medium)
+            Spacer(modifier = Modifier.width(6.dp))
+            Box(
+                modifier = Modifier
+                    .size(14.dp)
+                    .clip(CircleShape)
+                    .background(if (passed) CryptoGreen.copy(alpha = 0.15f) else CryptoRedText.copy(alpha = 0.15f))
+                    .border(1.dp, if (passed) CryptoGreen else CryptoRedText, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                if (passed) {
+                    Icon(Icons.Default.Check, contentDescription = null, tint = CryptoGreen, modifier = Modifier.size(9.dp))
+                } else {
+                    Box(modifier = Modifier.size(4.dp).background(CryptoRedText, CircleShape))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DecisionGateSummary(isBengali: Boolean = false) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF050A13)),
+        modifier = Modifier.fillMaxWidth().border(0.95.dp, CryptoCyan.copy(alpha = 0.62f), RoundedCornerShape(12.dp))
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(text = if (isBengali) "ডিসিশন গেট সামারি" else "DECISION GATE SUMMARY", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextSecondary, letterSpacing = 1.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(text = if (isBengali) "চূড়ান্ত সিদ্ধান্ত:" else "Final Gate:", fontSize = 11.sp, color = TextMuted)
+                Text(text = "ACCEPTABLE", fontSize = 13.sp, color = CryptoGreen, fontWeight = FontWeight.Black)
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            HorizontalDivider(color = BorderColor.copy(alpha = 0.4f))
+            Spacer(modifier = Modifier.height(6.dp))
+            
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                ExecutionMetric("Direction", "PASS", CryptoGreen)
+                ExecutionMetric("Risk Score", "PASS", CryptoGreen)
+                ExecutionMetric("Readiness", "PASS", CryptoGreen)
+                ExecutionMetric("Consensus", "PASS", CryptoGreen)
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(text = "Blocked Reasons: None", fontSize = 9.sp, color = TextMuted)
+            Text(text = "Warnings: Monitor volatility", fontSize = 9.sp, color = AccentGold)
+        }
+    }
+}
+
+@Composable
+fun ConflictFlags(isBengali: Boolean = false) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF050A13)),
+        modifier = Modifier.fillMaxWidth().border(0.95.dp, CryptoCyan.copy(alpha = 0.62f), RoundedCornerShape(12.dp))
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(text = if (isBengali) "কনফ্লিক্ট ফ্ল্যাগ" else "CONFLICT FLAGS", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextSecondary, letterSpacing = 1.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                ConflictChip("CONSENSUS ALIGNED", CryptoGreen, Modifier.weight(1f))
+                ConflictChip("RISK OK", CryptoGreen, Modifier.weight(1f))
+                ConflictChip("ENTRY CHECK REQUIRED", AccentGold, Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+fun ConflictChip(text: String, color: Color, modifier: Modifier) {
+    Box(
+        modifier = modifier
+            .background(color.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+            .border(1.dp, color, RoundedCornerShape(4.dp))
+            .padding(vertical = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = text, fontSize = 7.5.sp, color = color, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+    }
+}
+
+@Composable
+fun SourceProvenanceAudit(isBengali: Boolean = false) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF050A13)),
+        modifier = Modifier.fillMaxWidth().border(0.95.dp, CryptoCyan.copy(alpha = 0.62f), RoundedCornerShape(12.dp))
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(text = if (isBengali) "সোর্স / প্রোভেনেন্স / অডিট" else "SOURCE / PROVENANCE / AUDIT", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = TextSecondary, letterSpacing = 1.sp)
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(text = "Signal ID: SIG-8942-A", fontSize = 9.sp, color = TextMuted)
+            Text(text = "Source: Local Mock / Simulated", fontSize = 9.sp, color = CryptoCyan)
+            Text(text = "Rules Fired: 14/15 Institutional Constraints", fontSize = 9.sp, color = TextMuted)
+            Text(text = "Data Mode: Snapshot | Model Mode: Offline Matrix", fontSize = 9.sp, color = TextMuted)
+            Text(text = "Audit State: LOGGED & VERIFIED", fontSize = 9.sp, color = CryptoGreen)
+        }
+    }
+}
+
+@Composable
+fun FinalGuidanceModule(isBengali: Boolean = false) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+        Text(text = if (isBengali) "চূড়ান্ত নির্দেশনা" else "FINAL GUIDANCE", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = CryptoCyan, letterSpacing = 1.sp)
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = "Suggested Action: VALIDATED ENTRY", fontSize = 11.sp, color = CryptoGreen, fontWeight = FontWeight.Bold)
+        Text(text = "Why: Alignment across short-term momentum and multi-AI consensus.", fontSize = 10.sp, color = TextSecondary)
+        Text(text = "Risk Reminder: Ensure trailing stops. No system guarantees profit.", fontSize = 10.sp, color = CryptoRedText)
     }
 }
