@@ -72,6 +72,9 @@ fun LiveRadarScreen(
         // Short Term Signals Display List
         item(key = "short_term_signals_$displayWindow") {
             ShortTermOpportunisticSignalsSection(timeframe = displayWindow, isBengali = isBengali, viewModel = viewModel)
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            AiAutoPilotMockupSection(isBengali = isBengali)
         }
 
         // Radar Alert Logs Title
