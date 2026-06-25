@@ -1,23 +1,46 @@
 package com.example.feature.live_radar
 
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.*
+import com.example.ui.theme.*   // ← keeps your color & typography tokens
+
+/* ─────────────────────────────────────────  PUBLIC COMPOSABLE  ───────────────────────────────────────── */
 
 @Composable
 fun AiAutoPilotMockupSection(isBengali: Boolean) {
+
+    /* animated radar rotation (used in “Titan Vision” button) */
+    val radarRotation by rememberInfiniteTransition(label = "radar")
+        .animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(2_800, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "radarRotation"
+        )
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -25,7 +48,8 @@ fun AiAutoPilotMockupSection(isBengali: Boolean) {
             .border(1.dp, BorderColor, RoundedCornerShape(12.dp))
             .padding(16.dp)
     ) {
-        // Header
+
+        /* ───────── HEADER ───────── */
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -33,7 +57,7 @@ fun AiAutoPilotMockupSection(isBengali: Boolean) {
         ) {
             Column {
                 Text(
-                    text = "AI AUTO PILOT",
+                    text = "TITAN AI AUTO PILOT",
                     color = CryptoCyan,
                     fontSize = 14.sp,
                     fontFamily = FontFamily.Monospace,
@@ -46,71 +70,60 @@ fun AiAutoPilotMockupSection(isBengali: Boolean) {
                     fontFamily = FontFamily.Monospace
                 )
             }
-            Box(
-                modifier = Modifier
-                    .background(DarkSurfaceVariant, RoundedCornerShape(4.dp))
-                    .border(0.5.dp, BorderColor, RoundedCornerShape(4.dp))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            BadgePill("SIMULATION ONLY")
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        /* ───────── POWER-CORE BUTTON  (“SCAN ∆ TITAN VISION”) ───────── */
+        TitanVisionButton(
+            radarRotation = radarRotation,
+            isBengali = isBengali,
+            onClick = {
+                // TODO: viewModel.activateTitanVision()
+            }
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        /* ───────── STATE  (unchanged) ───────── */
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ActionChip("SCAN ∆ TITAN VISION")
+            Spacer(Modifier.width(12.dp))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(0.5f)
             ) {
+                Text("STATE", color = TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Spacer(Modifier.height(2.dp))
                 Text(
-                    text = "SIMULATION ONLY",
-                    color = TextSecondary,
-                    fontSize = 9.sp,
+                    "STANDBY",
+                    color = CryptoCyan,
+                    fontSize = 12.sp,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // State & Action
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .background(DarkSurfaceVariant, RoundedCornerShape(4.dp))
-                    .border(0.5.dp, BorderColor, RoundedCornerShape(4.dp))
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                    .weight(1f)
-            ) {
-                Text(
-                    text = "SCAN FOR AI AUTO PILOT",
-                    color = TextPrimary,
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(0.5f)) {
-                Text(text = "STATE", color = TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(text = "STANDBY", color = CryptoCyan, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Scope Chips
-        Text(text = "SCOPE", color = TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-        Spacer(modifier = Modifier.height(6.dp))
+        /* ───────── SCOPE  ───────── */
+        SectionLabel("SCOPE")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ScopeChip("SPOT")
             ScopeChip("FUTURES LONG")
             ScopeChip("FUTURES SHORT")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // Presets
-        Text(text = "INVESTMENT PRESETS", color = TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-        Spacer(modifier = Modifier.height(6.dp))
+        /* ───────── PRESETS  ───────── */
+        SectionLabel("INVESTMENT PRESETS")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             PresetChip("IN1 $10", isLocked = false)
             PresetChip("IN2 $15", isLocked = false)
@@ -118,11 +131,10 @@ fun AiAutoPilotMockupSection(isBengali: Boolean) {
             PresetChip("IN4 $50", isLocked = true)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // Hard Gate Preview
-        Text(text = "HARD GATE PREVIEW", color = TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-        Spacer(modifier = Modifier.height(6.dp))
+        /* ───────── HARD-GATE PREVIEW  ───────── */
+        SectionLabel("HARD GATE PREVIEW")
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -131,31 +143,82 @@ fun AiAutoPilotMockupSection(isBengali: Boolean) {
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            HardGateRow("Signal Direction", "STANDBY", CryptoCyan)
-            HardGateRow("Stop-Loss Validity", "STANDBY", CryptoCyan)
-            HardGateRow("Risk / Reward", "STANDBY", CryptoCyan)
-            HardGateRow("Risk Score", "STANDBY", CryptoCyan)
-            HardGateRow("Execution Readiness", "STANDBY", CryptoCyan)
-            HardGateRow("Data Freshness", "STANDBY", CryptoCyan)
-            HardGateRow("Spread", "STANDBY", CryptoCyan)
-            HardGateRow("Slippage", "STANDBY", CryptoCyan)
-            HardGateRow("Liquidity", "STANDBY", CryptoCyan)
-            HardGateRow("Consensus Confidence", "STANDBY", CryptoCyan)
-            HardGateRow("Consensus Disagreement", "STANDBY", CryptoCyan)
-            HardGateRow("Conflict Flag", "STANDBY", CryptoCyan)
-            HardGateRow("Portfolio Exposure", "STANDBY", CryptoCyan)
-            HardGateRow("Validity Window", "STANDBY", CryptoCyan)
+            listOf(
+                "Signal Direction",
+                "Stop-Loss Validity",
+                "Risk / Reward",
+                "Risk Score",
+                "Execution Readiness",
+                "Data Freshness",
+                "Spread",
+                "Slippage",
+                "Liquidity",
+                "Consensus Confidence",
+                "Consensus Disagreement",
+                "Conflict Flag",
+                "Portfolio Exposure",
+                "Validity Window"
+            ).forEach { label ->
+                HardGateRow(label, "STANDBY", CryptoCyan)
+            }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Safety Copy
+        Spacer(Modifier.height(16.dp))
+
+        /* ───────── DISCLAIMER ───────── */
         Text(
-            text = "AI Auto Pilot is simulation-only in this phase. No exchange order will be opened.",
+            text = "TITAN AI Auto Pilot is simulation-only in this phase. No exchange order will be opened.",
             color = AccentGold,
             fontSize = 10.sp,
             fontFamily = FontFamily.SansSerif,
             lineHeight = 14.sp
+        )
+    }
+}
+
+/* ─────────────────────────────────────────  REUSABLE UI ELEMENTS  ───────────────────────────────────────── */
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(text, color = TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+    Spacer(Modifier.height(6.dp))
+}
+
+@Composable
+private fun BadgePill(text: String) {
+    Box(
+        modifier = Modifier
+            .background(DarkSurfaceVariant, RoundedCornerShape(4.dp))
+            .border(0.5.dp, BorderColor, RoundedCornerShape(4.dp))
+            .padding(horizontal = 6.dp, vertical = 2.dp)
+    ) {
+        Text(
+            text = text,
+            color = TextSecondary,
+            fontSize = 9.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun ActionChip(label: String) {
+    Box(
+        modifier = Modifier
+            .background(DarkSurfaceVariant, RoundedCornerShape(4.dp))
+            .border(0.5.dp, BorderColor, RoundedCornerShape(4.dp))
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .weight(1f)
+    ) {
+        Text(
+            text = label,
+            color = TextPrimary,
+            fontSize = 12.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -181,8 +244,15 @@ private fun ScopeChip(label: String) {
 private fun PresetChip(label: String, isLocked: Boolean) {
     Box(
         modifier = Modifier
-            .background(if (isLocked) DarkBackground else DarkSurfaceVariant, RoundedCornerShape(4.dp))
-            .border(0.5.dp, if (isLocked) BorderColor.copy(alpha = 0.5f) else BorderColor, RoundedCornerShape(4.dp))
+            .background(
+                if (isLocked) DarkBackground else DarkSurfaceVariant,
+                RoundedCornerShape(4.dp)
+            )
+            .border(
+                0.5.dp,
+                if (isLocked) BorderColor.copy(alpha = 0.5f) else BorderColor,
+                RoundedCornerShape(4.dp)
+            )
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -194,7 +264,7 @@ private fun PresetChip(label: String, isLocked: Boolean) {
                 fontWeight = if (isLocked) FontWeight.Normal else FontWeight.Bold
             )
             if (isLocked) {
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(Modifier.width(4.dp))
                 Text(
                     text = "[LOCKED]",
                     color = AccentGold,
@@ -226,5 +296,81 @@ private fun HardGateRow(label: String, status: String, statusColor: Color) {
             fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Bold
         )
+    }
+}
+
+/* ─────────────────────────────────────────  HELPER COMPOSABLE  ───────────────────────────────────────── */
+
+@Composable
+private fun TitanVisionButton(
+    radarRotation: Float,
+    isBengali: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(82.dp)
+            .background(
+                brush = Brush.verticalGradient(
+                    listOf(CryptoCyan.copy(alpha = 0.12f), Color.Transparent)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .border(1.5.dp, CryptoCyan.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+            /* ----- animated radar icon ----- */
+            Box(
+                modifier = Modifier.size(52.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.radar_scan), // supply this asset
+                    contentDescription = "Titan Radar",
+                    modifier = Modifier
+                        .size(48.dp)
+                        .graphicsLayer { rotationZ = radarRotation }
+                )
+                /* pulsing sweep */
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.radialGradient(
+                                listOf(CryptoGreen.copy(alpha = 0.4f), Color.Transparent)
+                            )
+                        )
+                        .graphicsLayer {
+                            alpha = (1 + kotlin.math.sin(radarRotation * 0.1f)) * 0.6f
+                        }
+                )
+            }
+
+            /* ----- label ----- */
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "SCAN ∆ TITAN VISION",
+                    color = CryptoCyan,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.5.sp
+                )
+                Text(
+                    text = if (isBengali) "ইনস্ট্যান্ট মার্কেট ওভাররাইড" else "INSTANT MARKET OVERRIDE",
+                    color = TextMuted,
+                    fontSize = 9.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+        }
     }
 }

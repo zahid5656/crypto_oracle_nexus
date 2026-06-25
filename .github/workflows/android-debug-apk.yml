@@ -13,7 +13,7 @@ on:
           - clean assembleDebug
   push:
     branches:
-      - main_refactor_debug-test-3
+      - main_refactor_debug-test-4
 
 permissions:
   contents: read
