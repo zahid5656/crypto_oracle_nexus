@@ -364,7 +364,7 @@ fun MissionTerminalCard(
         // AUTO-TRADING & AI POLICY ROW
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
             val policyText = if (mission?.copilotMode?.contains("EXECUTION") == true) "ASSIST & EXECUTION" else "ASSIST ONLY"
-            CompactDataRow("AI COPILOT POLICY", policyText, if (policyText == "ASSIST ONLY") T_Cyan else T_Gold)
+            CompactDataRow("TITAN AI COPILOT POLICY", policyText, if (policyText == "ASSIST ONLY") T_Cyan else T_Gold)
             
             if (policyText == "ASSIST & EXECUTION") {
                 Spacer(modifier = Modifier.height(SpacingCompact))
@@ -425,7 +425,7 @@ fun MissionTerminalCard(
 
         // 5. AI TRADE GUARDIAN STATUS
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = SpacingMedium, vertical = SpacingNormal)) {
-            Text("AI TRADE GUARDIAN", color = T_Gold, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("TITAN AI TRADE GUARDIAN", color = T_Gold, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(SpacingCompact))
             Row(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.weight(1f).padding(end = SpacingNormal)) {
@@ -630,7 +630,7 @@ fun MissionTerminalCard(
                             Text("SL1: ${mcFormatMissionPriceText(manualStopLoss ?: stopLoss)} | SL2: ${mcFormatMissionPriceText(mission?.sl2)}", color = T_Red, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Leverage: ${leverage ?: if (marketType.equals("Spot", ignoreCase = true)) "1X" else "Not Set"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Allocation: ${mission?.positionSize ?: "Not Set"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
-                            Text("Risk Profile: ${mission?.riskProfile ?: "Not Set"}", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                            Text("Consensus Bias: ${mission?.riskProfile ?: "Not Set"}", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Remark: ${mission?.setupRemark ?: "None"}", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Time in Trade: $timeElapsed", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Spacer(modifier = Modifier.height(8.dp))
@@ -647,7 +647,7 @@ fun MissionTerminalCard(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             val policyText = if (mission?.copilotMode?.contains("EXECUTION") == true) "ASSIST & EXECUTION" else "ASSIST ONLY"
-                            Text("AI Copilot Policy: $policyText", color = T_Cyan, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                            Text("TITAN AI Copilot Policy: $policyText", color = T_Cyan, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             if (mission?.copilotMode?.contains("Shadow") == true || mission?.copilotMode?.contains("EXECUTION") == true) {
                                 Text("Mode: Shadow Only", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             }
@@ -763,7 +763,7 @@ fun MissionTerminalCard(
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideTp3, onValueChange = { overrideTp3 = it }, label = { Text("TP3", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideSl, onValueChange = { overrideSl = it }, label = { Text("Stop Loss", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideLev, onValueChange = { overrideLev = it }, label = { Text("Leverage", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
-                                item { androidx.compose.material3.OutlinedTextField(value = overrideRisk, onValueChange = { overrideRisk = it }, label = { Text("Risk Profile", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
+                                item { androidx.compose.material3.OutlinedTextField(value = overrideRisk, onValueChange = { overrideRisk = it }, label = { Text("Consensus Bias", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideAlloc, onValueChange = { overrideAlloc = it }, label = { Text("Allocation", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideRemark, onValueChange = { overrideRemark = it }, label = { Text("Remark", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item {
@@ -792,7 +792,7 @@ fun MissionTerminalCard(
                                 }
                                 item { 
                                     Spacer(modifier = Modifier.height(12.dp))
-                                    Text("AI Copilot Policy", color = T_TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                    Text("TITAN AI Copilot Policy", color = T_TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                         Box(
@@ -829,7 +829,7 @@ fun MissionTerminalCard(
                             newLogs.add("OVERRIDE APPLIED")
                             newLogs.add("SETUP UPDATED: $selectedSetup")
                             if (mission.copilotMode != aiPolicy) {
-                                newLogs.add("AI COPILOT POLICY UPDATED: $aiPolicy")
+                                newLogs.add("TITAN AI COPILOT POLICY UPDATED: $aiPolicy")
                                 if (aiPolicy.contains("EXECUTION")) {
                                     newLogs.add("SHADOW EXECUTION ENABLED")
                                 } else {

@@ -461,24 +461,24 @@ fun DecisionBriefBlock(
                 )
             )
             .border(0.75.dp, accentColor.copy(alpha = 0.46f), RoundedCornerShape(10.dp))
-            .padding(horizontal = 10.dp, vertical = 7.dp)
+            .padding(horizontal = 8.dp, vertical = 5.dp)
     ) {
         Text(
             text = title,
-            fontSize = 11.5.sp,
+            fontSize = 10.5.sp,
             fontWeight = FontWeight.Black,
             color = accentColor,
             maxLines = 1,
             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
         Text(
             text = value,
-            fontSize = 13.5.sp,
+            fontSize = 11.5.sp,
             color = TextPrimary,
-            lineHeight = 18.sp
+            lineHeight = 14.5.sp
         )
     }
 }
