@@ -298,15 +298,15 @@ private fun TitanOracleVisionScanner(
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = if (scanning) "VISION SCANNING" else "TITAN ORACLE",
-                color = if (scanning) TextMuted else CryptoCyan,
+                text = "TITAN AI ORACLE RADAR",
+                color = CryptoCyan,
                 fontSize = 9.5.sp,
                 fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
             )
             Text(
-                text = "VISION SCANNER",
+                text = if (scanning) "TRACKING MISSION" else "VISION SCANNER",
                 color = TextPrimary,
                 fontSize = 11.5.sp,
                 fontFamily = FontFamily.SansSerif,

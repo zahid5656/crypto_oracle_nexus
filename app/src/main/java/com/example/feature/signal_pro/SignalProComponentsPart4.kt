@@ -111,10 +111,8 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoV
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, if (isExpanded && isLong) CryptoCyan else cardBorder, RoundedCornerShape(16.dp))
-            .clickable { 
-                if (isExpanded) {
-                    expandedAsset.value = null
-                } else {
+            .clickable {
+                if (!isExpanded) {
                     expandedAsset.value = "${coin.coinSymbol}_futures"
                 }
             }
@@ -428,7 +426,7 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoV
                     StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = livePrice)
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Tap here to collapse details ↑",
+                        text = "Tap here to collapse details ⤴",
                         fontSize = 12.sp,
                         color = CryptoCyan,
                         fontWeight = FontWeight.Bold,
@@ -514,10 +512,8 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int, viewModel: CryptoViewModel, 
                 ),
                 shape = RoundedCornerShape(16.dp)
             )
-            .clickable { 
-                if (isExpanded) {
-                    expandedAsset.value = null
-                } else {
+            .clickable {
+                if (!isExpanded) {
                     expandedAsset.value = "${symbol}_oraclepick"
                 }
             }
@@ -765,7 +761,7 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int, viewModel: CryptoViewModel, 
                     StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = curPrice)
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Tap here to collapse details ↑",
+                        text = "Tap here to collapse details ⤴",
                         fontSize = 12.sp,
                         color = CryptoCyan,
                         fontWeight = FontWeight.Bold,

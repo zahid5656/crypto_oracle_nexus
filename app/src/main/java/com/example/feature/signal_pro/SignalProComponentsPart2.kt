@@ -97,10 +97,8 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, if (isExpanded) CryptoCyan else BorderColor, RoundedCornerShape(16.dp))
-            .clickable { 
-                if (isExpanded) {
-                    expandedAsset.value = null
-                } else {
+            .clickable {
+                if (!isExpanded) {
                     expandedAsset.value = coin.coinSymbol
                 }
             }
@@ -426,7 +424,7 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
                     StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = livePrice)
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Tap here to collapse details ↑",
+                        text = "Tap here to collapse details ⤴",
                         fontSize = 12.sp,
                         color = CryptoCyan,
                         fontWeight = FontWeight.Bold,

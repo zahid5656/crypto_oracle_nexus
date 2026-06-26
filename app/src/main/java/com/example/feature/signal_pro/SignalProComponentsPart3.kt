@@ -274,6 +274,8 @@ fun StartTradeFlow(
                     onClick = { showMockupUi = true }
                 )
 
+                Spacer(modifier = Modifier.height(6.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -319,20 +321,28 @@ fun StartTradeFlow(
                     }
                 }
 
-                TextButton(
+                Spacer(modifier = Modifier.height(2.dp))
+
+                OutlinedButton(
                     onClick = { showDecisionBrief = false },
-                    modifier = Modifier.align(Alignment.CenterHorizontally).height(34.dp)
+                    border = BorderStroke(0.8.dp, TextSecondary.copy(alpha = 0.55f)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+                    shape = RoundedCornerShape(999.dp),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .height(34.dp)
+                        .widthIn(min = 104.dp)
                 ) {
                     Text(
                         text = if (isBengali) "বন্ধ" else "CLOSE",
-                        color = TextSecondary,
+                        color = TextPrimary,
                         fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 0.8.sp
                     )
                 }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }

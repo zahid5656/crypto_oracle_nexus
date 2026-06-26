@@ -40,9 +40,9 @@ import com.example.viewmodel.CryptoViewModel
 private val T_Surface = Color(0xFF111112)
 private val T_Bg = DarkBackground
 private val T_BorderMedium = Color(0xFF3A3A3C)
-private val T_TextPrimary = Color(0xFFFFFFFF)
-private val T_TextSecondary = Color(0xFF8E8E93)
-private val T_TextMuted = Color(0xFF636366)
+private val T_TextPrimary = TextPrimary
+private val T_TextSecondary = TextSecondary
+private val T_TextMuted = TextMuted
 
 private val T_Green = CryptoGreen
 private val T_Red = CryptoRedText
@@ -69,7 +69,7 @@ fun SignalProMockupScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 10.dp),
-            contentPadding = PaddingValues(bottom = 98.dp, top = 2.dp),
+            contentPadding = PaddingValues(bottom = 126.dp, top = 2.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             item { SignalProHeader(onBack = { viewModel.navigateTo(AppScreen.Home) }) }
@@ -101,8 +101,9 @@ fun SignalProMockupScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .background(T_Bg.copy(alpha = 0.94f))
-                .padding(horizontal = 10.dp, vertical = 8.dp)
+                .background(T_Bg.copy(alpha = 0.96f))
+                .navigationBarsPadding()
+                .padding(horizontal = 10.dp, vertical = 10.dp)
         ) {
             ActionButtonsSurface(onBack = { viewModel.navigateTo(AppScreen.Home) })
         }
@@ -461,18 +462,20 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                             ),
                             shape = RoundedCornerShape(8.dp)
                         )
-                        .border(0.8.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                        .border(0.8.dp, T_TextPrimary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
                         .clickable { showDecisionBrief = false; step = 1 },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "TITAN ∆ INSIGHT",
-                        color = Color.White,
+                        color = T_TextPrimary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.2.sp
                     )
                 }
+
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Button(
@@ -489,8 +492,15 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                     ) { Text("ACCEPT SIGNAL", fontWeight = FontWeight.Black, fontSize = 11.sp) }
                 }
                 
-                TextButton(onClick = { showDecisionBrief = false }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text("CLOSE", color = T_TextSecondary, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                Spacer(modifier = Modifier.height(2.dp))
+                OutlinedButton(
+                    onClick = { showDecisionBrief = false },
+                    border = androidx.compose.foundation.BorderStroke(0.8.dp, T_TextSecondary.copy(alpha = 0.55f)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = T_TextPrimary),
+                    shape = RoundedCornerShape(999.dp),
+                    modifier = Modifier.align(Alignment.CenterHorizontally).height(34.dp).widthIn(min = 104.dp)
+                ) {
+                    Text("CLOSE", color = T_TextPrimary, fontWeight = FontWeight.Black, fontSize = 10.sp, letterSpacing = 0.8.sp)
                 }
             }
         }
@@ -577,32 +587,32 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .height(48.dp)
+                    .height(44.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF02050D), Color(0xFF0B1220), Color(0xFF02050D))))
                     .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(T_Cyan.copy(alpha=0.10f), T_Green.copy(alpha=0.08f), T_Cyan.copy(alpha=0.10f))))
-                    .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Transparent, T_Cyan.copy(alpha=0.42f), Color.White.copy(alpha=0.12f), T_Green.copy(alpha=0.26f), Color.Transparent), startX = recoSweepX, endX = recoSweepX + 520f))
+                    .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Transparent, T_Cyan.copy(alpha=0.42f), T_TextPrimary.copy(alpha=0.12f), T_Green.copy(alpha=0.26f), Color.Transparent), startX = recoSweepX, endX = recoSweepX + 520f))
                     .border(0.8.dp, T_Cyan.copy(alpha=0.66f), RoundedCornerShape(10.dp))
                     .clickable { onBack() }
                     .padding(horizontal = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("⬅️ BACK", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White, letterSpacing = 0.8.sp)
+                Text("⬅️ BACK", fontSize = 11.sp, fontWeight = FontWeight.Black, color = T_TextPrimary, letterSpacing = 0.8.sp)
             }
 
             Box(
                 modifier = Modifier
                     .scale(scale)
                     .weight(1f)
-                    .height(48.dp)
+                    .height(44.dp)
                     .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(T_Cyan.copy(alpha = pulseAlpha), T_Green.copy(alpha = pulseAlpha))), RoundedCornerShape(10.dp))
-                    .border(0.8.dp, Color.White.copy(alpha = 0.28f), RoundedCornerShape(10.dp))
+                    .border(0.8.dp, T_TextPrimary.copy(alpha = 0.28f), RoundedCornerShape(10.dp))
                     .clickable(interactionSource = interactionSource, indication = androidx.compose.foundation.LocalIndication.current, onClick = { step = 1 })
                     .padding(horizontal = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("➡️ ACCEPT SIGNAL", fontWeight = FontWeight.Black, fontSize = 11.sp, color = Color.White, letterSpacing = 0.8.sp)
+                    Text("➡️ ACCEPT SIGNAL", fontWeight = FontWeight.Black, fontSize = 11.sp, color = T_TextPrimary, letterSpacing = 0.8.sp)
                 }
             }
         }
