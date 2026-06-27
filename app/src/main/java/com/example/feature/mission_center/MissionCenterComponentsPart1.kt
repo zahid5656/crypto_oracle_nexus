@@ -41,7 +41,7 @@ internal val T_Bg = DarkBackground
 internal val T_Surface = Color(0xFF111112)
 internal val T_Border = Color(0xFF1C1C1E)
 internal val T_BorderHigh = Color(0xFF2C2C2E)
-internal val T_TextPrimary = Color(0xFFFFFFFF)
+internal val T_TextPrimary = TextPrimary
 internal val T_TextSecondary = Color(0xFF8E8E93)
 internal val T_TextMuted = Color(0xFF636366)
 internal val T_Green = CryptoGreen
@@ -255,7 +255,7 @@ fun MissionTerminalHeaderBlock(viewModel: CryptoViewModel) {
         ) {
             Column {
                 Text(
-                    text = "AI COPILOT TRADE GUARDIAN",
+                    text = "TITAN AI COPILOT TRADE GUARDIAN",
                     color = T_TextMuted,
                     fontSize = 8.sp,
                     fontFamily = FontFamily.Monospace,
@@ -387,7 +387,7 @@ fun PremiumCopilotActivationBanner(isBengali: Boolean) {
             Box(modifier = Modifier.size(8.dp).background(T_Cyan, CircleShape))
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = if (isBengali) "এআই ট্রেড গাইডেন্স সক্রিয়" else "AI TRADE GUARDIAN ACTIVE",
+                text = if (isBengali) "টাইটান এআই ট্রেড গাইডেন্স সক্রিয়" else "TITAN AI TRADE GUARDIAN ACTIVE",
                 color = T_TextPrimary,
                 fontSize = 12.sp,
                 fontFamily = FontFamily.Monospace,
@@ -396,7 +396,7 @@ fun PremiumCopilotActivationBanner(isBengali: Boolean) {
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = if (isBengali) "এআই ট্রেড গাইডেন্স সতর্কতা-শুধুমাত্র মোডে মিশন মনিটর করছে।" else "AI Trade Guardian is monitoring this mission in Alert-Only mode.",
+            text = if (isBengali) "টাইটান এআই ট্রেড গাইডেন্স সতর্কতা-শুধুমাত্র মোডে মিশন মনিটর করছে।" else "TITAN AI Trade Guardian is monitoring this mission in Alert-Only mode.",
             color = T_TextSecondary,
             fontSize = 11.sp,
             fontFamily = FontFamily.SansSerif,
@@ -553,7 +553,7 @@ fun EscalationPolicyCard(viewModel: CryptoViewModel, isBengali: Boolean) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "AI COPILOT EXECUTION STATUS",
+                "TITAN AI COPILOT EXECUTION STATUS",
                 color = T_TextMuted,
                 fontSize = 9.sp,
                 fontFamily = FontFamily.Monospace,

@@ -51,7 +51,7 @@ private val T_Surface = Color(0xFF111112)
 private val T_Border = Color(0xFF1C1C1E)
 private val T_BorderHigh = Color(0xFF2C2C2E)
 private val T_BorderMedium = Color(0xFF3A3A3C)
-private val T_TextPrimary = Color(0xFFFFFFFF)
+private val T_TextPrimary = TextPrimary
 private val T_TextSecondary = Color(0xFF8E8E93)
 private val T_TextMuted = Color(0xFF636366)
 private val T_Green = CryptoGreen 
@@ -259,7 +259,7 @@ fun OracleFeedHeaderBlock(viewModel: CryptoViewModel, feedState: String) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "BINANCE WSS : ACTIVE",
+                    text = "LOCAL SNAPSHOT : ACTIVE",
                     color = T_Green,
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
@@ -275,7 +275,7 @@ fun OracleFeedHeaderBlock(viewModel: CryptoViewModel, feedState: String) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "GEMINI PRO : ONLINE",
+                    text = "AI CORE : LOCAL",
                     color = T_Cyan,
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
@@ -386,10 +386,9 @@ fun SourceProvenanceRow() {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("Market: API", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-        Text("AI: Pending", color = T_Gold, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-        Text("Cache: Fresh", color = T_Green, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-        Text("Model: Active", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+        Text("SOURCE: ORACLE QUANT ENGINE [LS]", color = T_TextSecondary, fontSize = 8.4.sp, fontFamily = FontFamily.SansSerif, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1.35f))
+        Text("LOCAL MATRIX : ACTIVE", color = T_Green, fontSize = 8.4.sp, fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold, maxLines = 1, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
+        Text("API COST: 0", color = T_TextSecondary, fontSize = 8.4.sp, fontFamily = FontFamily.SansSerif, maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.weight(0.6f))
     }
 }
 
@@ -739,7 +738,7 @@ fun StateBox(message: String, color: Color) {
 fun OracleReferenceIndexPanel() {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
-            Text("Source: Simulated", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            Text("SOURCE: LOCAL SNAPSHOT [LS]", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
             Text("Last update: 12s", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
         }
         val indexList = listOf(
@@ -820,7 +819,7 @@ fun OracleAnalyticalInsightsPanel() {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).border(0.5.dp, T_BorderMedium, RoundedCornerShape(4.dp)).background(T_Surface).padding(12.dp)
     ) {
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
-            Text("Source: Cached Model", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            Text("SOURCE: ORACLE QUANT ENGINE [LS]", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
             Text("Last update: 45s", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
         }
         val insights = listOf(
@@ -851,7 +850,7 @@ fun OracleAnalyticalInsightsPanel() {
 fun MarketFeedIntelligencePanel() {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
-            Text("Source: Simulated Feed", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            Text("SOURCE: CURATED STATIC FEED [LS]", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
             Text("Feed status: Stable", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
         }
         val articles = listOf(

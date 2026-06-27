@@ -40,9 +40,9 @@ import com.example.viewmodel.CryptoViewModel
 private val T_Surface = Color(0xFF111112)
 private val T_Bg = DarkBackground
 private val T_BorderMedium = Color(0xFF3A3A3C)
-private val T_TextPrimary = Color(0xFFFFFFFF)
-private val T_TextSecondary = Color(0xFF8E8E93)
-private val T_TextMuted = Color(0xFF636366)
+private val T_TextPrimary = TextPrimary
+private val T_TextSecondary = TextSecondary
+private val T_TextMuted = TextMuted
 
 private val T_Green = CryptoGreen
 private val T_Red = CryptoRedText
@@ -59,109 +59,70 @@ fun SignalProMockupScreen(
         viewModel.navigateTo(AppScreen.Home)
     }
 
-    LazyColumn(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(T_Bg)
-            .padding(horizontal = 12.dp),
-        contentPadding = PaddingValues(bottom = 24.dp)
     ) {
-        item {
-            SignalProHeader(onBack = { viewModel.navigateTo(AppScreen.Home) })
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            PriceMatrixBlock()
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            CQISurface()
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                 Box(modifier = Modifier.weight(1f)) { RiskScoreSurface() }
-                 Box(modifier = Modifier.weight(1f)) { ExecutionReadinessSurface() }
-             }
-             Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            ConsensusSummarySurface()
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        
-        item {
-            MultiAIConsensusSurface()
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            DirectionValidationSurface()
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(modifier = Modifier.weight(1f)) { RRValidationSurface() }
-                Box(modifier = Modifier.weight(1f)) { SLSanitySurface() }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .navigationBarsPadding()
+                .padding(horizontal = 10.dp),
+            contentPadding = PaddingValues(bottom = 42.dp, top = 2.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            item { SignalProHeader(onBack = { viewModel.navigateTo(AppScreen.Home) }) }
+            item { PriceMatrixBlock() }
+            item { CQISurface() }
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(modifier = Modifier.weight(1f)) { RiskScoreSurface() }
+                    Box(modifier = Modifier.weight(1f)) { ExecutionReadinessSurface() }
+                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            TPMatrixSurface()
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            PositionAllocationSurface()
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            DecisionGateSurface()
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            ConflictFlagSurface()
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            AuditRow()
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-
-        item {
-            ActionButtonsSurface()
+            item { ConsensusSummarySurface() }
+            item { MultiAIConsensusSurface() }
+            item { DirectionValidationSurface() }
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(modifier = Modifier.weight(1f)) { RRValidationSurface() }
+                    Box(modifier = Modifier.weight(1f)) { SLSanitySurface() }
+                }
+            }
+            item { TPMatrixSurface() }
+            item { PositionAllocationSurface() }
+            item { DecisionGateSurface() }
+            item { ConflictFlagSurface() }
+            item { AuditRow() }
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                ActionButtonsSurface(onBack = { viewModel.navigateTo(AppScreen.Home) })
+                Spacer(modifier = Modifier.height(18.dp))
+            }
         }
     }
 }
 
 @Composable
 fun SignalProHeader(onBack: () -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack, modifier = Modifier.size(28.dp)) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = T_TextPrimary)
             }
             Spacer(modifier = Modifier.width(8.dp))
             Column {
-                Text("SIGNAL PRO", color = T_TextPrimary, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("TITAN ORACLE SIGNAL INSIGHT", color = T_TextPrimary, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 Text("Validation Cockpit", color = T_Cyan, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             }
         }
         
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column {
-                Text("Symbol: BTC", color = T_TextPrimary, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("Symbol: BTC", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 Text("Mode: FUTURES LONG", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             Column(horizontalAlignment = Alignment.End) {
@@ -169,7 +130,7 @@ fun SignalProHeader(onBack: () -> Unit) {
                 Text("Validity: 42m", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Timeframe: 24H", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             Text("Freshness: 12s", color = T_Green, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
@@ -185,7 +146,7 @@ fun PriceMatrixBlock() {
             PriceItem("Current", "$63,994", T_TextPrimary)
             PriceItem("Expected", "$65,400", T_Gold)
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(7.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             PriceItem("Predicted", "$66,200", T_Green)
             PriceItem("TP", "$66,500", T_Green)
@@ -198,7 +159,7 @@ fun PriceMatrixBlock() {
 fun PriceItem(label: String, value: String, valueColor: Color) {
     Column(horizontalAlignment = Alignment.Start) {
         Text(label, color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-        Text(value, color = valueColor, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, style = androidx.compose.ui.text.TextStyle(fontFeatureSettings = "tnum"))
+        Text(value, color = valueColor, fontSize = 12.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, style = androidx.compose.ui.text.TextStyle(fontFeatureSettings = "tnum"))
     }
 }
 
@@ -208,14 +169,14 @@ fun CQISurface() {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Column {
                 Text("CQI Score", color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Text("88", color = T_Green, fontSize = 24.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("88", color = T_Green, fontSize = 21.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text("Classification", color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Text("HIGH CONFIDENCE", color = T_Green, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("HIGH CONFIDENCE", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Probability: 82%", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
             Text("Status: VALIDATED", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
@@ -227,8 +188,8 @@ fun CQISurface() {
 fun RiskScoreSurface() {
     SurfaceBlock("RISK SCORE / ঝুঁকির পরিমান") {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            Text("24", color = T_Gold, fontSize = 24.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            Text("MEDIUM", color = T_Gold, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("24", color = T_Gold, fontSize = 21.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("MEDIUM", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -251,15 +212,15 @@ fun ConsensusSummarySurface() {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column {
                 Text("Consensus Confidence", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-                Text("HIGH (84%)", color = T_Green, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
+                Text("HIGH (84%)", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(5.dp))
                 Text("Consensus Bias", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-                Text("AGGRESSIVE", color = T_Gold, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("AGGRESSIVE", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text("Direction", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-                Text("BULLISH", color = T_Green, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
+                Text("BULLISH", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(5.dp))
                 Text("Vote Split", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                 Text("4-0-1 (1 Outlier)", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
             }
@@ -294,7 +255,7 @@ fun EngineCard(name: String, score: String, vote: String, status: String, color:
             Text("Status: $status", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(score, color = color, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text(score, color = color, fontSize = 12.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.width(8.dp))
             Text(vote, color = color, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
@@ -307,14 +268,14 @@ fun DirectionValidationSurface() {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column {
                 Text("Direction Logic", color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Text("LONG", color = T_Green, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("LONG", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text("Entry State", color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Text("VALID", color = T_Green, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("VALID", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(7.dp))
         Text("StopLoss < Entry : VALID", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
         Text("Target > Entry : VALID", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
     }
@@ -325,7 +286,7 @@ fun RRValidationSurface() {
     SurfaceBlock("RISK / REWARD") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("RR: 2.4R", color = T_Cyan, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            Text("VALID", color = T_Green, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("VALID", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text("Risk Path: Standard", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
@@ -359,7 +320,7 @@ fun TPMatrixSurface() {
 fun TPItem(label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(label, color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-        Text(value, color = T_Green, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        Text(value, color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -367,9 +328,9 @@ fun TPItem(label: String, value: String) {
 fun PositionAllocationSurface() {
     SurfaceBlock("POSITION ALLOCATION") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("Posture", color = T_TextMuted, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
-            Text("Moderate", color = T_Cyan, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            Text("5.0% Cap", color = T_TextSecondary, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+            Text("Posture", color = T_TextMuted, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+            Text("Moderate", color = T_Cyan, fontSize = 12.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("5.0% Cap", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
         }
     }
 }
@@ -378,14 +339,14 @@ fun PositionAllocationSurface() {
 fun DecisionGateSurface() {
     SurfaceBlock("DECISION GATE SUMMARY") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Decision Gate:", color = T_TextPrimary, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            Text("REVIEW", color = T_Gold, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("Decision Gate:", color = T_TextPrimary, fontSize = 12.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("REVIEW", color = T_Gold, fontSize = 12.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         Text("Blocked: None", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
         Text("Warnings: Spread elevated", color = T_Orange, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column {
                 Text("Signal Dir: PASS", color = T_Green, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
@@ -423,7 +384,7 @@ fun AuditRow() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActionButtonsSurface() {
+fun ActionButtonsSurface(onBack: () -> Unit) {
     var step by remember { mutableStateOf(0) }
     var showDecisionBrief by remember { mutableStateOf(false) }
     
@@ -469,18 +430,46 @@ fun ActionButtonsSurface() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.92f)
-                    .padding(horizontal = 18.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                    .padding(horizontal = 18.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text("AI Decision Brief", fontSize = 20.sp, fontWeight = FontWeight.Black, color = T_Cyan)
-                Text("Compact signal summary for faster decision-making", fontSize = 12.5.sp, color = T_TextSecondary)
+                Text("TITAN AI ORACLE DECISION BRIEF", fontSize = 17.sp, fontWeight = FontWeight.Black, color = T_Cyan)
+                Text("Compact signal summary for fast decision-making", fontSize = 10.5.sp, color = T_TextSecondary)
                 
-                SurfaceBlock("Signal Verdict") { Text("Signal is strong, but entry confirmation is still required.", color = T_Green, fontSize = 12.sp) }
-                SurfaceBlock("Why It Matters") { Text("This setup combines trend, momentum, volume, AI consensus, and risk profile signals.", color = T_Cyan, fontSize = 12.sp) }
-                SurfaceBlock("Risk Warning") { Text("Risk is low to medium. Follow stop loss and position sizing.", color = T_Gold, fontSize = 12.sp) }
-                SurfaceBlock("Suggested Action") { Text("Verify entry price, stop loss, and target before accepting the signal.", color = T_Green, fontSize = 12.sp) }
+                SurfaceBlock("Signal Verdict") { Text("Signal is strong, but entry confirmation is still required.", color = T_Green, fontSize = 11.sp) }
+                SurfaceBlock("Why It Matters") { Text("Trend, momentum, volume, TITAN AI consensus, and risk score align for this setup.", color = T_Cyan, fontSize = 11.sp) }
+                SurfaceBlock("Risk Warning") { Text("Risk is low to medium. Follow stop loss and position sizing.", color = T_Gold, fontSize = 11.sp) }
+                SurfaceBlock("Suggested Action") { Text("Verify entry price, stop loss, and target before accepting the signal.", color = T_Green, fontSize = 11.sp) }
                 
-                Text("AI assists decision-making; the final trading decision is yours.", fontSize = 11.5.sp, color = T_TextMuted)
+                Text("TITAN AI assists decision-making; the final trading decision is yours.", fontSize = 11.5.sp, color = T_TextMuted)
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(46.dp)
+                        .background(
+                            brush = androidx.compose.ui.graphics.Brush.linearGradient(
+                                colors = listOf(
+                                    T_Cyan.copy(alpha = 0.85f),
+                                    Color(0xFF0077FF).copy(alpha = 0.85f)
+                                )
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .border(0.8.dp, T_TextPrimary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                        .clickable { showDecisionBrief = false; step = 1 },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "TITAN ∆ INSIGHT",
+                        color = T_TextPrimary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.2.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Button(
@@ -497,8 +486,15 @@ fun ActionButtonsSurface() {
                     ) { Text("ACCEPT SIGNAL", fontWeight = FontWeight.Black, fontSize = 11.sp) }
                 }
                 
-                TextButton(onClick = { showDecisionBrief = false }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text("CLOSE", color = T_TextSecondary, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                Spacer(modifier = Modifier.height(2.dp))
+                OutlinedButton(
+                    onClick = { showDecisionBrief = false },
+                    border = androidx.compose.foundation.BorderStroke(0.8.dp, T_TextSecondary.copy(alpha = 0.55f)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = T_TextPrimary),
+                    shape = RoundedCornerShape(999.dp),
+                    modifier = Modifier.align(Alignment.CenterHorizontally).height(34.dp).widthIn(min = 104.dp)
+                ) {
+                    Text("CLOSE", color = T_TextPrimary, fontWeight = FontWeight.Black, fontSize = 10.sp, letterSpacing = 0.8.sp)
                 }
             }
         }
@@ -519,7 +515,7 @@ fun ActionButtonsSurface() {
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text("SIGNAL SETUP", fontSize = 20.sp, fontWeight = FontWeight.Black, color = T_Cyan)
-                Text("Auto-filled from the current signal. Review before accepting.", fontSize = 12.sp, color = T_TextSecondary)
+                Text("Auto-filled from the current signal. Review before accepting.", fontSize = 11.sp, color = T_TextSecondary)
                 
                 // Use Recommended Signal Button Placeholder that user requested
                 Button(
@@ -555,10 +551,10 @@ fun ActionButtonsSurface() {
             title = { Text("Verify Trade Details", color = T_Cyan, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
             text = {
                 Column {
-                    Text("Direction: LONG (FUTURES)", color = T_TextSecondary, fontSize = 14.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Locked Entry Price:", color = T_TextSecondary, fontSize = 12.sp)
-                    Text("$63,920.00", color = T_Green, fontSize = 24.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace) // The bright green dollar value user requested
+                    Text("Direction: LONG (FUTURES)", color = T_TextSecondary, fontSize = 12.5.sp)
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Text("Locked Entry Price:", color = T_TextSecondary, fontSize = 11.sp)
+                    Text("$63,920.00", color = T_Green, fontSize = 21.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace) // The bright green dollar value user requested
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Once accepted, this entry will activate personal mission tracking.", color = T_Gold, fontSize = 10.sp)
                 }
@@ -575,41 +571,42 @@ fun ActionButtonsSurface() {
         )
     }
 
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(48.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF02050D), Color(0xFF0B1220), Color(0xFF02050D))))
-                .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(T_Cyan.copy(alpha=0.10f), T_Green.copy(alpha=0.08f), T_Cyan.copy(alpha=0.10f))))
-                .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Transparent, T_Cyan.copy(alpha=0.42f), Color.White.copy(alpha=0.12f), T_Green.copy(alpha=0.26f), Color.Transparent), startX = recoSweepX, endX = recoSweepX + 520f))
-                .border(0.8.dp, T_Cyan.copy(alpha=0.66f), RoundedCornerShape(10.dp))
-                .clickable { showDecisionBrief = true }
-                .padding(horizontal = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-                Text("HIGH CONFIDENCE", fontSize = 10.sp, fontWeight = FontWeight.Black, color = Color(0xFFF4F8FF), maxLines = 1)
-                Text("| VERIFY ENTRY |", fontSize = 10.sp, fontWeight = FontWeight.Black, color = Color(0xFFF4F8FF), maxLines = 1)
+    androidx.compose.material3.Surface(
+        modifier = Modifier
+            .fillMaxWidth(),
+        color = Color.Transparent
+    ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF02050D), Color(0xFF0B1220), Color(0xFF02050D))))
+                    .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(T_Cyan.copy(alpha=0.10f), T_Green.copy(alpha=0.08f), T_Cyan.copy(alpha=0.10f))))
+                    .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Transparent, T_Cyan.copy(alpha=0.42f), T_TextPrimary.copy(alpha=0.12f), T_Green.copy(alpha=0.26f), Color.Transparent), startX = recoSweepX, endX = recoSweepX + 520f))
+                    .border(0.8.dp, T_Cyan.copy(alpha=0.66f), RoundedCornerShape(10.dp))
+                    .clickable { onBack() }
+                    .padding(horizontal = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("⬅️ BACK", fontSize = 11.sp, fontWeight = FontWeight.Black, color = T_TextPrimary, letterSpacing = 0.8.sp)
             }
-        }
 
-        Box(
-            modifier = Modifier
-                .scale(scale)
-                .weight(1f)
-                .height(48.dp)
-                .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(T_Cyan.copy(alpha = pulseAlpha), T_Green.copy(alpha = pulseAlpha))), RoundedCornerShape(10.dp))
-                .border(0.8.dp, Color.White.copy(alpha = 0.28f), RoundedCornerShape(10.dp))
-                .clickable(interactionSource = interactionSource, indication = androidx.compose.foundation.LocalIndication.current, onClick = { step = 1 })
-                .padding(horizontal = 10.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
-                Spacer(modifier = Modifier.width(5.dp))
-                Text("ACCEPT SIGNAL", fontWeight = FontWeight.Black, fontSize = 11.sp, color = Color.White, letterSpacing = 0.8.sp)
+            Box(
+                modifier = Modifier
+                    .scale(scale)
+                    .weight(1f)
+                    .height(44.dp)
+                    .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(T_Cyan.copy(alpha = pulseAlpha), T_Green.copy(alpha = pulseAlpha))), RoundedCornerShape(10.dp))
+                    .border(0.8.dp, T_TextPrimary.copy(alpha = 0.28f), RoundedCornerShape(10.dp))
+                    .clickable(interactionSource = interactionSource, indication = androidx.compose.foundation.LocalIndication.current, onClick = { step = 1 })
+                    .padding(horizontal = 10.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("➡️ ACCEPT SIGNAL", fontWeight = FontWeight.Black, fontSize = 11.sp, color = T_TextPrimary, letterSpacing = 0.8.sp)
+                }
             }
         }
     }
@@ -622,7 +619,7 @@ fun ChipLabel(text: String, color: Color) {
             .clip(RoundedCornerShape(4.dp))
             .background(color.copy(alpha = 0.15f))
             .border(0.5.dp, color, RoundedCornerShape(4.dp))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(horizontal = 7.dp, vertical = 3.dp)
     ) {
         Text(text, color = color, fontSize = 9.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
     }
@@ -635,10 +632,10 @@ fun SurfaceBlock(title: String, content: @Composable () -> Unit) {
             .fillMaxWidth()
             .border(0.5.dp, T_BorderMedium, RoundedCornerShape(6.dp))
             .background(T_Surface)
-            .padding(12.dp)
+            .padding(horizontal = 8.dp, vertical = 6.dp)
     ) {
-        Text(title, color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(12.dp))
+        Text(title, color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(4.dp))
         content()
     }
 }

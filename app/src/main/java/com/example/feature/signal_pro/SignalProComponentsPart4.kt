@@ -111,10 +111,8 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoV
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, if (isExpanded && isLong) CryptoCyan else cardBorder, RoundedCornerShape(16.dp))
-            .clickable { 
-                if (isExpanded) {
-                    expandedAsset.value = null
-                } else {
+            .clickable {
+                if (!isExpanded) {
                     expandedAsset.value = "${coin.coinSymbol}_futures"
                 }
             }
@@ -428,7 +426,7 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoV
                     StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = livePrice)
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Tap here to collapse details ↑",
+                        text = "Tap here to collapse details ⤴",
                         fontSize = 12.sp,
                         color = CryptoCyan,
                         fontWeight = FontWeight.Bold,
@@ -514,10 +512,8 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int, viewModel: CryptoViewModel, 
                 ),
                 shape = RoundedCornerShape(16.dp)
             )
-            .clickable { 
-                if (isExpanded) {
-                    expandedAsset.value = null
-                } else {
+            .clickable {
+                if (!isExpanded) {
                     expandedAsset.value = "${symbol}_oraclepick"
                 }
             }
@@ -765,7 +761,7 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int, viewModel: CryptoViewModel, 
                     StartTradeFlow(viewModel = viewModel, mission = mission, livePrice = curPrice)
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Tap here to collapse details ↑",
+                        text = "Tap here to collapse details ⤴",
                         fontSize = 12.sp,
                         color = CryptoCyan,
                         fontWeight = FontWeight.Bold,
@@ -861,13 +857,23 @@ fun RealTimeInvestmentTrackingModule(
             )
 
             Spacer(modifier = Modifier.height(12.dp))
+            HorizontalDivider(color = BorderColor.copy(alpha = 0.5f))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "MARKET EVIDENCE SUMMARY",
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextSecondary,
+                letterSpacing = 0.5.sp,
+                modifier = Modifier.padding(bottom = 6.dp)
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "Signal Heat: 94", fontSize = 9.sp, color = CryptoRedText)
                 Text(text = "Pressure: ${if (isLong) "Buy" else "Sell"} Side", fontSize = 9.sp, color = if (isLong) CryptoGreen else CryptoRedText)
-                Text(text = "Bias: ${if (isLong) "Bullish" else "Bearish"}", fontSize = 9.sp, color = if (isLong) CryptoGreen else CryptoRedText)
+                Text(text = "Trend Bias: ${if (isLong) "Bullish" else "Bearish"}", fontSize = 9.sp, color = if (isLong) CryptoGreen else CryptoRedText)
             }
             Spacer(modifier = Modifier.height(4.dp))
             Row(
@@ -875,7 +881,7 @@ fun RealTimeInvestmentTrackingModule(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "Volatility: Elevated", fontSize = 9.sp, color = AccentGold)
-                Text(text = "Liquidity: Strong", fontSize = 9.sp, color = CryptoCyan)
+                Text(text = "Liquidity detail: Strong (Tier 1 Order Book)", fontSize = 9.sp, color = CryptoCyan)
             }
         }
     }
