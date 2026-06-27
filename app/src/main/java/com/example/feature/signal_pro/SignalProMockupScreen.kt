@@ -389,7 +389,10 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
     var showDecisionBrief by remember { mutableStateOf(false) }
     
     val decisionBriefSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val setupSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val setupSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { sheetValue -> sheetValue != SheetValue.Hidden }
+    )
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -486,13 +489,13 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                     ) { Text("ACCEPT SIGNAL", fontWeight = FontWeight.Black, fontSize = 11.sp) }
                 }
                 
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 OutlinedButton(
                     onClick = { showDecisionBrief = false },
                     border = androidx.compose.foundation.BorderStroke(0.8.dp, T_TextSecondary.copy(alpha = 0.55f)),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = T_TextPrimary),
                     shape = RoundedCornerShape(999.dp),
-                    modifier = Modifier.align(Alignment.CenterHorizontally).height(34.dp).widthIn(min = 104.dp)
+                    modifier = Modifier.align(Alignment.CenterHorizontally).height(36.dp).widthIn(min = 126.dp)
                 ) {
                     Text("CLOSE", color = T_TextPrimary, fontWeight = FontWeight.Black, fontSize = 10.sp, letterSpacing = 0.8.sp)
                 }
@@ -502,8 +505,9 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
 
     if (step == 2) {
         ModalBottomSheet(
-            onDismissRequest = { step = 0 },
+            onDismissRequest = { /* Setup cockpit closes only from its visible CLOSE action. */ },
             sheetState = setupSheetState,
+            dragHandle = null,
             containerColor = Color(0xFF030712),
             contentColor = T_TextPrimary
         ) {

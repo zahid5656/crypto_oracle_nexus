@@ -2,7 +2,7 @@
 
 **Full Brand:** TITAN CRYPTO ORACLE NEXUS  
 **Product Category:** AI-powered crypto trading intelligence, signal validation, mission control, active trade supervision, diagnosis, and guarded automation research platform.  
-**Primary Owner / Founder:** MD. ZAHIDUL ISLAM
+**Primary Owner / Founder:** MD. ZAHIDUL ISLAM  
 **Repository Status:** Private / owner-controlled project source.
 
 ---
@@ -15,7 +15,7 @@ The project is being developed as an institutional-style crypto intelligence coc
 
 - Oracle Feed market intelligence
 - Signal Pro validation and decision support
-- TITAN Δ INSIGHT compact decision briefing
+- TITAN Δ Insight compact decision briefing
 - Setup Signal configuration
 - Accept Signal mission activation preview
 - Live Radar tactical monitoring
@@ -23,7 +23,7 @@ The project is being developed as an institutional-style crypto intelligence coc
 - Stats Hub outcome intelligence
 - Trial-mode diagnosis
 - API-cost visibility
-- Future guarded AUTO-TRADING, TITAN AI COPILOT EXECUTION, and TITAN AI AUTO PILOT simulation
+- future guarded Auto-Trading, TITAN AI Copilot Execution, and TITAN AI Auto Pilot simulation
 
 The system must assist, validate, explain, monitor, diagnose, and support trading decisions. It must not claim guaranteed profit, guaranteed prediction accuracy, or guaranteed trade outcomes.
 
@@ -95,13 +95,13 @@ This project must preserve these rules:
 
 ## Intellectual Property and Copyright Notice
 
-Copyright © Zahidul Islam. All rights reserved.
+Copyright © Md. Zahidul Islam. All rights reserved.
 
-All project source code, UI concepts, product strategy, written documentation, trading workflow designs, screen structures, naming systems, execution-mode theory, mission-control logic, roadmap material, diagrams, prompts, and related project content are proprietary to Zahidul Islam unless a separate written agreement states otherwise.
+All project source code, UI concepts, product strategy, written documentation, trading workflow designs, screen structures, naming systems, execution-mode theory, mission-control logic, roadmap material, diagrams, prompts, and related project content are proprietary to Md. Zahidul Islam unless a separate written agreement states otherwise.
 
 No license is granted by default.
 
-You may not copy, reuse, publish, distribute, train on, sell, sublicense, reverse engineer, extract, or adapt any part of this project without prior written permission from Zahidul Islam.
+You may not copy, reuse, publish, distribute, train on, sell, sublicense, reverse engineer, extract, or adapt any part of this project without prior written permission from Md. Zahidul Islam.
 
 This includes, but is not limited to:
 

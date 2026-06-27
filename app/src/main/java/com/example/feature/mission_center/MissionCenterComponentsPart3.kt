@@ -274,7 +274,7 @@ fun MissionTerminalCard(
                     Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
                         Text("LEVERAGE", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                         Spacer(modifier = Modifier.height(SpacingCompact))
-                        Text(leverage?.uppercase() ?: "NOT SET", color = T_TextSecondary, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Text(leverage?.uppercase() ?: "2X", color = T_TextSecondary, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -321,8 +321,19 @@ fun MissionTerminalCard(
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("ENTRY", mcFormatUsd(entryVal), T_TextPrimary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                val setupDisplay = sMode.replace("OVERRIDDEN", "").replace("CUSTOM", "").replace("(", "").replace(")", "").replace("RECOMMENDED SETUP", "RECOMMENDED").trim()
-                val setupColor = if (setupDisplay.contains("RECOMMENDED", ignoreCase = true)) T_Green else T_Cyan
+                val setupDisplay = when {
+                    sMode.contains("CUSTOM-1", ignoreCase = true) || sMode.contains("CUSTOM SETUP-1", ignoreCase = true) -> "CUSTOM-1"
+                    sMode.contains("CUSTOM-2", ignoreCase = true) || sMode.contains("CUSTOM SETUP-2", ignoreCase = true) -> "CUSTOM-2"
+                    sMode.contains("SETUP-1", ignoreCase = true) -> "SETUP-1"
+                    sMode.contains("SETUP-2", ignoreCase = true) -> "SETUP-2"
+                    sMode.contains("RECOMMENDED", ignoreCase = true) -> "RECOMMENDED"
+                    else -> sMode.replace("OVERRIDDEN", "").replace("(", "").replace(")", "").trim()
+                }
+                val setupColor = when {
+                    setupDisplay.contains("RECOMMENDED", ignoreCase = true) -> T_Green
+                    setupDisplay.contains("CUSTOM", ignoreCase = true) -> T_Gold
+                    else -> T_Cyan
+                }
                 CompactDataRow("SETUP", setupDisplay, setupColor)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 val overrideCount = if (sMode.contains("OVERRIDDEN") || sMode.contains("CUSTOM")) "1" else "0" // Simulated override count
@@ -334,7 +345,7 @@ fun MissionTerminalCard(
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("SL2", mcFormatMissionPriceText(mission?.sl2), if (mission?.sl2 != null) T_Gold else T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                val levValue = (leverage?.uppercase() ?: if (isFutures) "NOT SET" else "1X").replace("SPOT / 1X", "1X").replace("SPOT", "1X")
+                val levValue = (leverage?.uppercase() ?: if (isFutures) "2X" else "1X").replace("SPOT / 1X", "1X").replace("SPOT", "1X")
                 CompactDataRow("LEVERAGE", levValue, T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("ALLOCATION", mission?.positionSize?.uppercase() ?: "NOT SET", T_TextPrimary)
@@ -628,7 +639,7 @@ fun MissionTerminalCard(
                             Text("Original Signal Entry: ${mcFormatMissionPriceText(originalEntry)}", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("TP1: ${mcFormatMissionPriceText(tp1)} | TP2: ${mcFormatMissionPriceText(tp2)} | TP3: ${mcFormatMissionPriceText(tp3)}", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("SL1: ${mcFormatMissionPriceText(manualStopLoss ?: stopLoss)} | SL2: ${mcFormatMissionPriceText(mission?.sl2)}", color = T_Red, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
-                            Text("Leverage: ${leverage ?: if (marketType.equals("Spot", ignoreCase = true)) "1X" else "Not Set"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                            Text("Leverage: ${leverage ?: if (marketType.equals("Spot", ignoreCase = true)) "1X" else "2X"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Allocation: ${mission?.positionSize ?: "Not Set"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Consensus Bias: ${mission?.riskProfile ?: "Not Set"}", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Remark: ${mission?.setupRemark ?: "None"}", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
@@ -827,7 +838,7 @@ fun MissionTerminalCard(
                         Button(onClick = {
                             val newLogs = mutableListOf<String>()
                             newLogs.add("OVERRIDE APPLIED")
-                            newLogs.add("SETUP UPDATED: $selectedSetup")
+                            newLogs.add("SETUP UPDATED: $selectedSetup -> CUSTOM PROFILE")
                             if (mission.copilotMode != aiPolicy) {
                                 newLogs.add("TITAN AI COPILOT POLICY UPDATED: $aiPolicy")
                                 if (aiPolicy.contains("EXECUTION")) {
@@ -855,9 +866,15 @@ fun MissionTerminalCard(
                                 autoValidation.second?.let { newLogs.add("AUTO-TRADING VALIDATION: $it") }
                             }
                             val updatedLog = (mission.missionHistoryLog + newLogs).takeLast(20)
+                            val resolvedOverrideSetupMode = when {
+                                selectedSetup.contains("RECOMMENDED", ignoreCase = true) -> "CUSTOM-1"
+                                selectedSetup.contains("CUSTOM SETUP-1", ignoreCase = true) -> "CUSTOM-1"
+                                selectedSetup.contains("CUSTOM SETUP-2", ignoreCase = true) -> "CUSTOM-2"
+                                else -> "CUSTOM-1"
+                            }
 
                             val updatedMission = mission.copy(
-                                setupMode = "Overridden ($selectedSetup)",
+                                setupMode = resolvedOverrideSetupMode,
                                 setupRemark = overrideRemark.ifBlank { null },
                                 tp1 = overrideTp1.ifBlank { null },
                                 tp2 = overrideTp2.ifBlank { null },
