@@ -82,10 +82,17 @@ fun StartTradeFlow(
     var showMockupUi by remember { mutableStateOf(false) }
     val isBengali by viewModel.isBengali.collectAsState()
     val decisionBriefSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val setupSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-        confirmValueChange = { sheetValue -> sheetValue != SheetValue.Hidden }
-    )
+    // Setup Signal is now rendered as a locked dialog instead of a draggable bottom sheet.
+    // This avoids sheet-state deadlock/freezing after rapid policy toggles and a quick VERIFY/ACCEPT tap.
+    var fastSetupMutationAllowedAt by remember { mutableStateOf(0L) }
+    var missionConfirmLocked by remember { mutableStateOf(false) }
+    fun guardedSetupMutation(action: () -> Unit) {
+        val now = System.currentTimeMillis()
+        if (now >= fastSetupMutationAllowedAt) {
+            fastSetupMutationAllowedAt = now + 140L
+            action()
+        }
+    }
 
     // Stable UI session key for per-signal user choices.
     // Do not include volatile values such as mission.id, generated timestamps,
@@ -480,20 +487,24 @@ fun StartTradeFlow(
     }
 
     if (step == 2) {
-        ModalBottomSheet(
-            onDismissRequest = { /* Mission setup is a locked cockpit; only the CLOSE button dismisses it. */ },
-            sheetState = setupSheetState,
-            dragHandle = null,
-            containerColor = Color(0xFF030712),
-            contentColor = TextPrimary
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { /* Locked setup cockpit: only the visible CLOSE button dismisses it. */ },
+            properties = androidx.compose.ui.window.DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.90f)
+                    .fillMaxWidth(0.94f)
+                    .fillMaxHeight(0.92f)
+                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp, bottomStart = 18.dp, bottomEnd = 18.dp))
+                    .background(Color(0xFF030712))
+                    .border(0.9.dp, CryptoCyan.copy(alpha = 0.30f), RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp, bottomStart = 18.dp, bottomEnd = 18.dp))
                     .verticalScroll(rememberScrollState())
                     .navigationBarsPadding()
-                    .padding(horizontal = 14.dp, vertical = 6.dp),
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(7.dp)
             ) {
                 Row(
@@ -523,9 +534,9 @@ fun StartTradeFlow(
                 }
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    SetupPresetChip("RECOMMENDED", selectedSetupPreset == "RECOMMENDED", CryptoGreen, Modifier.weight(1f)) { applySetupPreset("RECOMMENDED") }
-                    SetupPresetChip("SETUP-1", selectedSetupPreset == "SETUP-1", CryptoCyan, Modifier.weight(1f)) { applySetupPreset("SETUP-1") }
-                    SetupPresetChip("SETUP-2", selectedSetupPreset == "SETUP-2", CryptoCyan, Modifier.weight(1f)) { applySetupPreset("SETUP-2") }
+                    SetupPresetChip("RECOMMENDED", selectedSetupPreset == "RECOMMENDED", CryptoGreen, Modifier.weight(1f)) { guardedSetupMutation { applySetupPreset("RECOMMENDED") } }
+                    SetupPresetChip("SETUP-1", selectedSetupPreset == "SETUP-1", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { applySetupPreset("SETUP-1") } }
+                    SetupPresetChip("SETUP-2", selectedSetupPreset == "SETUP-2", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { applySetupPreset("SETUP-2") } }
                 }
 
                 val recommendedCoreLocked = selectedSetupPreset == "RECOMMENDED"
@@ -573,14 +584,14 @@ fun StartTradeFlow(
                     Spacer(modifier = Modifier.height(5.dp))
                     Text("AUTO-TRADING", color = TextMuted, fontSize = 8.8.sp, fontWeight = FontWeight.Bold)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        SetupPresetChip("AUTO-TRADING OFF", !acceptAutoTradingEnabled, TextMuted, Modifier.weight(1f)) { acceptAutoTradingEnabled = false }
-                        SetupPresetChip("AUTO-TRADING ON", acceptAutoTradingEnabled, CryptoGreen, Modifier.weight(1f)) { acceptAutoTradingEnabled = true }
+                        SetupPresetChip("AUTO-TRADING OFF", !acceptAutoTradingEnabled, TextMuted, Modifier.weight(1f)) { guardedSetupMutation { acceptAutoTradingEnabled = false } }
+                        SetupPresetChip("AUTO-TRADING ON", acceptAutoTradingEnabled, CryptoGreen, Modifier.weight(1f)) { guardedSetupMutation { acceptAutoTradingEnabled = true } }
                     }
                     Spacer(modifier = Modifier.height(7.dp))
                     Text("TITAN AI COPILOT POLICY", color = TextMuted, fontSize = 8.8.sp, fontWeight = FontWeight.Bold)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        SetupPresetChip("ASSIST ONLY", setupCopilotPolicy == "ASSIST ONLY", CryptoCyan, Modifier.weight(1f)) { setupCopilotPolicy = "ASSIST ONLY" }
-                        SetupPresetChip("COPILOT EXECUTION", setupCopilotPolicy == "EXECUTION", AccentGold, Modifier.weight(1f)) { setupCopilotPolicy = "EXECUTION" }
+                        SetupPresetChip("ASSIST ONLY", setupCopilotPolicy == "ASSIST ONLY", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { setupCopilotPolicy = "ASSIST ONLY" } }
+                        SetupPresetChip("COPILOT EXECUTION", setupCopilotPolicy == "EXECUTION", AccentGold, Modifier.weight(1f)) { guardedSetupMutation { setupCopilotPolicy = "EXECUTION" } }
                     }
                 }
 
@@ -597,16 +608,16 @@ fun StartTradeFlow(
                     copilotLiquidityGuard = copilotLiquidityGuard,
                     copilotRegimeFlip = copilotRegimeFlip,
                     copilotVolatilitySpike = copilotVolatilitySpike,
-                    onAutoTargetChange = { autoCloseTarget = it },
-                    onAutoTp1Change = { autoCloseTp1 = it },
-                    onAutoTp2Change = { autoCloseTp2 = it },
-                    onAutoTp3Change = { autoCloseTp3 = it },
-                    onAutoStopLossChange = { autoCloseStopLoss = it },
-                    onCopilotRiskExtremeChange = { copilotRiskExtreme = it },
-                    onCopilotExecutionPoorChange = { copilotExecutionPoor = it },
-                    onCopilotLiquidityGuardChange = { copilotLiquidityGuard = it },
-                    onCopilotRegimeFlipChange = { copilotRegimeFlip = it },
-                    onCopilotVolatilitySpikeChange = { copilotVolatilitySpike = it }
+                    onAutoTargetChange = { guardedSetupMutation { autoCloseTarget = it } },
+                    onAutoTp1Change = { guardedSetupMutation { autoCloseTp1 = it } },
+                    onAutoTp2Change = { guardedSetupMutation { autoCloseTp2 = it } },
+                    onAutoTp3Change = { guardedSetupMutation { autoCloseTp3 = it } },
+                    onAutoStopLossChange = { guardedSetupMutation { autoCloseStopLoss = it } },
+                    onCopilotRiskExtremeChange = { guardedSetupMutation { copilotRiskExtreme = it } },
+                    onCopilotExecutionPoorChange = { guardedSetupMutation { copilotExecutionPoor = it } },
+                    onCopilotLiquidityGuardChange = { guardedSetupMutation { copilotLiquidityGuard = it } },
+                    onCopilotRegimeFlipChange = { guardedSetupMutation { copilotRegimeFlip = it } },
+                    onCopilotVolatilitySpikeChange = { guardedSetupMutation { copilotVolatilitySpike = it } }
                 )
 
                 SetupCompactPanel(title = "DEFAULT SELECTIONS") {
@@ -645,7 +656,7 @@ fun StartTradeFlow(
                                 )
                             )
                             .border(0.8.dp, Color.White.copy(alpha = 0.22f), RoundedCornerShape(14.dp))
-                            .clickable { step = 1 },
+                            .clickable { guardedSetupMutation { step = 1 } },
                         contentAlignment = Alignment.Center
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
@@ -735,9 +746,9 @@ fun StartTradeFlow(
                         )
                         Spacer(modifier = Modifier.height(5.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            SetupPresetChip("RECOMMENDED", selectedSetupPreset == "RECOMMENDED", CryptoGreen, Modifier.weight(1f)) { applySetupPreset("RECOMMENDED") }
-                            SetupPresetChip("SETUP-1", selectedSetupPreset == "SETUP-1", CryptoCyan, Modifier.weight(1f)) { applySetupPreset("SETUP-1") }
-                            SetupPresetChip("SETUP-2", selectedSetupPreset == "SETUP-2", CryptoCyan, Modifier.weight(1f)) { applySetupPreset("SETUP-2") }
+                            SetupPresetChip("RECOMMENDED", selectedSetupPreset == "RECOMMENDED", CryptoGreen, Modifier.weight(1f)) { guardedSetupMutation { applySetupPreset("RECOMMENDED") } }
+                            SetupPresetChip("SETUP-1", selectedSetupPreset == "SETUP-1", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { applySetupPreset("SETUP-1") } }
+                            SetupPresetChip("SETUP-2", selectedSetupPreset == "SETUP-2", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { applySetupPreset("SETUP-2") } }
                         }
                     }
 
@@ -746,8 +757,8 @@ fun StartTradeFlow(
                             SetupSummaryLine("Leverage", setupLeverage.ifBlank { recommendedLeverageForMarket() }, AccentGold)
                             Spacer(modifier = Modifier.height(5.dp))
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                SetupPresetChip("CROSS", acceptMarginMode == "CROSS", AccentGold, Modifier.weight(1f)) { acceptMarginMode = "CROSS" }
-                                SetupPresetChip("ISOLATED", acceptMarginMode == "ISOLATED", CryptoCyan, Modifier.weight(1f)) { acceptMarginMode = "ISOLATED" }
+                                SetupPresetChip("CROSS", acceptMarginMode == "CROSS", AccentGold, Modifier.weight(1f)) { guardedSetupMutation { acceptMarginMode = "CROSS" } }
+                                SetupPresetChip("ISOLATED", acceptMarginMode == "ISOLATED", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { acceptMarginMode = "ISOLATED" } }
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             SetupSummaryLine("Liquidity Guard", "ACTIVE", CryptoGreen)
@@ -799,14 +810,14 @@ fun StartTradeFlow(
                         Spacer(modifier = Modifier.height(5.dp))
                         Text("AUTO-TRADING", color = TextMuted, fontSize = 8.8.sp, fontWeight = FontWeight.Bold)
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            SetupPresetChip("AUTO-TRADING OFF", !acceptAutoTradingEnabled, TextMuted, Modifier.weight(1f)) { acceptAutoTradingEnabled = false }
-                            SetupPresetChip("AUTO-TRADING ON", acceptAutoTradingEnabled, CryptoGreen, Modifier.weight(1f)) { acceptAutoTradingEnabled = true }
+                            SetupPresetChip("AUTO-TRADING OFF", !acceptAutoTradingEnabled, TextMuted, Modifier.weight(1f)) { guardedSetupMutation { acceptAutoTradingEnabled = false } }
+                            SetupPresetChip("AUTO-TRADING ON", acceptAutoTradingEnabled, CryptoGreen, Modifier.weight(1f)) { guardedSetupMutation { acceptAutoTradingEnabled = true } }
                         }
                         Spacer(modifier = Modifier.height(7.dp))
                         Text("TITAN AI COPILOT POLICY", color = TextMuted, fontSize = 8.8.sp, fontWeight = FontWeight.Bold)
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            SetupPresetChip("ASSIST ONLY", setupCopilotPolicy == "ASSIST ONLY", CryptoCyan, Modifier.weight(1f)) { setupCopilotPolicy = "ASSIST ONLY" }
-                            SetupPresetChip("COPILOT EXECUTION", setupCopilotPolicy == "EXECUTION", AccentGold, Modifier.weight(1f)) { setupCopilotPolicy = "EXECUTION" }
+                            SetupPresetChip("ASSIST ONLY", setupCopilotPolicy == "ASSIST ONLY", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { setupCopilotPolicy = "ASSIST ONLY" } }
+                            SetupPresetChip("COPILOT EXECUTION", setupCopilotPolicy == "EXECUTION", AccentGold, Modifier.weight(1f)) { guardedSetupMutation { setupCopilotPolicy = "EXECUTION" } }
                         }
                     }
 
@@ -823,16 +834,16 @@ fun StartTradeFlow(
                         copilotLiquidityGuard = copilotLiquidityGuard,
                         copilotRegimeFlip = copilotRegimeFlip,
                         copilotVolatilitySpike = copilotVolatilitySpike,
-                        onAutoTargetChange = { autoCloseTarget = it },
-                        onAutoTp1Change = { autoCloseTp1 = it },
-                        onAutoTp2Change = { autoCloseTp2 = it },
-                        onAutoTp3Change = { autoCloseTp3 = it },
-                        onAutoStopLossChange = { autoCloseStopLoss = it },
-                        onCopilotRiskExtremeChange = { copilotRiskExtreme = it },
-                        onCopilotExecutionPoorChange = { copilotExecutionPoor = it },
-                        onCopilotLiquidityGuardChange = { copilotLiquidityGuard = it },
-                        onCopilotRegimeFlipChange = { copilotRegimeFlip = it },
-                        onCopilotVolatilitySpikeChange = { copilotVolatilitySpike = it }
+                        onAutoTargetChange = { guardedSetupMutation { autoCloseTarget = it } },
+                        onAutoTp1Change = { guardedSetupMutation { autoCloseTp1 = it } },
+                        onAutoTp2Change = { guardedSetupMutation { autoCloseTp2 = it } },
+                        onAutoTp3Change = { guardedSetupMutation { autoCloseTp3 = it } },
+                        onAutoStopLossChange = { guardedSetupMutation { autoCloseStopLoss = it } },
+                        onCopilotRiskExtremeChange = { guardedSetupMutation { copilotRiskExtreme = it } },
+                        onCopilotExecutionPoorChange = { guardedSetupMutation { copilotExecutionPoor = it } },
+                        onCopilotLiquidityGuardChange = { guardedSetupMutation { copilotLiquidityGuard = it } },
+                        onCopilotRegimeFlipChange = { guardedSetupMutation { copilotRegimeFlip = it } },
+                        onCopilotVolatilitySpikeChange = { guardedSetupMutation { copilotVolatilitySpike = it } }
                     )
                 }
 
@@ -864,7 +875,8 @@ fun StartTradeFlow(
                                 )
                             )
                             .border(0.8.dp, Color.White.copy(alpha = 0.22f), RoundedCornerShape(14.dp))
-                            .clickable {
+                            .clickable(enabled = !missionConfirmLocked) {
+                                missionConfirmLocked = true
                                 viewModel.startMission(
                                     syncedMission.copy(
                                         id = java.util.UUID.randomUUID().toString(),
@@ -996,7 +1008,7 @@ fun StartTradeFlow(
                         )
                     )
                     .border(0.8.dp, CryptoCyan.copy(alpha = 0.66f), RoundedCornerShape(10.dp))
-                    .clickable { showDecisionBrief = true }
+                    .clickable { if (step == 0 && !showDecisionBrief) showDecisionBrief = true }
                     .padding(horizontal = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -1044,7 +1056,7 @@ fun StartTradeFlow(
                     .clickable(
                         interactionSource = interactionSource,
                         indication = LocalIndication.current,
-                        onClick = { step = 1 }
+                        onClick = { if (step == 0) step = 1 }
                     )
                     .padding(horizontal = 10.dp),
                 contentAlignment = Alignment.Center

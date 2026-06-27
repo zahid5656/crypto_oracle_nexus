@@ -389,10 +389,14 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
     var showDecisionBrief by remember { mutableStateOf(false) }
     
     val decisionBriefSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val setupSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-        confirmValueChange = { sheetValue -> sheetValue != SheetValue.Hidden }
-    )
+    var fastSetupMutationAllowedAt by remember { mutableStateOf(0L) }
+    fun guardedSetupMutation(action: () -> Unit) {
+        val now = System.currentTimeMillis()
+        if (now >= fastSetupMutationAllowedAt) {
+            fastSetupMutationAllowedAt = now + 140L
+            action()
+        }
+    }
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -504,17 +508,21 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
     }
 
     if (step == 2) {
-        ModalBottomSheet(
-            onDismissRequest = { /* Setup cockpit closes only from its visible CLOSE action. */ },
-            sheetState = setupSheetState,
-            dragHandle = null,
-            containerColor = Color(0xFF030712),
-            contentColor = T_TextPrimary
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { /* Locked setup cockpit: only CLOSE dismisses it. */ },
+            properties = androidx.compose.ui.window.DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.94f)
                     .fillMaxHeight(0.92f)
+                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp, bottomStart = 18.dp, bottomEnd = 18.dp))
+                    .background(Color(0xFF030712))
+                    .border(0.9.dp, T_Cyan.copy(alpha = 0.30f), RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp, bottomStart = 18.dp, bottomEnd = 18.dp))
                     .padding(horizontal = 18.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -540,7 +548,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                         Text("CLOSE", color = T_TextSecondary, fontWeight = FontWeight.Bold)
                     }
                     Button(
-                        onClick = { step = 1 },
+                        onClick = { guardedSetupMutation { step = 1 } },
                         colors = ButtonDefaults.buttonColors(containerColor = T_Green, contentColor = T_Bg),
                         modifier = Modifier.weight(1f).height(46.dp)
                     ) { Text("ACCEPT SIGNAL", fontWeight = FontWeight.Black) }
