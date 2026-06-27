@@ -69,7 +69,7 @@ fun SignalProMockupScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 10.dp),
-            contentPadding = PaddingValues(bottom = 126.dp, top = 2.dp),
+            contentPadding = PaddingValues(bottom = 196.dp, top = 2.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             item { SignalProHeader(onBack = { viewModel.navigateTo(AppScreen.Home) }) }
@@ -101,9 +101,10 @@ fun SignalProMockupScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .background(T_Bg.copy(alpha = 0.96f))
+                .background(T_Bg.copy(alpha = 0.98f))
                 .navigationBarsPadding()
-                .padding(horizontal = 10.dp, vertical = 10.dp)
+                .padding(horizontal = 10.dp)
+                .padding(top = 8.dp, bottom = 34.dp)
         ) {
             ActionButtonsSurface(onBack = { viewModel.navigateTo(AppScreen.Home) })
         }
@@ -579,8 +580,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
 
     androidx.compose.material3.Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding(),
+            .fillMaxWidth(),
         color = Color.Transparent
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
