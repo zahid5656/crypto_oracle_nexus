@@ -1,0 +1,348 @@
+name: Apply Runtime UX Stabilization Patch
+
+on:
+  push:
+    branches:
+      - pre-backend-test
+    paths:
+      - '.github/workflows/apply-runtime-ux-stabilization.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-runtime-ux-stabilization:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: pre-backend-test
+
+      - name: Apply targeted runtime UX patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/runtime_remaining.patch <<'PATCH_EOF'
+--- a/app/src/main/java/com/example/feature/live_radar/LiveRadarComponentsPart1.kt
++++ b/app/src/main/java/com/example/feature/live_radar/LiveRadarComponentsPart1.kt
+@@ -1,6 +1,8 @@
+ package com.example.feature.live_radar
+ 
+ import androidx.compose.animation.*
++import androidx.compose.animation.core.FastOutSlowInEasing
++import androidx.compose.animation.core.tween
+ import androidx.compose.foundation.BorderStroke
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.border
+@@ -37,6 +39,10 @@
+ import kotlin.random.Random
+ 
+ // Extracted from LiveRadarScreen.kt to keep the public screen entry point compact.
++
++private fun Modifier.liveRadarSmoothExpansion(): Modifier = this.animateContentSize(
++    animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
++)
+ internal fun liveRadarConfidenceColor(value: String): Color {
+     val numeric = value.replace("%", "").trim().toIntOrNull() ?: return TextSecondary
+     return titanPositiveScoreColor(numeric)
+@@ -286,6 +292,7 @@
+             Column(
+                 modifier = Modifier
+                     .fillMaxWidth()
++                    .liveRadarSmoothExpansion()
+                     .background(DarkBackground, RoundedCornerShape(8.dp))
+                     .border(
+                         1.dp,
+@@ -404,6 +411,7 @@
+             Column(
+                 modifier = Modifier
+                     .fillMaxWidth()
++                    .liveRadarSmoothExpansion()
+                     .background(DarkBackground, RoundedCornerShape(8.dp))
+                     .border(
+                         1.dp,
+@@ -522,6 +530,7 @@
+             Column(
+                 modifier = Modifier
+                     .fillMaxWidth()
++                    .liveRadarSmoothExpansion()
+                     .background(DarkBackground, RoundedCornerShape(8.dp))
+                     .border(
+                         1.dp,
+--- a/app/src/main/java/com/example/feature/mission_center/MissionCenterComponentsPart3.kt
++++ b/app/src/main/java/com/example/feature/mission_center/MissionCenterComponentsPart3.kt
+@@ -13,16 +13,19 @@
+ import androidx.compose.foundation.verticalScroll
+ import androidx.compose.foundation.shape.CircleShape
+ import androidx.compose.foundation.shape.RoundedCornerShape
++import androidx.compose.foundation.text.KeyboardOptions
+ import androidx.compose.material3.*
+ import androidx.compose.runtime.*
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.draw.clip
++import androidx.compose.ui.focus.onFocusChanged
+ import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.graphics.RectangleShape
+ import androidx.compose.ui.text.font.FontFamily
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.text.style.TextAlign
++import androidx.compose.ui.text.input.KeyboardType
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+ import com.example.viewmodel.CryptoViewModel
+@@ -36,6 +39,15 @@
+ 
+ // Terminal Colors - Institutional Grade
+ 
++private fun mcLeverageDigitsOnly(value: String?): String {
++    return value.orEmpty().filter { it.isDigit() }.take(3)
++}
++
++private fun mcLeverageDisplayValue(value: String?): String? {
++    val digits = mcLeverageDigitsOnly(value)
++    return digits.takeIf { it.isNotBlank() }?.let { "${it}X" }
++}
++
+ // Extracted from MissionCenterScreen.kt to keep the public screen entry point compact.
+ @Composable
+ fun MissionTerminalCard(
+@@ -721,7 +733,8 @@
+                 var overrideTp2 by remember { mutableStateOf(mission.tp2 ?: "") }
+                 var overrideTp3 by remember { mutableStateOf(mission.tp3 ?: "") }
+                 var overrideSl by remember { mutableStateOf(mission.manualStopLoss?.replace(" / SIGNAL FALLBACK", "") ?: "") }
+-                var overrideLev by remember { mutableStateOf(mission.leverage?.replace(" / SIGNAL FALLBACK", "") ?: "") }
++                var overrideLev by remember { mutableStateOf(mcLeverageDigitsOnly(mission.leverage?.replace(" / SIGNAL FALLBACK", ""))) }
++                var overrideLevFocused by remember { mutableStateOf(false) }
+                 var overrideRisk by remember { mutableStateOf(mission.riskProfile ?: "") }
+                 var overrideAlloc by remember { mutableStateOf(mission.positionSize ?: "") }
+                 var overrideRemark by remember { mutableStateOf(mission.setupRemark ?: "") }
+@@ -754,7 +767,7 @@
+                                                 overrideTp2 = profile.tp2
+                                                 overrideTp3 = profile.tp3
+                                                 overrideSl = profile.stopLoss
+-                                                overrideLev = profile.leverage
++                                                overrideLev = mcLeverageDigitsOnly(profile.leverage)
+                                                 overrideRisk = profile.riskProfile
+                                                 overrideAlloc = profile.positionSize
+                                                 overrideRemark = profile.remark
+@@ -763,7 +776,7 @@
+                                                 overrideTp2 = ""
+                                                 overrideTp3 = ""
+                                                 overrideSl = mission.stopLoss
+-                                                overrideLev = ""
++                                                overrideLev = mcLeverageDigitsOnly(if (isFutures) "2X" else "1X")
+                                                 overrideRisk = ""
+                                                 overrideAlloc = ""
+                                                 overrideRemark = ""
+@@ -788,7 +801,18 @@
+                                 item { androidx.compose.material3.OutlinedTextField(value = overrideTp2, onValueChange = { overrideTp2 = it }, label = { Text("TP2", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
+                                 item { androidx.compose.material3.OutlinedTextField(value = overrideTp3, onValueChange = { overrideTp3 = it }, label = { Text("TP3", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
+                                 item { androidx.compose.material3.OutlinedTextField(value = overrideSl, onValueChange = { overrideSl = it }, label = { Text("Stop Loss", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
+-                                item { androidx.compose.material3.OutlinedTextField(value = overrideLev, onValueChange = { overrideLev = it }, label = { Text("Leverage", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
++                                item {
++                                    androidx.compose.material3.OutlinedTextField(
++                                        value = if (overrideLevFocused) overrideLev else mcLeverageDisplayValue(overrideLev).orEmpty(),
++                                        onValueChange = { overrideLev = mcLeverageDigitsOnly(it) },
++                                        label = { Text("Leverage numeric only", fontSize = 10.sp) },
++                                        supportingText = { Text("Tap to edit number only. X returns when editing ends.", fontSize = 9.sp) },
++                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
++                                        modifier = Modifier.fillMaxWidth().onFocusChanged { overrideLevFocused = it.isFocused },
++                                        singleLine = true,
++                                        colors = textFieldColors
++                                    )
++                                }
+                                 item { androidx.compose.material3.OutlinedTextField(value = overrideRisk, onValueChange = { overrideRisk = it }, label = { Text("Consensus Bias", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
+                                 item { androidx.compose.material3.OutlinedTextField(value = overrideAlloc, onValueChange = { overrideAlloc = it }, label = { Text("Allocation", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
+                                 item { androidx.compose.material3.OutlinedTextField(value = overrideRemark, onValueChange = { overrideRemark = it }, label = { Text("Remark", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
+@@ -888,7 +912,7 @@
+                                 tp2 = overrideTp2.ifBlank { null },
+                                 tp3 = overrideTp3.ifBlank { null },
+                                 manualStopLoss = overrideSl.ifBlank { null },
+-                                leverage = overrideLev.ifBlank { null },
++                                leverage = mcLeverageDisplayValue(overrideLev),
+                                 riskProfile = overrideRisk.ifBlank { null },
+                                 positionSize = overrideAlloc.ifBlank { null },
+                                 copilotMode = aiPolicy,
+--- a/app/src/main/java/com/example/feature/signal_pro/SignalProComponentsPart3.kt
++++ b/app/src/main/java/com/example/feature/signal_pro/SignalProComponentsPart3.kt
+@@ -17,6 +17,7 @@
+ import androidx.compose.foundation.lazy.items
+ import androidx.compose.foundation.shape.CircleShape
+ import androidx.compose.foundation.shape.RoundedCornerShape
++import androidx.compose.foundation.text.KeyboardOptions
+ import androidx.compose.material.icons.Icons
+ import androidx.compose.material.icons.filled.ArrowBack
+ import androidx.compose.material.icons.filled.Check
+@@ -33,6 +34,7 @@
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.draw.scale
+ import androidx.compose.ui.draw.clip
++import androidx.compose.ui.focus.onFocusChanged
+ import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.graphics.graphicsLayer
+ import androidx.compose.ui.platform.testTag
+@@ -42,6 +44,7 @@
+ import androidx.compose.ui.text.font.FontFamily
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.text.style.TextAlign
++import androidx.compose.ui.text.input.KeyboardType
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+ import androidx.compose.animation.core.tween
+@@ -69,6 +72,13 @@
+ import androidx.compose.foundation.layout.size
+ import androidx.compose.ui.draw.shadow
+ 
++
++private fun spLeverageDigitsOnly(value: String?): String = value.orEmpty().filter { it.isDigit() }.take(3)
++private fun spLeverageDisplayValue(value: String?): String {
++    val digits = spLeverageDigitsOnly(value)
++    return if (digits.isBlank()) "" else "${digits}X"
++}
++
+ // Extracted from SignalProScreen.kt to keep the public screen entry point compact.
+ @OptIn(ExperimentalMaterial3Api::class)
+ @Composable
+@@ -561,7 +571,7 @@
+ 
+                 SetupCompactPanel(title = "MISSION INTELLIGENCE") {
+                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+-                        CompactSetupTextField("LEVERAGE", setupLeverage, { setupLeverage = it.uppercase().replace(" ", "") }, Modifier.weight(1f), enabled = coreEditEnabled)
++                        CompactLeverageTextField("LEVERAGE", setupLeverage, { setupLeverage = spLeverageDisplayValue(it) }, Modifier.weight(1f), enabled = coreEditEnabled)
+                         CompactSetupTextField("ALLOCATION", setupAllocation, { setupAllocation = it }, Modifier.weight(1f), enabled = coreEditEnabled)
+                     }
+                     Spacer(modifier = Modifier.height(7.dp))
+@@ -1097,7 +1107,7 @@
+         initialValue = -420f,
+         targetValue = 620f,
+         animationSpec = infiniteRepeatable(
+-            animation = tween(3600, easing = LinearEasing),
++            animation = tween(7200, easing = LinearEasing),
+             repeatMode = RepeatMode.Restart
+         ),
+         label = "TitanInsightSweep"
+@@ -1106,7 +1116,7 @@
+         initialValue = 0.28f,
+         targetValue = 0.58f,
+         animationSpec = infiniteRepeatable(
+-            animation = tween(1400, easing = LinearEasing),
++            animation = tween(1800, easing = LinearEasing),
+             repeatMode = RepeatMode.Reverse
+         ),
+         label = "TitanInsightGlow"
+@@ -1210,6 +1220,44 @@
+         textStyle = androidx.compose.ui.text.TextStyle(
+             color = TextPrimary,
+             fontSize = 11.sp,
++            fontWeight = FontWeight.SemiBold,
++            fontFamily = FontFamily.SansSerif,
++            fontFeatureSettings = "tnum"
++        ),
++        colors = OutlinedTextFieldDefaults.colors(
++            focusedBorderColor = CryptoCyan.copy(alpha = 0.78f),
++            unfocusedBorderColor = TextMuted.copy(alpha = 0.40f),
++            focusedLabelColor = CryptoCyan,
++            unfocusedLabelColor = TextMuted,
++            cursorColor = CryptoCyan,
++            focusedTextColor = TextPrimary,
++            unfocusedTextColor = TextPrimary
++        )
++    )
++}
++
++@Composable
++private fun CompactLeverageTextField(
++    label: String,
++    value: String,
++    onValueChange: (String) -> Unit,
++    modifier: Modifier = Modifier,
++    enabled: Boolean = true
++) {
++    var focused by remember { mutableStateOf(false) }
++    val digits = spLeverageDigitsOnly(value)
++    val displayValue = if (focused) digits else spLeverageDisplayValue(value)
++    OutlinedTextField(
++        value = displayValue,
++        onValueChange = { if (enabled) onValueChange(it) },
++        label = { Text(label, fontSize = 8.5.sp, maxLines = 1) },
++        modifier = modifier.height(52.dp).onFocusChanged { focused = it.isFocused },
++        singleLine = true,
++        readOnly = !enabled,
++        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
++        textStyle = androidx.compose.ui.text.TextStyle(
++            color = TextPrimary,
++            fontSize = 11.sp,
+             fontWeight = FontWeight.SemiBold,
+             fontFamily = FontFamily.SansSerif,
+             fontFeatureSettings = "tnum"
+--- a/app/src/main/java/com/example/feature/signal_pro/SignalProMockupScreen.kt
++++ b/app/src/main/java/com/example/feature/signal_pro/SignalProMockupScreen.kt
+@@ -69,8 +69,8 @@
+                 .fillMaxSize()
+                 .navigationBarsPadding()
+                 .padding(horizontal = 10.dp),
+-            contentPadding = PaddingValues(bottom = 42.dp, top = 2.dp),
+-            verticalArrangement = Arrangement.spacedBy(5.dp)
++            contentPadding = PaddingValues(bottom = 72.dp, top = 2.dp),
++            verticalArrangement = Arrangement.spacedBy(4.dp)
+         ) {
+             item { SignalProHeader(onBack = { viewModel.navigateTo(AppScreen.Home) }) }
+             item { PriceMatrixBlock() }
+@@ -113,8 +113,8 @@
+             }
+             Spacer(modifier = Modifier.width(8.dp))
+             Column {
+-                Text("TITAN ORACLE SIGNAL INSIGHT", color = T_TextPrimary, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+-                Text("Validation Cockpit", color = T_Cyan, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
++                Text("TITAN ORACLE SIGNAL INSIGHT", color = T_TextPrimary, fontSize = 15.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
++                Text("Validation Cockpit", color = T_Cyan, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+             }
+         }
+         
+@@ -251,8 +251,8 @@
+         verticalAlignment = Alignment.CenterVertically
+     ) {
+         Column {
+-            Text(name, color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+-            Text("Status: $status", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
++            Text(name, color = T_TextPrimary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
++            Text("Status: $status", color = T_TextSecondary, fontSize = 8.5.sp, fontFamily = FontFamily.Monospace)
+         }
+         Row(verticalAlignment = Alignment.CenterVertically) {
+             Text(score, color = color, fontSize = 12.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+@@ -602,7 +602,7 @@
+                     .padding(horizontal = 8.dp),
+                 contentAlignment = Alignment.Center
+             ) {
+-                Text("⬅️ BACK", fontSize = 11.sp, fontWeight = FontWeight.Black, color = T_TextPrimary, letterSpacing = 0.8.sp)
++                Text("← BACK", fontSize = 11.sp, fontWeight = FontWeight.Black, color = T_TextPrimary, letterSpacing = 0.8.sp)
+             }
+ 
+             Box(
+@@ -617,7 +617,7 @@
+                 contentAlignment = Alignment.Center
+             ) {
+                 Row(verticalAlignment = Alignment.CenterVertically) {
+-                    Text("➡️ ACCEPT SIGNAL", fontWeight = FontWeight.Black, fontSize = 11.sp, color = T_TextPrimary, letterSpacing = 0.8.sp)
++                    Text("ACCEPT SIGNAL →", fontWeight = FontWeight.Black, fontSize = 11.sp, color = T_TextPrimary, letterSpacing = 0.8.sp)
+                 }
+             }
+         }
+PATCH_EOF
+          git apply --check /tmp/runtime_remaining.patch
+          git apply /tmp/runtime_remaining.patch
+          rm -f .github/workflows/apply-runtime-ux-stabilization.yml
+          git config user.name "zahid5656"
+          git config user.email "zahid5656@gmail.com"
+          git add app/src/main/java/com/example/feature/live_radar/LiveRadarComponentsPart1.kt
+          git add app/src/main/java/com/example/feature/mission_center/MissionCenterComponentsPart3.kt
+          git add app/src/main/java/com/example/feature/signal_pro/SignalProComponentsPart3.kt
+          git add app/src/main/java/com/example/feature/signal_pro/SignalProMockupScreen.kt
+          git add -u .github/workflows/apply-runtime-ux-stabilization.yml
+          git commit -m "fix: stabilize remaining runtime UX before backend" \
+            -m "Apply targeted runtime UX stabilization on pre-backend-test.
+
+Complete leverage suffix editing behavior, Live Radar expansion parity, Signal Insight compactness, bottom action visibility, and Decision Brief spacing without backend/API/database/execution changes."
+          git push origin HEAD:pre-backend-test
