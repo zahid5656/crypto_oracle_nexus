@@ -322,6 +322,7 @@ fun MissionTerminalCard(
                 CompactDataRow("ENTRY", mcFormatUsd(entryVal), T_TextPrimary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 val setupDisplay = when {
+                    sMode.contains("CUSTOM-R", ignoreCase = true) || sMode.contains("CUSTOM RECOMMENDED", ignoreCase = true) || sMode.contains("REC-CUSTOM", ignoreCase = true) -> "CUSTOM-R"
                     sMode.contains("CUSTOM-1", ignoreCase = true) || sMode.contains("CUSTOM SETUP-1", ignoreCase = true) -> "CUSTOM-1"
                     sMode.contains("CUSTOM-2", ignoreCase = true) || sMode.contains("CUSTOM SETUP-2", ignoreCase = true) -> "CUSTOM-2"
                     sMode.contains("SETUP-1", ignoreCase = true) -> "SETUP-1"
@@ -336,8 +337,8 @@ fun MissionTerminalCard(
                 }
                 CompactDataRow("SETUP", setupDisplay, setupColor)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                val overrideCount = if (sMode.contains("OVERRIDDEN") || sMode.contains("CUSTOM")) "1" else "0" // Simulated override count
-                CompactDataRow("OVERRIDE", overrideCount, T_TextPrimary)
+                val overrideCountValue = mission?.missionHistoryLog?.count { it.contains("OVERRIDE APPLIED", ignoreCase = true) } ?: 0
+                CompactDataRow("OVERRIDE", overrideCountValue.toString(), T_TextPrimary)
             }
             // RIGHT COLUMN
             Column(modifier = Modifier.weight(1f).padding(start = SpacingNormal)) {
@@ -703,7 +704,19 @@ fun MissionTerminalCard(
             }
 
             if (showOverride && mission != null && viewModel != null) {
-                var selectedSetup by remember { mutableStateOf(mission.setupMode ?: "RECOMMENDED SETUP") }
+                val currentOverrideCount = mission.missionHistoryLog.count { it.contains("OVERRIDE APPLIED", ignoreCase = true) }
+                val nextOverrideNumber = currentOverrideCount + 1
+                val initialOverrideSource = when {
+                    mission.setupMode?.contains("CUSTOM-2", ignoreCase = true) == true || mission.setupMode?.contains("CUSTOM SETUP-2", ignoreCase = true) == true || mission.setupMode?.contains("SETUP-2", ignoreCase = true) == true -> "CUSTOM SETUP-2"
+                    mission.setupMode?.contains("CUSTOM-1", ignoreCase = true) == true || mission.setupMode?.contains("CUSTOM SETUP-1", ignoreCase = true) == true || mission.setupMode?.contains("SETUP-1", ignoreCase = true) == true -> "CUSTOM SETUP-1"
+                    else -> "RECOMMENDED SETUP"
+                }
+                var selectedSetup by remember(mission.id, mission.setupMode, nextOverrideNumber) { mutableStateOf(initialOverrideSource) }
+                val nextOverrideLabel = when (selectedSetup) {
+                    "CUSTOM SETUP-1" -> "CUSTOM-1"
+                    "CUSTOM SETUP-2" -> "CUSTOM-2"
+                    else -> "CUSTOM-R"
+                }
                 var overrideTp1 by remember { mutableStateOf(mission.tp1?.replace(" / SIGNAL FALLBACK", "") ?: "") }
                 var overrideTp2 by remember { mutableStateOf(mission.tp2 ?: "") }
                 var overrideTp3 by remember { mutableStateOf(mission.tp3 ?: "") }
@@ -722,7 +735,7 @@ fun MissionTerminalCard(
 
                 AlertDialog(
                     onDismissRequest = { showOverride = false },
-                    title = { Text("OVERRIDE SETUP", color = T_Gold, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace) },
+                    title = { Text("OVERRIDE SETUP → $nextOverrideLabel", color = T_Gold, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace) },
                     text = {
                         Column(modifier = Modifier.fillMaxWidth().heightIn(max = 500.dp)) {
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -747,6 +760,8 @@ fun MissionTerminalCard(
                                                 overrideRemark = profile.remark
                                             } else {
                                                 overrideTp1 = mission.targets
+                                                overrideTp2 = ""
+                                                overrideTp3 = ""
                                                 overrideSl = mission.stopLoss
                                                 overrideLev = ""
                                                 overrideRisk = ""
@@ -837,8 +852,8 @@ fun MissionTerminalCard(
                     confirmButton = {
                         Button(onClick = {
                             val newLogs = mutableListOf<String>()
-                            newLogs.add("OVERRIDE APPLIED")
-                            newLogs.add("SETUP UPDATED: $selectedSetup -> CUSTOM PROFILE")
+                            newLogs.add("OVERRIDE APPLIED #$nextOverrideNumber")
+                            newLogs.add("SETUP UPDATED: $selectedSetup -> $nextOverrideLabel")
                             if (mission.copilotMode != aiPolicy) {
                                 newLogs.add("TITAN AI COPILOT POLICY UPDATED: $aiPolicy")
                                 if (aiPolicy.contains("EXECUTION")) {
@@ -866,15 +881,8 @@ fun MissionTerminalCard(
                                 autoValidation.second?.let { newLogs.add("AUTO-TRADING VALIDATION: $it") }
                             }
                             val updatedLog = (mission.missionHistoryLog + newLogs).takeLast(20)
-                            val resolvedOverrideSetupMode = when {
-                                selectedSetup.contains("RECOMMENDED", ignoreCase = true) -> "CUSTOM-1"
-                                selectedSetup.contains("CUSTOM SETUP-1", ignoreCase = true) -> "CUSTOM-1"
-                                selectedSetup.contains("CUSTOM SETUP-2", ignoreCase = true) -> "CUSTOM-2"
-                                else -> "CUSTOM-1"
-                            }
-
                             val updatedMission = mission.copy(
-                                setupMode = resolvedOverrideSetupMode,
+                                setupMode = nextOverrideLabel,
                                 setupRemark = overrideRemark.ifBlank { null },
                                 tp1 = overrideTp1.ifBlank { null },
                                 tp2 = overrideTp2.ifBlank { null },
