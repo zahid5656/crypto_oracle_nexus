@@ -1,80 +1,112 @@
-name: Runtime UX Patch Runner
+name: Build Android Debug APK
 
 on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: "Gradle build task"
+        required: true
+        default: "assembleDebug"
+        type: choice
+        options:
+          - assembleDebug
+          - clean assembleDebug
   push:
-    branches: [pre-backend-test]
-    paths:
-      - '.github/workflows/android-debug-apk.yml'
+    branches:
+      - pre-backend-test
 
 permissions:
-  contents: write
+  contents: read
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx4096m -Dfile.encoding=UTF-8"
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
 jobs:
-  apply:
+  build-debug-apk:
+    name: Build Debug APK
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
-          fetch-depth: 2
-      - name: Apply patch and restore workflow
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          yes | sdkmanager --licenses >/dev/null
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: current
+
+      - name: Show build environment
+        run: |
+          java -version
+          gradle --version
+          echo "Branch: ${GITHUB_REF_NAME}"
+          echo "Commit: ${GITHUB_SHA}"
+
+      - name: Build debug APK
         shell: bash
         run: |
-          set -euo pipefail
-          cat > /tmp/runtime_remaining.patch.gz.b64 <<'B64_EOF'
-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
-B64_EOF
-          python3 - <<'PY_EOF'
-          import base64, gzip, pathlib
-          data = pathlib.Path('/tmp/runtime_remaining.patch.gz.b64').read_text().strip()
-          pathlib.Path('/tmp/runtime_remaining.patch').write_bytes(gzip.decompress(base64.b64decode(data)))
-          PY_EOF
-          git apply --check /tmp/runtime_remaining.patch
-          git apply /tmp/runtime_remaining.patch
-          git checkout HEAD^ -- .github/workflows/android-debug-apk.yml
-          git config user.name "zahid5656"
-          git config user.email "zahid5656@gmail.com"
-          git add app/src/main/java/com/example/feature/live_radar/LiveRadarComponentsPart1.kt
-          git add app/src/main/java/com/example/feature/mission_center/MissionCenterComponentsPart3.kt
-          git add app/src/main/java/com/example/feature/signal_pro/SignalProComponentsPart3.kt
-          git add app/src/main/java/com/example/feature/signal_pro/SignalProMockupScreen.kt
-          git add .github/workflows/android-debug-apk.yml
-          git commit -m "fix: stabilize remaining runtime UX before backend" -m "Apply targeted runtime UX stabilization on pre-backend-test without backend, API, database, or execution changes."
-          git push origin HEAD:pre-backend-test
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+            ./gradlew ${{ github.event.inputs.build_type || 'assembleDebug' }} --stacktrace --no-daemon
+          else
+            gradle ${{ github.event.inputs.build_type || 'assembleDebug' }} --stacktrace --no-daemon
+          fi
+
+
+      - name: Generate timestamped artifact name
+
+        id: artifact_name
+
+        shell: bash
+
+        run: |
+
+          FILE_TS="$(TZ='Asia/Dhaka' date '+%H-%M-%S-%d-%B-%y')"
+
+          ARTIFACT_NAME="crypto-oracle-nexus-debug-[${FILE_TS}]-apk"
+
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
+          echo "ZIP download name will be: $ARTIFACT_NAME.zip"
+
+      - name: Upload debug APK artifact
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: ${{ steps.artifact_name.outputs.artifact_name }}
+
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+          if-no-files-found: error
+
+          retention-days: 30
+
+      - name: Upload build reports on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: crypto-oracle-nexus-build-reports
+          path: |
+            **/build/reports/**
+            **/build/outputs/logs/**
+          if-no-files-found: ignore
+          retention-days: 7
