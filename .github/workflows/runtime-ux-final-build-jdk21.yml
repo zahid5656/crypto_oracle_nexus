@@ -39,18 +39,9 @@ jobs:
       - name: Install Android SDK packages
         shell: bash
         run: |
-          sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
-          yes | sdkmanager --licenses >/dev/null
-
-      - name: Remove temporary workflow from branch
-        shell: bash
-        run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/runtime-ux-final-build-jdk21.yml
-          git commit -m "chore: remove temporary runtime UX final build workflow" || true
-          git push origin HEAD:pre-backend-test-runtime-ux-final
+          sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          yes | sdkmanager --licenses >/dev/null || true
 
       - name: Build debug APK with JDK 21
         shell: bash
@@ -63,3 +54,14 @@ jobs:
           else
             gradle assembleDebug --stacktrace --no-daemon
           fi
+
+      - name: Remove temporary workflow from branch after build
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/runtime-ux-final-build-jdk21.yml || true
+          git commit -m "chore: remove temporary runtime UX final build workflow" || true
+          git push origin HEAD:pre-backend-test-runtime-ux-final || true
