@@ -1,0 +1,66 @@
+name: Runtime UX Final Fix 2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - pre-backend-test-runtime-ux-final
+    paths:
+      - '.github/workflows/runtime-ux-final-fix2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: pre-backend-test-runtime-ux-final
+          fetch-depth: 0
+
+      - name: Apply missing Live Radar smooth expansion calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path('app/src/main/java/com/example/feature/live_radar/LiveRadarComponentsPart1.kt')
+          s = path.read_text()
+          old = 'modifier = Modifier\n                    .fillMaxWidth()\n                    .background(DarkBackground, RoundedCornerShape(8.dp))'
+          new = 'modifier = Modifier\n                    .fillMaxWidth()\n                    .liveRadarSmoothExpansion()\n                    .background(DarkBackground, RoundedCornerShape(8.dp))'
+          count = s.count(old)
+          if count < 3:
+              print(f'Existing unpatched card modifiers: {count}')
+          if count:
+              s = s.replace(old, new)
+          if s.count('.liveRadarSmoothExpansion()') < 4:
+              raise SystemExit('Expected helper plus 3 modifier calls after patch')
+          path.write_text(s)
+          PY
+          git diff --check
+
+      - name: Commit and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/runtime-ux-final-fix2.yml
+          git add app/src/main/java/com/example/feature/live_radar/LiveRadarComponentsPart1.kt
+          git commit -m "fix: complete Live Radar smooth expansion hook" -m "- Add smooth expansion modifier calls to the three Live Radar signal card groups" -m "- Keep runtime UX final branch scoped to approved frontend files"
+          git push origin HEAD:pre-backend-test-runtime-ux-final
+
+      - name: Build debug APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f ./gradlew ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug --stacktrace --no-daemon
+          else
+            gradle assembleDebug --stacktrace --no-daemon
+          fi
