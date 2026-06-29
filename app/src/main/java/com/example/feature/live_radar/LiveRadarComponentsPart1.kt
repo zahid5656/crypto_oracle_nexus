@@ -381,6 +381,21 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         )
                     }
                     StartTradeFlow(viewModel = viewModel, mission = mission)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = if (isBengali) "বিস্তারিত বন্ধ করুন ⤴" else "COLLAPSE DETAILS ⤴",
+                        fontSize = 10.sp,
+                        color = CryptoCyan,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(CryptoCyan.copy(alpha = 0.08f))
+                            .border(0.6.dp, CryptoCyan.copy(alpha = 0.38f), RoundedCornerShape(8.dp))
+                            .clickable { expandedKey = null }
+                            .padding(vertical = 6.dp),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
@@ -499,6 +514,21 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         )
                     }
                     StartTradeFlow(viewModel = viewModel, mission = mission)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = if (isBengali) "বিস্তারিত বন্ধ করুন ⤴" else "COLLAPSE DETAILS ⤴",
+                        fontSize = 10.sp,
+                        color = CryptoCyan,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(CryptoCyan.copy(alpha = 0.08f))
+                            .border(0.6.dp, CryptoCyan.copy(alpha = 0.38f), RoundedCornerShape(8.dp))
+                            .clickable { expandedKey = null }
+                            .padding(vertical = 6.dp),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
@@ -617,6 +647,21 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         )
                     }
                     StartTradeFlow(viewModel = viewModel, mission = mission)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = if (isBengali) "বিস্তারিত বন্ধ করুন ⤴" else "COLLAPSE DETAILS ⤴",
+                        fontSize = 10.sp,
+                        color = CryptoCyan,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(CryptoCyan.copy(alpha = 0.08f))
+                            .border(0.6.dp, CryptoCyan.copy(alpha = 0.38f), RoundedCornerShape(8.dp))
+                            .clickable { expandedKey = null }
+                            .padding(vertical = 6.dp),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }

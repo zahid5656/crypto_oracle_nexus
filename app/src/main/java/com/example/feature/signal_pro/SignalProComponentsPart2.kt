@@ -97,15 +97,15 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, if (isExpanded) CryptoCyan else BorderColor, RoundedCornerShape(16.dp))
-            .clickable {
-                if (!isExpanded) {
-                    expandedAsset.value = coin.coinSymbol
-                }
+            .clickable(enabled = !isExpanded) {
+                expandedAsset.value = coin.coinSymbol
             }
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expandedAsset.value = if (isExpanded) null else coin.coinSymbol },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {

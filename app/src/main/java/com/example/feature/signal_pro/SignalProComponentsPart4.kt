@@ -111,10 +111,8 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoV
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, if (isExpanded && isLong) CryptoCyan else cardBorder, RoundedCornerShape(16.dp))
-            .clickable {
-                if (!isExpanded) {
-                    expandedAsset.value = "${coin.coinSymbol}_futures"
-                }
+            .clickable(enabled = !isExpanded) {
+                expandedAsset.value = "${coin.coinSymbol}_futures"
             }
     ) {
         Column(
@@ -122,7 +120,9 @@ fun FuturesItemCard(coin: FuturesSignal, timeframeIndex: Int, viewModel: CryptoV
                 .padding(12.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expandedAsset.value = if (isExpanded) null else "${coin.coinSymbol}_futures" },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -512,10 +512,8 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int, viewModel: CryptoViewModel, 
                 ),
                 shape = RoundedCornerShape(16.dp)
             )
-            .clickable {
-                if (!isExpanded) {
-                    expandedAsset.value = "${symbol}_oraclepick"
-                }
+            .clickable(enabled = !isExpanded) {
+                expandedAsset.value = "${symbol}_oraclepick"
             }
     ) {
         Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp)) {
@@ -536,7 +534,9 @@ fun OraclePickCard(asset: Any, timeframeIndex: Int, viewModel: CryptoViewModel, 
 
             // Coin primary asset info row
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expandedAsset.value = if (isExpanded) null else "${symbol}_oraclepick" },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {

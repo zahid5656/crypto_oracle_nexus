@@ -351,6 +351,21 @@ fun StartTradeFlow(
         conditionInvalidReason = if (setupTarget.isNotBlank() && setupSl1.isNotBlank()) "Ready for supervised mission handoff." else "Target and SL1 are required before mission activation."
     )
 
+    fun startAcceptedMission(entryPrice: Double = livePrice) {
+        viewModel.startMission(
+            syncedMission.copy(
+                id = java.util.UUID.randomUUID().toString(),
+                entryPrice = entryPrice,
+                originalSignalEntry = if (mission.originalSignalEntry > 0.0) mission.originalSignalEntry else mission.entryPrice,
+                currentPrice = livePrice,
+                startTime = System.currentTimeMillis(),
+                lastUpdated = System.currentTimeMillis()
+            )
+        )
+        viewModel.sendLocalAlert("Mission Started", "TITAN AI intelligence system successfully started monitoring ${mission.coinSymbol}")
+        showDecisionBrief = false
+        step = 0
+    }
     if (showDecisionBrief) {
         ModalBottomSheet(
             onDismissRequest = { showDecisionBrief = false },
@@ -443,7 +458,7 @@ fun StartTradeFlow(
                     Button(
                         onClick = {
                             showDecisionBrief = false
-                            step = 1
+                            step = 2
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = CryptoGreen, contentColor = DarkBackground),
                         shape = RoundedCornerShape(10.dp),
