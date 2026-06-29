@@ -1,0 +1,10 @@
+fix: restore compact Oracle Feed terminal layout
+
+- Restore Oracle Reference Index to compact 5-coin table layout
+- Restore Market Dashboard to compact 10-asset Binance sync table layout
+- Remove unnecessary per-coin boxed rows and wasted vertical spacing
+- Preserve Gemini cyan-blue section contrast and TITAN dark terminal identity
+- Restore Oracle Analytical Insights left/right alignment with clamped decimal precision
+- Replace broken Market Feed typography with clearer readable font while keeping badge colors
+- Keep FX Open-Market Index compact and single-instance only
+- Avoid backend, API, database, Gradle, Manifest, and execution logic changes

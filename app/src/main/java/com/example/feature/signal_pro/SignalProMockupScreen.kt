@@ -63,14 +63,14 @@ fun SignalProMockupScreen(
         modifier = modifier
             .fillMaxSize()
             .background(T_Bg)
+            .navigationBarsPadding()
     ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .navigationBarsPadding()
                 .padding(horizontal = 10.dp),
-            contentPadding = PaddingValues(bottom = 72.dp, top = 2.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            contentPadding = PaddingValues(bottom = 126.dp, top = 2.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             item { SignalProHeader(onBack = { viewModel.navigateTo(AppScreen.Home) }) }
             item { PriceMatrixBlock() }
@@ -95,11 +95,17 @@ fun SignalProMockupScreen(
             item { DecisionGateSurface() }
             item { ConflictFlagSurface() }
             item { AuditRow() }
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                ActionButtonsSurface(onBack = { viewModel.navigateTo(AppScreen.Home) })
-                Spacer(modifier = Modifier.height(18.dp))
-            }
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(T_Bg.copy(alpha = 0.96f))
+                .navigationBarsPadding()
+                .padding(horizontal = 10.dp, vertical = 10.dp)
+        ) {
+            ActionButtonsSurface(onBack = { viewModel.navigateTo(AppScreen.Home) })
         }
     }
 }
@@ -113,8 +119,8 @@ fun SignalProHeader(onBack: () -> Unit) {
             }
             Spacer(modifier = Modifier.width(8.dp))
             Column {
-                Text("TITAN ORACLE SIGNAL INSIGHT", color = T_TextPrimary, fontSize = 15.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                Text("Validation Cockpit", color = T_Cyan, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Text("TITAN ORACLE SIGNAL INSIGHT", color = T_TextPrimary, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("Validation Cockpit", color = T_Cyan, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             }
         }
         
@@ -198,7 +204,7 @@ fun RiskScoreSurface() {
 fun ExecutionReadinessSurface() {
     SurfaceBlock("EXECUTION READINESS") {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            Text("ACCEPTABLE", color = T_Cyan, fontSize = 15.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("ACCEPTABLE", color = T_Cyan, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
             Text("Spread: 0.04% | Liq: High", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
             Text("Slip: Low | Latency: 180ms", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
@@ -285,7 +291,7 @@ fun DirectionValidationSurface() {
 fun RRValidationSurface() {
     SurfaceBlock("RISK / REWARD") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("RR: 2.4R", color = T_Cyan, fontSize = 15.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("RR: 2.4R", color = T_Cyan, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             Text("VALID", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -297,7 +303,7 @@ fun RRValidationSurface() {
 fun SLSanitySurface() {
     SurfaceBlock("STOP-LOSS SANITY") {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            Text("3.8%", color = T_Green, fontSize = 15.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("3.8%", color = T_Green, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
             Text("State: Standard", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
         }
@@ -389,14 +395,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
     var showDecisionBrief by remember { mutableStateOf(false) }
     
     val decisionBriefSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var fastSetupMutationAllowedAt by remember { mutableStateOf(0L) }
-    fun guardedSetupMutation(action: () -> Unit) {
-        val now = System.currentTimeMillis()
-        if (now >= fastSetupMutationAllowedAt) {
-            fastSetupMutationAllowedAt = now + 140L
-            action()
-        }
-    }
+    val setupSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -493,13 +492,13 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                     ) { Text("ACCEPT SIGNAL", fontWeight = FontWeight.Black, fontSize = 11.sp) }
                 }
                 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 OutlinedButton(
                     onClick = { showDecisionBrief = false },
                     border = androidx.compose.foundation.BorderStroke(0.8.dp, T_TextSecondary.copy(alpha = 0.55f)),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = T_TextPrimary),
                     shape = RoundedCornerShape(999.dp),
-                    modifier = Modifier.align(Alignment.CenterHorizontally).height(36.dp).widthIn(min = 126.dp)
+                    modifier = Modifier.align(Alignment.CenterHorizontally).height(34.dp).widthIn(min = 104.dp)
                 ) {
                     Text("CLOSE", color = T_TextPrimary, fontWeight = FontWeight.Black, fontSize = 10.sp, letterSpacing = 0.8.sp)
                 }
@@ -508,21 +507,16 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
     }
 
     if (step == 2) {
-        androidx.compose.ui.window.Dialog(
-            onDismissRequest = { /* Locked setup cockpit: only CLOSE dismisses it. */ },
-            properties = androidx.compose.ui.window.DialogProperties(
-                usePlatformDefaultWidth = false,
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false
-            )
+        ModalBottomSheet(
+            onDismissRequest = { step = 0 },
+            sheetState = setupSheetState,
+            containerColor = Color(0xFF030712),
+            contentColor = T_TextPrimary
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth(0.94f)
+                    .fillMaxWidth()
                     .fillMaxHeight(0.92f)
-                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp, bottomStart = 18.dp, bottomEnd = 18.dp))
-                    .background(Color(0xFF030712))
-                    .border(0.9.dp, T_Cyan.copy(alpha = 0.30f), RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp, bottomStart = 18.dp, bottomEnd = 18.dp))
                     .padding(horizontal = 18.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -548,7 +542,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                         Text("CLOSE", color = T_TextSecondary, fontWeight = FontWeight.Bold)
                     }
                     Button(
-                        onClick = { guardedSetupMutation { step = 1 } },
+                        onClick = { step = 1 },
                         colors = ButtonDefaults.buttonColors(containerColor = T_Green, contentColor = T_Bg),
                         modifier = Modifier.weight(1f).height(46.dp)
                     ) { Text("ACCEPT SIGNAL", fontWeight = FontWeight.Black) }
@@ -585,7 +579,8 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
 
     androidx.compose.material3.Surface(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .navigationBarsPadding(),
         color = Color.Transparent
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -602,7 +597,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                     .padding(horizontal = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("← BACK", fontSize = 11.sp, fontWeight = FontWeight.Black, color = T_TextPrimary, letterSpacing = 0.8.sp)
+                Text("⬅️ BACK", fontSize = 11.sp, fontWeight = FontWeight.Black, color = T_TextPrimary, letterSpacing = 0.8.sp)
             }
 
             Box(
@@ -617,7 +612,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("ACCEPT SIGNAL →", fontWeight = FontWeight.Black, fontSize = 11.sp, color = T_TextPrimary, letterSpacing = 0.8.sp)
+                    Text("➡️ ACCEPT SIGNAL", fontWeight = FontWeight.Black, fontSize = 11.sp, color = T_TextPrimary, letterSpacing = 0.8.sp)
                 }
             }
         }

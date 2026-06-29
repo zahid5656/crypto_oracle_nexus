@@ -1,8 +1,6 @@
 package com.example.feature.live_radar
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,10 +37,6 @@ import com.example.viewmodel.CryptoViewModel
 import kotlin.random.Random
 
 // Extracted from LiveRadarScreen.kt to keep the public screen entry point compact.
-
-private fun Modifier.liveRadarSmoothExpansion(): Modifier = this.animateContentSize(
-    animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
-)
 internal fun liveRadarConfidenceColor(value: String): Color {
     val numeric = value.replace("%", "").trim().toIntOrNull() ?: return TextSecondary
     return titanPositiveScoreColor(numeric)
@@ -292,7 +286,6 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .liveRadarSmoothExpansion()
                     .background(DarkBackground, RoundedCornerShape(8.dp))
                     .border(
                         1.dp,
@@ -411,7 +404,6 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .liveRadarSmoothExpansion()
                     .background(DarkBackground, RoundedCornerShape(8.dp))
                     .border(
                         1.dp,
@@ -530,7 +522,6 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .liveRadarSmoothExpansion()
                     .background(DarkBackground, RoundedCornerShape(8.dp))
                     .border(
                         1.dp,

@@ -13,19 +13,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.viewmodel.CryptoViewModel
@@ -40,15 +37,6 @@ import com.example.ui.theme.DarkBackground
 // Terminal Colors - Institutional Grade
 
 // Extracted from MissionCenterScreen.kt to keep the public screen entry point compact.
-
-private fun mcLeverageDigitsOnly(value: String?): String {
-    return value.orEmpty().filter { it.isDigit() }.take(3)
-}
-
-private fun mcLeverageDisplayValue(value: String?): String? {
-    val digits = mcLeverageDigitsOnly(value)
-    return digits.takeIf { it.isNotBlank() }?.let { "${it}X" }
-}
 @Composable
 fun MissionTerminalCard(
     missionId: String,
@@ -286,7 +274,7 @@ fun MissionTerminalCard(
                     Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
                         Text("LEVERAGE", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
                         Spacer(modifier = Modifier.height(SpacingCompact))
-                        Text(leverage?.uppercase() ?: "2X", color = T_TextSecondary, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Text(leverage?.uppercase() ?: "NOT SET", color = T_TextSecondary, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -333,24 +321,12 @@ fun MissionTerminalCard(
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("ENTRY", mcFormatUsd(entryVal), T_TextPrimary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                val setupDisplay = when {
-                    sMode.contains("CUSTOM-R", ignoreCase = true) || sMode.contains("CUSTOM RECOMMENDED", ignoreCase = true) || sMode.contains("REC-CUSTOM", ignoreCase = true) -> "CUSTOM-R"
-                    sMode.contains("CUSTOM-1", ignoreCase = true) || sMode.contains("CUSTOM SETUP-1", ignoreCase = true) -> "CUSTOM-1"
-                    sMode.contains("CUSTOM-2", ignoreCase = true) || sMode.contains("CUSTOM SETUP-2", ignoreCase = true) -> "CUSTOM-2"
-                    sMode.contains("SETUP-1", ignoreCase = true) -> "SETUP-1"
-                    sMode.contains("SETUP-2", ignoreCase = true) -> "SETUP-2"
-                    sMode.contains("RECOMMENDED", ignoreCase = true) -> "RECOMMENDED"
-                    else -> sMode.replace("OVERRIDDEN", "").replace("(", "").replace(")", "").trim()
-                }
-                val setupColor = when {
-                    setupDisplay.contains("RECOMMENDED", ignoreCase = true) -> T_Green
-                    setupDisplay.contains("CUSTOM", ignoreCase = true) -> T_Gold
-                    else -> T_Cyan
-                }
+                val setupDisplay = sMode.replace("OVERRIDDEN", "").replace("CUSTOM", "").replace("(", "").replace(")", "").replace("RECOMMENDED SETUP", "RECOMMENDED").trim()
+                val setupColor = if (setupDisplay.contains("RECOMMENDED", ignoreCase = true)) T_Green else T_Cyan
                 CompactDataRow("SETUP", setupDisplay, setupColor)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                val overrideCountValue = mission?.missionHistoryLog?.count { it.contains("OVERRIDE APPLIED", ignoreCase = true) } ?: 0
-                CompactDataRow("OVERRIDE", overrideCountValue.toString(), T_TextPrimary)
+                val overrideCount = if (sMode.contains("OVERRIDDEN") || sMode.contains("CUSTOM")) "1" else "0" // Simulated override count
+                CompactDataRow("OVERRIDE", overrideCount, T_TextPrimary)
             }
             // RIGHT COLUMN
             Column(modifier = Modifier.weight(1f).padding(start = SpacingNormal)) {
@@ -358,7 +334,7 @@ fun MissionTerminalCard(
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("SL2", mcFormatMissionPriceText(mission?.sl2), if (mission?.sl2 != null) T_Gold else T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
-                val levValue = (leverage?.uppercase() ?: if (isFutures) "2X" else "1X").replace("SPOT / 1X", "1X").replace("SPOT", "1X")
+                val levValue = (leverage?.uppercase() ?: if (isFutures) "NOT SET" else "1X").replace("SPOT / 1X", "1X").replace("SPOT", "1X")
                 CompactDataRow("LEVERAGE", levValue, T_TextSecondary)
                 Spacer(modifier = Modifier.height(SpacingCompact))
                 CompactDataRow("ALLOCATION", mission?.positionSize?.uppercase() ?: "NOT SET", T_TextPrimary)
@@ -652,7 +628,7 @@ fun MissionTerminalCard(
                             Text("Original Signal Entry: ${mcFormatMissionPriceText(originalEntry)}", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("TP1: ${mcFormatMissionPriceText(tp1)} | TP2: ${mcFormatMissionPriceText(tp2)} | TP3: ${mcFormatMissionPriceText(tp3)}", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("SL1: ${mcFormatMissionPriceText(manualStopLoss ?: stopLoss)} | SL2: ${mcFormatMissionPriceText(mission?.sl2)}", color = T_Red, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
-                            Text("Leverage: ${leverage ?: if (marketType.equals("Spot", ignoreCase = true)) "1X" else "2X"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
+                            Text("Leverage: ${leverage ?: if (marketType.equals("Spot", ignoreCase = true)) "1X" else "Not Set"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Allocation: ${mission?.positionSize ?: "Not Set"}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Consensus Bias: ${mission?.riskProfile ?: "Not Set"}", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
                             Text("Remark: ${mission?.setupRemark ?: "None"}", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.SansSerif)
@@ -716,25 +692,12 @@ fun MissionTerminalCard(
             }
 
             if (showOverride && mission != null && viewModel != null) {
-                val currentOverrideCount = mission.missionHistoryLog.count { it.contains("OVERRIDE APPLIED", ignoreCase = true) }
-                val nextOverrideNumber = currentOverrideCount + 1
-                val initialOverrideSource = when {
-                    mission.setupMode?.contains("CUSTOM-2", ignoreCase = true) == true || mission.setupMode?.contains("CUSTOM SETUP-2", ignoreCase = true) == true || mission.setupMode?.contains("SETUP-2", ignoreCase = true) == true -> "CUSTOM SETUP-2"
-                    mission.setupMode?.contains("CUSTOM-1", ignoreCase = true) == true || mission.setupMode?.contains("CUSTOM SETUP-1", ignoreCase = true) == true || mission.setupMode?.contains("SETUP-1", ignoreCase = true) == true -> "CUSTOM SETUP-1"
-                    else -> "RECOMMENDED SETUP"
-                }
-                var selectedSetup by remember(mission.id, mission.setupMode, nextOverrideNumber) { mutableStateOf(initialOverrideSource) }
-                val nextOverrideLabel = when (selectedSetup) {
-                    "CUSTOM SETUP-1" -> "CUSTOM-1"
-                    "CUSTOM SETUP-2" -> "CUSTOM-2"
-                    else -> "CUSTOM-R"
-                }
+                var selectedSetup by remember { mutableStateOf(mission.setupMode ?: "RECOMMENDED SETUP") }
                 var overrideTp1 by remember { mutableStateOf(mission.tp1?.replace(" / SIGNAL FALLBACK", "") ?: "") }
                 var overrideTp2 by remember { mutableStateOf(mission.tp2 ?: "") }
                 var overrideTp3 by remember { mutableStateOf(mission.tp3 ?: "") }
                 var overrideSl by remember { mutableStateOf(mission.manualStopLoss?.replace(" / SIGNAL FALLBACK", "") ?: "") }
-                var overrideLev by remember { mutableStateOf(mcLeverageDigitsOnly(mission.leverage?.replace(" / SIGNAL FALLBACK", ""))) }
-                var overrideLevFocused by remember { mutableStateOf(false) }
+                var overrideLev by remember { mutableStateOf(mission.leverage?.replace(" / SIGNAL FALLBACK", "") ?: "") }
                 var overrideRisk by remember { mutableStateOf(mission.riskProfile ?: "") }
                 var overrideAlloc by remember { mutableStateOf(mission.positionSize ?: "") }
                 var overrideRemark by remember { mutableStateOf(mission.setupRemark ?: "") }
@@ -748,7 +711,7 @@ fun MissionTerminalCard(
 
                 AlertDialog(
                     onDismissRequest = { showOverride = false },
-                    title = { Text("OVERRIDE SETUP → $nextOverrideLabel", color = T_Gold, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace) },
+                    title = { Text("OVERRIDE SETUP", color = T_Gold, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace) },
                     text = {
                         Column(modifier = Modifier.fillMaxWidth().heightIn(max = 500.dp)) {
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -767,16 +730,14 @@ fun MissionTerminalCard(
                                                 overrideTp2 = profile.tp2
                                                 overrideTp3 = profile.tp3
                                                 overrideSl = profile.stopLoss
-                                                overrideLev = mcLeverageDigitsOnly(profile.leverage)
+                                                overrideLev = profile.leverage
                                                 overrideRisk = profile.riskProfile
                                                 overrideAlloc = profile.positionSize
                                                 overrideRemark = profile.remark
                                             } else {
                                                 overrideTp1 = mission.targets
-                                                overrideTp2 = ""
-                                                overrideTp3 = ""
                                                 overrideSl = mission.stopLoss
-                                                overrideLev = if (isFutures) "2" else "1"
+                                                overrideLev = ""
                                                 overrideRisk = ""
                                                 overrideAlloc = ""
                                                 overrideRemark = ""
@@ -801,20 +762,7 @@ fun MissionTerminalCard(
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideTp2, onValueChange = { overrideTp2 = it }, label = { Text("TP2", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideTp3, onValueChange = { overrideTp3 = it }, label = { Text("TP3", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideSl, onValueChange = { overrideSl = it }, label = { Text("Stop Loss", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
-                                item {
-                                    androidx.compose.material3.OutlinedTextField(
-                                        value = if (overrideLevFocused) overrideLev else mcLeverageDisplayValue(overrideLev).orEmpty(),
-                                        onValueChange = { overrideLev = mcLeverageDigitsOnly(it) },
-                                        label = { Text("Leverage", fontSize = 10.sp) },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .onFocusChanged { focusState -> overrideLevFocused = focusState.isFocused },
-                                        singleLine = true,
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                        supportingText = { Text("Digits only. X is restored after editing.", fontSize = 8.sp) },
-                                        colors = textFieldColors
-                                    )
-                                }
+                                item { androidx.compose.material3.OutlinedTextField(value = overrideLev, onValueChange = { overrideLev = it }, label = { Text("Leverage", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideRisk, onValueChange = { overrideRisk = it }, label = { Text("Consensus Bias", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideAlloc, onValueChange = { overrideAlloc = it }, label = { Text("Allocation", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
                                 item { androidx.compose.material3.OutlinedTextField(value = overrideRemark, onValueChange = { overrideRemark = it }, label = { Text("Remark", fontSize = 10.sp) }, modifier = Modifier.fillMaxWidth(), singleLine = true, colors = textFieldColors) }
@@ -878,8 +826,8 @@ fun MissionTerminalCard(
                     confirmButton = {
                         Button(onClick = {
                             val newLogs = mutableListOf<String>()
-                            newLogs.add("OVERRIDE APPLIED #$nextOverrideNumber")
-                            newLogs.add("SETUP UPDATED: $selectedSetup -> $nextOverrideLabel")
+                            newLogs.add("OVERRIDE APPLIED")
+                            newLogs.add("SETUP UPDATED: $selectedSetup")
                             if (mission.copilotMode != aiPolicy) {
                                 newLogs.add("TITAN AI COPILOT POLICY UPDATED: $aiPolicy")
                                 if (aiPolicy.contains("EXECUTION")) {
@@ -907,14 +855,15 @@ fun MissionTerminalCard(
                                 autoValidation.second?.let { newLogs.add("AUTO-TRADING VALIDATION: $it") }
                             }
                             val updatedLog = (mission.missionHistoryLog + newLogs).takeLast(20)
+
                             val updatedMission = mission.copy(
-                                setupMode = nextOverrideLabel,
+                                setupMode = "Overridden ($selectedSetup)",
                                 setupRemark = overrideRemark.ifBlank { null },
                                 tp1 = overrideTp1.ifBlank { null },
                                 tp2 = overrideTp2.ifBlank { null },
                                 tp3 = overrideTp3.ifBlank { null },
                                 manualStopLoss = overrideSl.ifBlank { null },
-                                leverage = mcLeverageDisplayValue(overrideLev),
+                                leverage = overrideLev.ifBlank { null },
                                 riskProfile = overrideRisk.ifBlank { null },
                                 positionSize = overrideAlloc.ifBlank { null },
                                 copilotMode = aiPolicy,

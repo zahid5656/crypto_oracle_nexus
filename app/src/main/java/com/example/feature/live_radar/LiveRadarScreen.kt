@@ -52,7 +52,7 @@ fun LiveRadarScreen(
             .background(DarkBackground)
             .padding(horizontal = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(top = 10.dp, bottom = 28.dp)
+        contentPadding = PaddingValues(top = 10.dp, bottom = 20.dp)
     ) {
         val intervals = listOf("1M", "5M", "15M", "30M", "45M", "1H")
         val displayWindow = intervals.getOrElse(shortTermInterval) { "15M" }
@@ -85,7 +85,7 @@ fun LiveRadarScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (isBengali) "তাৎক্ষণিক পরিমাণগত রাডার বার্তা" else "REAL-TIME ALERTS FEED",
+                    text = if (isBengali) "তাত্ক্ষণিক পরিমাণগত রাডার বার্তা" else "REAL-TIME ALERTS FEED",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = CryptoCyan,
@@ -93,10 +93,10 @@ fun LiveRadarScreen(
                 )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .background(CryptoCyan.copy(alpha = 0.75f), CircleShape)
+                    CircularProgressIndicator(
+                        color = CryptoCyan,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(12.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
