@@ -464,7 +464,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                             shape = RoundedCornerShape(8.dp)
                         )
                         .border(0.8.dp, T_TextPrimary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
-                        .clickable { showDecisionBrief = false; step = 1 },
+                        .clickable { showDecisionBrief = false; step = 2 },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -487,7 +487,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                     ) { Text("SIGNAL SETUP", fontWeight = FontWeight.Black, fontSize = 11.sp) }
                     
                     Button(
-                        onClick = { showDecisionBrief = false; step = 1 },
+                        onClick = { showDecisionBrief = false; step = 2 },
                         colors = ButtonDefaults.buttonColors(containerColor = T_Green, contentColor = T_Bg),
                         modifier = Modifier.weight(1f).height(46.dp)
                     ) { Text("ACCEPT SIGNAL", fontWeight = FontWeight.Black, fontSize = 11.sp) }
@@ -548,7 +548,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                         Text("CLOSE", color = T_TextSecondary, fontWeight = FontWeight.Bold)
                     }
                     Button(
-                        onClick = { guardedSetupMutation { step = 1 } },
+                        onClick = { guardedSetupMutation { step = 0 } },
                         colors = ButtonDefaults.buttonColors(containerColor = T_Green, contentColor = T_Bg),
                         modifier = Modifier.weight(1f).height(46.dp)
                     ) { Text("ACCEPT SIGNAL", fontWeight = FontWeight.Black) }
@@ -557,7 +557,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
         }
     }
 
-    if (step == 1) {
+    if (false && step == 1) {
         AlertDialog(
             onDismissRequest = { step = 0 },
             title = { Text("Verify Trade Details", color = T_Cyan, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
@@ -612,7 +612,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                     .height(44.dp)
                     .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(T_Cyan.copy(alpha = pulseAlpha), T_Green.copy(alpha = pulseAlpha))), RoundedCornerShape(10.dp))
                     .border(0.8.dp, T_TextPrimary.copy(alpha = 0.28f), RoundedCornerShape(10.dp))
-                    .clickable(interactionSource = interactionSource, indication = androidx.compose.foundation.LocalIndication.current, onClick = { step = 1 })
+                    .clickable(interactionSource = interactionSource, indication = androidx.compose.foundation.LocalIndication.current, onClick = { step = 2 })
                     .padding(horizontal = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
