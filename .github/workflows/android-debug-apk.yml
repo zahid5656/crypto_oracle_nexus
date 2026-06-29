@@ -14,6 +14,7 @@ on:
   push:
     branches:
       - pre-backend-test
+      - pre-backend-test-remaining-ui
 
 permissions:
   contents: read
