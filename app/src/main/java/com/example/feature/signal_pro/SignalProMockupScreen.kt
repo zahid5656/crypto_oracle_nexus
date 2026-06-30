@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.*
@@ -383,6 +384,46 @@ fun AuditRow() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+
+@Composable
+private fun SignalInsightSetupPanel(
+    title: String,
+    context: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(Color(0xFF07101C).copy(alpha = 0.78f))
+            .border(0.65.dp, T_Cyan.copy(alpha = 0.30f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 9.dp, vertical = 7.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(title, color = T_Cyan, fontSize = 9.5.sp, fontWeight = FontWeight.Black, letterSpacing = 0.8.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(context, color = T_TextMuted, fontSize = 7.4.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.End, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(0.82f))
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        content()
+    }
+}
+
+@Composable
+private fun SignalInsightPresetChip(label: String, selected: Boolean, accent: Color, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .height(34.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (selected) accent.copy(alpha = 0.18f) else Color(0xFF050A13))
+            .border(0.65.dp, if (selected) accent else T_BorderMedium, RoundedCornerShape(8.dp))
+            .padding(horizontal = 5.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(label, color = if (selected) accent else T_TextSecondary, fontSize = 8.2.sp, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+    }
+}
+
 @Composable
 fun ActionButtonsSurface(onBack: () -> Unit) {
     var step by remember { mutableStateOf(0) }
@@ -528,21 +569,29 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
             ) {
                 Text("SIGNAL SETUP", fontSize = 20.sp, fontWeight = FontWeight.Black, color = T_Cyan)
                 Text("Auto-filled from the current signal. Review before accepting.", fontSize = 11.sp, color = T_TextSecondary)
-                
-                // Use Recommended Signal Button Placeholder that user requested
-                Button(
-                    onClick = { /* Auto-fill logic mock */ },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B)),
-                    modifier = Modifier.fillMaxWidth().height(40.dp),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text("USE RECOMMENDED SIGNAL SETUP", color = T_Cyan, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+
+                SignalInsightSetupPanel(title = "ONE-TAP QUICK SELECTION", context = "BTC | F-LONG | 24H") {
+                    Text(
+                        "RECOMMENDED is the default setup. Select SETUP-1 / SETUP-2 for faster simulation review before Mission Center handoff.",
+                        color = T_TextSecondary,
+                        fontSize = 9.sp,
+                        lineHeight = 11.sp
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        SignalInsightPresetChip("RECOMMENDED", true, T_Green, Modifier.weight(1f))
+                        SignalInsightPresetChip("SETUP-1", false, T_Cyan, Modifier.weight(1f))
+                        SignalInsightPresetChip("SETUP-2", false, T_Cyan, Modifier.weight(1f))
+                    }
                 }
-                
-                OutlinedTextField(value = "66500", onValueChange = {}, label = { Text("TARGET") }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = "62780", onValueChange = {}, label = { Text("SL1 / STOP LOSS") }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = "5.0% Cap", onValueChange = {}, label = { Text("ALLOCATION") }, modifier = Modifier.fillMaxWidth())
-                
+
+                SignalInsightSetupPanel(title = "PRICE / EXIT MATRIX", context = "BTC | F-LONG | 24H") {
+                    OutlinedTextField(value = "66500", onValueChange = {}, label = { Text("TARGET") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    OutlinedTextField(value = "62780", onValueChange = {}, label = { Text("SL1 / STOP LOSS") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    OutlinedTextField(value = "5.0% Cap", onValueChange = {}, label = { Text("ALLOCATION") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    Text("Remark: RECOMMENDED | SIGNAL PRO AUTO-SETUP", color = T_Cyan, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                }
+
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     TextButton(onClick = { step = 0 }, modifier = Modifier.weight(1f)) {
                         Text("CLOSE", color = T_TextSecondary, fontWeight = FontWeight.Bold)

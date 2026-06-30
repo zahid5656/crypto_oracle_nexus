@@ -42,6 +42,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.animation.core.tween
@@ -224,6 +225,16 @@ fun StartTradeFlow(
     val defaultTarget = parsedSignalTargets.lastOrNull().orEmpty()
     val defaultStopLoss = mission.stopLoss.takeIf { it.isNotBlank() && !it.equals("N/A", ignoreCase = true) && !it.equals("NOT SET", ignoreCase = true) }.orEmpty()
     val isFuturesMarket = mission.marketType.contains("Futures", ignoreCase = true)
+    val setupSourceLabel = remember(tradeFlowStateKey, mission.aiStatusEnglish, mission.aiStatusBengali) {
+        if (mission.aiStatusEnglish.contains("Radar", ignoreCase = true) || mission.aiStatusBengali.contains("রাডার")) "LIVE RADAR" else "SIGNAL PRO"
+    }
+    val setupDirectionCode = mission.type.trim().uppercase().ifBlank { "LONG" }
+    val setupMarketCode = if (isFuturesMarket) "F" else "S"
+    val setupInstrumentContext = remember(tradeFlowStateKey, isFuturesMarket) {
+        val symbol = mission.coinSymbol.trim().uppercase().ifBlank { "ASSET" }
+        val timeframe = mission.signalTimeframe.trim().uppercase().ifBlank { "TF" }
+        "$symbol | $setupMarketCode-$setupDirectionCode | $timeframe"
+    }
     fun recommendedLeverageForMarket(): String = if (isFuturesMarket) "2X" else "1X"
     val defaultLeverage = recommendedLeverageForMarket()
 
@@ -238,6 +249,7 @@ fun StartTradeFlow(
     var setupRiskProfile by rememberSaveable(tradeFlowStateKey) { mutableStateOf(if (highConfidence) "MODERATE" else "CONSERVATIVE") }
     var setupRemark by rememberSaveable(tradeFlowStateKey) { mutableStateOf("AUTO-FILLED FROM SIGNAL PRO") }
     var selectedSetupPreset by rememberSaveable(tradeFlowStateKey) { mutableStateOf("RECOMMENDED") }
+    var setupEditedManually by rememberSaveable(tradeFlowStateKey) { mutableStateOf(false) }
     var setupCopilotPolicy by rememberSaveable(tradeFlowStateKey) { mutableStateOf("ASSIST ONLY") }
     var autoCloseTarget by rememberSaveable(tradeFlowStateKey) { mutableStateOf(true) }
     var autoCloseTp1 by rememberSaveable(tradeFlowStateKey) { mutableStateOf(true) }
@@ -269,6 +281,7 @@ fun StartTradeFlow(
 
     fun applySetupPreset(preset: String) {
         selectedSetupPreset = preset
+        setupEditedManually = false
         when (preset) {
             "SETUP-1" -> {
                 applyConsensusBias("MODERATE")
@@ -290,7 +303,7 @@ fun StartTradeFlow(
                 copilotLiquidityGuard = true
                 copilotRegimeFlip = false
                 copilotVolatilitySpike = false
-                setupRemark = "SETUP-1 / MODERATE AUTO + COPILOT EXECUTION"
+                setupRemark = "SETUP-1 | $setupSourceLabel AUTO-PICKED | MODERATE+AUTO-TRADE+COPILOT EXECUTION"
             }
             "SETUP-2" -> {
                 applyConsensusBias("AGGRESSIVE")
@@ -312,7 +325,7 @@ fun StartTradeFlow(
                 copilotLiquidityGuard = true
                 copilotRegimeFlip = true
                 copilotVolatilitySpike = true
-                setupRemark = "SETUP-2 / AGGRESSIVE AUTO + COPILOT EXECUTION"
+                setupRemark = "SETUP-2 | $setupSourceLabel AUTO-PICKED | AGGRESSIVE+AUTO-TRADE+COPILOT EXECUTION"
             }
             else -> {
                 applyConsensusBias(if (highConfidence) "MODERATE" else "CONSERVATIVE")
@@ -330,7 +343,7 @@ fun StartTradeFlow(
                 copilotLiquidityGuard = true
                 copilotRegimeFlip = false
                 copilotVolatilitySpike = false
-                setupRemark = "RECOMMENDED / AUTO-PICKED FROM SIGNAL PRO"
+                setupRemark = "RECOMMENDED | $setupSourceLabel AUTO-SETUP"
             }
         }
     }
@@ -347,17 +360,28 @@ fun StartTradeFlow(
     }
 
     fun setupRemarkWithContext(): String {
-        val context = if (isFuturesMarket) "MARGIN: $acceptMarginMode / ${setupLeverage.ifBlank { recommendedLeverageForMarket() }}" else "SPOT: NO MARGIN"
-        val copilotContext = if (setupCopilotPolicy == "EXECUTION") {
-            "COPILOT CONDITIONS: ${copilotProtectionConditions().ifEmpty { listOf("NO EXECUTION RULE") }.joinToString(" / ")}"
-        } else {
-            "COPILOT: ASSIST ONLY"
+        val setupName = when (selectedSetupPreset) {
+            "SETUP-1" -> "SETUP-1"
+            "SETUP-2" -> "SETUP-2"
+            else -> "RECOMMENDED"
         }
-        return listOf(setupRemark, context, copilotContext)
-            .map { it.trim() }
-            .filter { it.isNotBlank() }
-            .distinct()
-            .joinToString(" | ")
+        val sourceMode = when {
+            selectedSetupPreset == "RECOMMENDED" && !setupEditedManually -> "$setupSourceLabel AUTO-SETUP"
+            setupEditedManually -> "$setupSourceLabel MANUAL"
+            else -> "$setupSourceLabel AUTO-PICKED"
+        }
+        val autoTradeActive = acceptAutoTradingEnabled && (autoCloseTarget || autoCloseTp1 || autoCloseTp2 || autoCloseTp3 || autoCloseStopLoss)
+        val dynamicTokens = listOfNotNull(
+            setupRiskProfile.uppercase(),
+            "AUTO-TRADE".takeIf { autoTradeActive },
+            if (setupCopilotPolicy == "EXECUTION") "COPILOT EXECUTION" else "COPILOT ASSIST ONLY"
+        ).joinToString("+")
+        val includeDynamicTokens = selectedSetupPreset != "RECOMMENDED" || setupEditedManually
+        return listOfNotNull(
+            setupName,
+            sourceMode,
+            dynamicTokens.takeIf { includeDynamicTokens && it.isNotBlank() }
+        ).joinToString(" | ")
     }
 
     val selectedSetupMode = when (selectedSetupPreset) {
@@ -604,41 +628,54 @@ fun StartTradeFlow(
                 val recommendedCoreLocked = selectedSetupPreset == "RECOMMENDED"
                 val coreEditEnabled = !recommendedCoreLocked
 
-                SetupCompactPanel(title = "PRICE / EXIT MATRIX") {
+                SetupCompactPanel(title = "PRICE / EXIT MATRIX", context = setupInstrumentContext) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                        CompactSetupTextField("TARGET", setupTarget, { setupTarget = it }, Modifier.weight(1f), enabled = coreEditEnabled)
-                        CompactSetupTextField("TP1", setupTp1, { setupTp1 = it }, Modifier.weight(1f), enabled = coreEditEnabled)
+                        CompactSetupTextField("TARGET", setupTarget, { setupEditedManually = true; setupTarget = it }, Modifier.weight(1f), enabled = coreEditEnabled)
+                        CompactSetupTextField("TP1", setupTp1, { setupEditedManually = true; setupTp1 = it }, Modifier.weight(1f), enabled = coreEditEnabled)
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                        CompactSetupTextField("TP2", setupTp2, { setupTp2 = it }, Modifier.weight(1f), enabled = coreEditEnabled)
-                        CompactSetupTextField("TP3", setupTp3, { setupTp3 = it }, Modifier.weight(1f), enabled = coreEditEnabled)
+                        CompactSetupTextField("TP2", setupTp2, { setupEditedManually = true; setupTp2 = it }, Modifier.weight(1f), enabled = coreEditEnabled)
+                        CompactSetupTextField("TP3", setupTp3, { setupEditedManually = true; setupTp3 = it }, Modifier.weight(1f), enabled = coreEditEnabled)
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                        CompactSetupTextField("SL1 / STOP LOSS", setupSl1, { setupSl1 = it }, Modifier.weight(1f), enabled = coreEditEnabled)
-                        CompactSetupTextField("SL2", setupSl2, { setupSl2 = it }, Modifier.weight(1f), enabled = coreEditEnabled)
+                        CompactSetupTextField("SL1 / STOP LOSS", setupSl1, { setupEditedManually = true; setupSl1 = it }, Modifier.weight(1f), enabled = coreEditEnabled)
+                        CompactSetupTextField("SL2", setupSl2, { setupEditedManually = true; setupSl2 = it }, Modifier.weight(1f), enabled = coreEditEnabled)
                     }
                 }
 
                 SetupCompactPanel(title = "MISSION INTELLIGENCE") {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                        CompactLeverageTextField("LEVERAGE", setupLeverage, { setupLeverage = it }, Modifier.weight(1f), enabled = coreEditEnabled)
-                        CompactAllocationTextField("ALLOCATION", setupAllocation, { setupAllocation = it }, Modifier.weight(1f), enabled = coreEditEnabled)
+                        CompactLeverageTextField("LEVERAGE", setupLeverage, { setupEditedManually = true; setupLeverage = it }, Modifier.weight(1f), enabled = coreEditEnabled)
+                        CompactAllocationTextField("ALLOCATION", setupAllocation, { setupEditedManually = true; setupAllocation = it }, Modifier.weight(1f), enabled = coreEditEnabled)
                     }
                     Spacer(modifier = Modifier.height(7.dp))
                     Text("CONSENSUS BIAS", color = TextMuted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        SetupPresetChip("CONSERVATIVE", setupRiskProfile == "CONSERVATIVE", CryptoCyan, Modifier.weight(1f), enabled = coreEditEnabled) { applyConsensusBias("CONSERVATIVE") }
-                        SetupPresetChip("MODERATE", setupRiskProfile == "MODERATE", CryptoGreen, Modifier.weight(1f), enabled = coreEditEnabled) { applyConsensusBias("MODERATE") }
-                        SetupPresetChip("AGGRESSIVE", setupRiskProfile == "AGGRESSIVE", AccentGold, Modifier.weight(1f), enabled = coreEditEnabled) { applyConsensusBias("AGGRESSIVE") }
+                        SetupPresetChip("CONSERVATIVE", setupRiskProfile == "CONSERVATIVE", CryptoCyan, Modifier.weight(1f), enabled = coreEditEnabled) { setupEditedManually = true; applyConsensusBias("CONSERVATIVE") }
+                        SetupPresetChip("MODERATE", setupRiskProfile == "MODERATE", CryptoGreen, Modifier.weight(1f), enabled = coreEditEnabled) { setupEditedManually = true; applyConsensusBias("MODERATE") }
+                        SetupPresetChip("AGGRESSIVE", setupRiskProfile == "AGGRESSIVE", AccentGold, Modifier.weight(1f), enabled = coreEditEnabled) { setupEditedManually = true; applyConsensusBias("AGGRESSIVE") }
                     }
                     if (recommendedCoreLocked) {
                         Spacer(modifier = Modifier.height(5.dp))
                         Text("RECOMMENDED core values are locked here. Use Mission Center Override to create CUSTOM-1.", color = TextMuted, fontSize = 8.4.sp, lineHeight = 10.2.sp)
                     }
                     Spacer(modifier = Modifier.height(7.dp))
-                    CompactSetupTextField("REMARK", setupRemark, { setupRemark = it }, Modifier.fillMaxWidth(), enabled = coreEditEnabled)
+                    Text("REMARK", color = TextMuted, fontSize = 8.6.sp, fontWeight = FontWeight.Black, maxLines = 1)
+                    Text(
+                        text = setupRemarkWithContext(),
+                        color = CryptoCyan,
+                        fontSize = 9.sp,
+                        lineHeight = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFF050A13))
+                            .border(0.55.dp, CryptoCyan.copy(alpha = 0.32f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                    )
                 }
 
                 SetupCompactPanel(title = "AUTOMATION / COPILOT MODE") {
@@ -646,14 +683,14 @@ fun StartTradeFlow(
                     Spacer(modifier = Modifier.height(5.dp))
                     Text("AUTO-TRADING", color = TextMuted, fontSize = 8.8.sp, fontWeight = FontWeight.Bold)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        SetupPresetChip("AUTO-TRADING OFF", !acceptAutoTradingEnabled, TextMuted, Modifier.weight(1f)) { guardedSetupMutation { acceptAutoTradingEnabled = false } }
-                        SetupPresetChip("AUTO-TRADING ON", acceptAutoTradingEnabled, CryptoGreen, Modifier.weight(1f)) { guardedSetupMutation { acceptAutoTradingEnabled = true } }
+                        SetupPresetChip("AUTO-TRADING OFF", !acceptAutoTradingEnabled, TextMuted, Modifier.weight(1f)) { guardedSetupMutation { setupEditedManually = true; acceptAutoTradingEnabled = false } }
+                        SetupPresetChip("AUTO-TRADING ON", acceptAutoTradingEnabled, CryptoGreen, Modifier.weight(1f)) { guardedSetupMutation { setupEditedManually = true; acceptAutoTradingEnabled = true } }
                     }
                     Spacer(modifier = Modifier.height(7.dp))
                     Text("TITAN AI COPILOT POLICY", color = TextMuted, fontSize = 8.8.sp, fontWeight = FontWeight.Bold)
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        SetupPresetChip("ASSIST ONLY", setupCopilotPolicy == "ASSIST ONLY", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { setupCopilotPolicy = "ASSIST ONLY" } }
-                        SetupPresetChip("COPILOT EXECUTION", setupCopilotPolicy == "EXECUTION", AccentGold, Modifier.weight(1f)) { guardedSetupMutation { setupCopilotPolicy = "EXECUTION" } }
+                        SetupPresetChip("ASSIST ONLY", setupCopilotPolicy == "ASSIST ONLY", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { setupEditedManually = true; setupCopilotPolicy = "ASSIST ONLY" } }
+                        SetupPresetChip("COPILOT EXECUTION", setupCopilotPolicy == "EXECUTION", AccentGold, Modifier.weight(1f)) { guardedSetupMutation { setupEditedManually = true; setupCopilotPolicy = "EXECUTION" } }
                     }
                 }
 
@@ -670,16 +707,16 @@ fun StartTradeFlow(
                     copilotLiquidityGuard = copilotLiquidityGuard,
                     copilotRegimeFlip = copilotRegimeFlip,
                     copilotVolatilitySpike = copilotVolatilitySpike,
-                    onAutoTargetChange = { guardedSetupMutation { autoCloseTarget = it } },
-                    onAutoTp1Change = { guardedSetupMutation { autoCloseTp1 = it } },
-                    onAutoTp2Change = { guardedSetupMutation { autoCloseTp2 = it } },
-                    onAutoTp3Change = { guardedSetupMutation { autoCloseTp3 = it } },
-                    onAutoStopLossChange = { guardedSetupMutation { autoCloseStopLoss = it } },
-                    onCopilotRiskExtremeChange = { guardedSetupMutation { copilotRiskExtreme = it } },
-                    onCopilotExecutionPoorChange = { guardedSetupMutation { copilotExecutionPoor = it } },
-                    onCopilotLiquidityGuardChange = { guardedSetupMutation { copilotLiquidityGuard = it } },
-                    onCopilotRegimeFlipChange = { guardedSetupMutation { copilotRegimeFlip = it } },
-                    onCopilotVolatilitySpikeChange = { guardedSetupMutation { copilotVolatilitySpike = it } }
+                    onAutoTargetChange = { guardedSetupMutation { setupEditedManually = true; autoCloseTarget = it } },
+                    onAutoTp1Change = { guardedSetupMutation { setupEditedManually = true; autoCloseTp1 = it } },
+                    onAutoTp2Change = { guardedSetupMutation { setupEditedManually = true; autoCloseTp2 = it } },
+                    onAutoTp3Change = { guardedSetupMutation { setupEditedManually = true; autoCloseTp3 = it } },
+                    onAutoStopLossChange = { guardedSetupMutation { setupEditedManually = true; autoCloseStopLoss = it } },
+                    onCopilotRiskExtremeChange = { guardedSetupMutation { setupEditedManually = true; copilotRiskExtreme = it } },
+                    onCopilotExecutionPoorChange = { guardedSetupMutation { setupEditedManually = true; copilotExecutionPoor = it } },
+                    onCopilotLiquidityGuardChange = { guardedSetupMutation { setupEditedManually = true; copilotLiquidityGuard = it } },
+                    onCopilotRegimeFlipChange = { guardedSetupMutation { setupEditedManually = true; copilotRegimeFlip = it } },
+                    onCopilotVolatilitySpikeChange = { guardedSetupMutation { setupEditedManually = true; copilotVolatilitySpike = it } }
                 )
 
                 SetupCompactPanel(title = "DEFAULT SELECTIONS") {
@@ -799,7 +836,7 @@ fun StartTradeFlow(
                         .verticalScroll(confirmScroll),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    SetupCompactPanel(title = "ONE-TAP QUICK SELECTION") {
+                    SetupCompactPanel(title = "ONE-TAP QUICK SELECTION", context = setupInstrumentContext) {
                         Text(
                             text = "RECOMMENDED is the default setup. Price, TP, SL, leverage, and allocation remain display-only here; use SIGNAL SETUP for full editing.",
                             color = TextSecondary,
@@ -819,8 +856,8 @@ fun StartTradeFlow(
                             SetupSummaryLine("Leverage", setupLeverage.ifBlank { recommendedLeverageForMarket() }, AccentGold)
                             Spacer(modifier = Modifier.height(5.dp))
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                SetupPresetChip("CROSS", acceptMarginMode == "CROSS", AccentGold, Modifier.weight(1f)) { guardedSetupMutation { acceptMarginMode = "CROSS" } }
-                                SetupPresetChip("ISOLATED", acceptMarginMode == "ISOLATED", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { acceptMarginMode = "ISOLATED" } }
+                                SetupPresetChip("CROSS", acceptMarginMode == "CROSS", AccentGold, Modifier.weight(1f)) { guardedSetupMutation { setupEditedManually = true; acceptMarginMode = "CROSS" } }
+                                SetupPresetChip("ISOLATED", acceptMarginMode == "ISOLATED", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { setupEditedManually = true; acceptMarginMode = "ISOLATED" } }
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             SetupSummaryLine("Liquidity Guard", "ACTIVE", CryptoGreen)
@@ -843,6 +880,7 @@ fun StartTradeFlow(
                         SetupSummaryLine("Stop Loss", setupSl1.ifBlank { mission.stopLoss }, CryptoRedText)
                         SetupSummaryLine("Allocation", spAllocationDisplayValue(setupAllocation, spRecommendedAllocation(highConfidence)), CryptoCyan)
                         SetupSummaryLine("Consensus Bias", setupRiskProfile, signalProfileRiskColor(setupRiskProfile))
+                        SetupSummaryLine("Remark", setupRemarkWithContext(), CryptoCyan)
                     }
 
                     SetupCompactPanel(title = "EXIT / PROTECTION MAP") {
@@ -872,14 +910,14 @@ fun StartTradeFlow(
                         Spacer(modifier = Modifier.height(5.dp))
                         Text("AUTO-TRADING", color = TextMuted, fontSize = 8.8.sp, fontWeight = FontWeight.Bold)
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            SetupPresetChip("AUTO-TRADING OFF", !acceptAutoTradingEnabled, TextMuted, Modifier.weight(1f)) { guardedSetupMutation { acceptAutoTradingEnabled = false } }
-                            SetupPresetChip("AUTO-TRADING ON", acceptAutoTradingEnabled, CryptoGreen, Modifier.weight(1f)) { guardedSetupMutation { acceptAutoTradingEnabled = true } }
+                            SetupPresetChip("AUTO-TRADING OFF", !acceptAutoTradingEnabled, TextMuted, Modifier.weight(1f)) { guardedSetupMutation { setupEditedManually = true; acceptAutoTradingEnabled = false } }
+                            SetupPresetChip("AUTO-TRADING ON", acceptAutoTradingEnabled, CryptoGreen, Modifier.weight(1f)) { guardedSetupMutation { setupEditedManually = true; acceptAutoTradingEnabled = true } }
                         }
                         Spacer(modifier = Modifier.height(7.dp))
                         Text("TITAN AI COPILOT POLICY", color = TextMuted, fontSize = 8.8.sp, fontWeight = FontWeight.Bold)
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            SetupPresetChip("ASSIST ONLY", setupCopilotPolicy == "ASSIST ONLY", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { setupCopilotPolicy = "ASSIST ONLY" } }
-                            SetupPresetChip("COPILOT EXECUTION", setupCopilotPolicy == "EXECUTION", AccentGold, Modifier.weight(1f)) { guardedSetupMutation { setupCopilotPolicy = "EXECUTION" } }
+                            SetupPresetChip("ASSIST ONLY", setupCopilotPolicy == "ASSIST ONLY", CryptoCyan, Modifier.weight(1f)) { guardedSetupMutation { setupEditedManually = true; setupCopilotPolicy = "ASSIST ONLY" } }
+                            SetupPresetChip("COPILOT EXECUTION", setupCopilotPolicy == "EXECUTION", AccentGold, Modifier.weight(1f)) { guardedSetupMutation { setupEditedManually = true; setupCopilotPolicy = "EXECUTION" } }
                         }
                     }
 
@@ -896,16 +934,16 @@ fun StartTradeFlow(
                         copilotLiquidityGuard = copilotLiquidityGuard,
                         copilotRegimeFlip = copilotRegimeFlip,
                         copilotVolatilitySpike = copilotVolatilitySpike,
-                        onAutoTargetChange = { guardedSetupMutation { autoCloseTarget = it } },
-                        onAutoTp1Change = { guardedSetupMutation { autoCloseTp1 = it } },
-                        onAutoTp2Change = { guardedSetupMutation { autoCloseTp2 = it } },
-                        onAutoTp3Change = { guardedSetupMutation { autoCloseTp3 = it } },
-                        onAutoStopLossChange = { guardedSetupMutation { autoCloseStopLoss = it } },
-                        onCopilotRiskExtremeChange = { guardedSetupMutation { copilotRiskExtreme = it } },
-                        onCopilotExecutionPoorChange = { guardedSetupMutation { copilotExecutionPoor = it } },
-                        onCopilotLiquidityGuardChange = { guardedSetupMutation { copilotLiquidityGuard = it } },
-                        onCopilotRegimeFlipChange = { guardedSetupMutation { copilotRegimeFlip = it } },
-                        onCopilotVolatilitySpikeChange = { guardedSetupMutation { copilotVolatilitySpike = it } }
+                        onAutoTargetChange = { guardedSetupMutation { setupEditedManually = true; autoCloseTarget = it } },
+                        onAutoTp1Change = { guardedSetupMutation { setupEditedManually = true; autoCloseTp1 = it } },
+                        onAutoTp2Change = { guardedSetupMutation { setupEditedManually = true; autoCloseTp2 = it } },
+                        onAutoTp3Change = { guardedSetupMutation { setupEditedManually = true; autoCloseTp3 = it } },
+                        onAutoStopLossChange = { guardedSetupMutation { setupEditedManually = true; autoCloseStopLoss = it } },
+                        onCopilotRiskExtremeChange = { guardedSetupMutation { setupEditedManually = true; copilotRiskExtreme = it } },
+                        onCopilotExecutionPoorChange = { guardedSetupMutation { setupEditedManually = true; copilotExecutionPoor = it } },
+                        onCopilotLiquidityGuardChange = { guardedSetupMutation { setupEditedManually = true; copilotLiquidityGuard = it } },
+                        onCopilotRegimeFlipChange = { guardedSetupMutation { setupEditedManually = true; copilotRegimeFlip = it } },
+                        onCopilotVolatilitySpikeChange = { guardedSetupMutation { setupEditedManually = true; copilotVolatilitySpike = it } }
                     )
                 }
 
@@ -1216,6 +1254,7 @@ private fun PremiumTitanInsightButton(
 @Composable
 private fun SetupCompactPanel(
     title: String,
+    context: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
@@ -1226,14 +1265,35 @@ private fun SetupCompactPanel(
             .border(0.65.dp, CryptoCyan.copy(alpha = 0.30f), RoundedCornerShape(10.dp))
             .padding(horizontal = 9.dp, vertical = 7.dp)
     ) {
-        Text(
-            text = title,
-            color = CryptoCyan,
-            fontSize = 9.5.sp,
-            fontWeight = FontWeight.Black,
-            letterSpacing = 0.8.sp,
-            maxLines = 1
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                color = CryptoCyan,
+                fontSize = 9.5.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 0.8.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+            if (!context.isNullOrBlank()) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = context,
+                    color = TextMuted,
+                    fontSize = 7.4.sp,
+                    fontWeight = FontWeight.Black,
+                    textAlign = TextAlign.End,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(0.82f)
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(6.dp))
         content()
     }
@@ -1504,8 +1564,17 @@ private fun SetupSummaryLine(label: String, value: String, valueColor: Color) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, color = TextSecondary, fontSize = 9.5.sp, maxLines = 1)
-        Text(value, color = valueColor, fontSize = 9.5.sp, fontWeight = FontWeight.Black, maxLines = 1)
+        Text(label, color = TextSecondary, fontSize = 9.5.sp, maxLines = 1, modifier = Modifier.weight(0.72f))
+        Text(
+            value,
+            color = valueColor,
+            fontSize = 9.5.sp,
+            fontWeight = FontWeight.Black,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(1.28f)
+        )
     }
 }
 

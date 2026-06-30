@@ -56,20 +56,9 @@ fun OpportunisticSignalAdornmentSection(
         }
     }
 
-    Spacer(modifier = Modifier.height(10.dp))
+    Spacer(modifier = Modifier.height(6.dp))
     HorizontalDivider(color = BorderColor.copy(alpha = 0.4f))
-    Spacer(modifier = Modifier.height(10.dp))
-
-    LiveRadarBetaDivergenceGuard(
-        symbol = symbol,
-        ecosystemLeaderName = ecosystemLeaderName,
-        isLong = isLong,
-        isBengali = isBengali
-    )
-
-    Spacer(modifier = Modifier.height(10.dp))
-    HorizontalDivider(color = BorderColor.copy(alpha = 0.4f))
-    Spacer(modifier = Modifier.height(10.dp))
+    Spacer(modifier = Modifier.height(6.dp))
 
     // 1. Take Profit Matrix
     Text(
@@ -106,9 +95,20 @@ fun OpportunisticSignalAdornmentSection(
         )
     }
 
-    Spacer(modifier = Modifier.height(10.dp))
+    Spacer(modifier = Modifier.height(6.dp))
     HorizontalDivider(color = BorderColor.copy(alpha = 0.4f))
-    Spacer(modifier = Modifier.height(10.dp))
+    Spacer(modifier = Modifier.height(6.dp))
+
+    LiveRadarBetaDivergenceGuard(
+        symbol = symbol,
+        ecosystemLeaderName = ecosystemLeaderName,
+        isLong = isLong,
+        isBengali = isBengali
+    )
+
+    Spacer(modifier = Modifier.height(6.dp))
+    HorizontalDivider(color = BorderColor.copy(alpha = 0.4f))
+    Spacer(modifier = Modifier.height(6.dp))
 
     // 2. Multi-AI Consensus Engines
     val geminiScore = 94
@@ -268,7 +268,7 @@ internal fun AiOracleAnalyticMetadataSection(
             overflow = TextOverflow.Ellipsis
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(5.dp))
 
         OracleAnalyticMetadataGrid(
             details = details,
@@ -276,7 +276,7 @@ internal fun AiOracleAnalyticMetadataSection(
             sectionColor = LiveRadarInstitutionalGreen
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(5.dp))
 
         OracleMetadataDescriptionTile(
             text = if (isBengali) details["desc_bn"].orEmpty() else details["desc"].orEmpty(),
@@ -317,7 +317,7 @@ internal fun OracleAnalyticMetadataGrid(
             )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -454,7 +454,7 @@ internal fun LiveRadarBetaDivergenceGuard(
             .fillMaxWidth()
             .background(LiveRadarPanelDark, RoundedCornerShape(13.dp))
             .border(0.9.dp, statusColor.copy(alpha = 0.62f), RoundedCornerShape(13.dp))
-            .padding(horizontal = 10.dp, vertical = 10.dp)
+            .padding(horizontal = 9.dp, vertical = 8.dp)
     ) {
         Text(
             text = "BETA DIVERGENCE GUARD",
@@ -466,14 +466,14 @@ internal fun LiveRadarBetaDivergenceGuard(
             overflow = TextOverflow.Ellipsis
         )
 
-        Spacer(modifier = Modifier.height(7.dp))
+        Spacer(modifier = Modifier.height(5.dp))
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(LiveRadarTileDark, RoundedCornerShape(10.dp))
                 .border(0.85.dp, statusColor.copy(alpha = 0.56f), RoundedCornerShape(10.dp))
-                .padding(horizontal = 10.dp, vertical = 8.dp),
+                .padding(horizontal = 9.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -519,7 +519,7 @@ internal fun LiveRadarBetaDivergenceGuard(
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(5.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -543,7 +543,7 @@ internal fun LiveRadarBetaDivergenceGuard(
             )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -566,7 +566,7 @@ internal fun LiveRadarBetaDivergenceGuard(
             )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -589,7 +589,7 @@ internal fun LiveRadarBetaDivergenceGuard(
             )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -644,16 +644,16 @@ internal fun BetaGuardMiniTile(
 
     Column(
         modifier = modifier
-            .heightIn(min = 56.dp)
+            .heightIn(min = 48.dp)
             .background(LiveRadarTileDark, RoundedCornerShape(9.dp))
             .border(0.85.dp, borderBrush, RoundedCornerShape(9.dp))
-            .padding(horizontal = 7.dp, vertical = 5.dp),
+            .padding(horizontal = 6.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = label,
-            fontSize = 10.2.sp,
+            fontSize = 9.2.sp,
             fontWeight = FontWeight.Black,
             color = baseColor,
             textAlign = TextAlign.Center,
@@ -665,7 +665,7 @@ internal fun BetaGuardMiniTile(
 
         Text(
             text = value,
-            fontSize = 12.8.sp,
+            fontSize = 11.8.sp,
             fontWeight = FontWeight.Black,
             color = LiveRadarSoftWhite,
             textAlign = TextAlign.Center,
@@ -677,7 +677,7 @@ internal fun BetaGuardMiniTile(
 
         Text(
             text = stat,
-            fontSize = 9.6.sp,
+            fontSize = 8.8.sp,
             fontWeight = FontWeight.Bold,
             color = visibleStatColor,
             textAlign = TextAlign.Center,

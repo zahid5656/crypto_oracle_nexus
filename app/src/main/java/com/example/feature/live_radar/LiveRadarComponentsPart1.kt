@@ -299,7 +299,6 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .bringIntoViewRequester(spotRadarAutoFitRequester)
                     .background(DarkBackground, RoundedCornerShape(8.dp))
                     .border(
                         1.dp,
@@ -311,6 +310,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .bringIntoViewRequester(spotRadarAutoFitRequester)
                         .clip(RoundedCornerShape(7.dp))
                         .clickable {
                             expandedKey = if (isExpanded) null else "spot_$index"
@@ -446,7 +446,6 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .bringIntoViewRequester(longRadarAutoFitRequester)
                     .background(DarkBackground, RoundedCornerShape(8.dp))
                     .border(
                         1.dp,
@@ -458,6 +457,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .bringIntoViewRequester(longRadarAutoFitRequester)
                         .clip(RoundedCornerShape(7.dp))
                         .clickable {
                             expandedKey = if (isExpanded) null else "long_$index"
@@ -593,7 +593,6 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .bringIntoViewRequester(shortRadarAutoFitRequester)
                     .background(DarkBackground, RoundedCornerShape(8.dp))
                     .border(
                         1.dp,
@@ -605,6 +604,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .bringIntoViewRequester(shortRadarAutoFitRequester)
                         .clip(RoundedCornerShape(7.dp))
                         .clickable {
                             expandedKey = if (isExpanded) null else "short_$index"
