@@ -10,7 +10,7 @@
 # **Category:** AI-Powered Crypto Trading Intelligence Platform
 # **Tagline:** AI Trading Copilot & Mission Control for Crypto Markets
 # **Status:** Pre-Implementation Master Roadmap
-# **Primary Owner / Founder Vision:** ZAHIDUL ISLAM
+# **Primary Owner / Founder Vision:** MD. ZAHIDUL ISLAM
 # **Intended Use / Purpose:** This document is the guiding project law for future work inside or outside ChatGPT project mode. It details the full project mission, vision, execution philosophy, feature system, frontend/backend architecture, implementation roadmap, trial-mode plan, and developer handoff guide.
 ### =========================================================================================================
 

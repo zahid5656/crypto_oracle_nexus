@@ -86,18 +86,45 @@ dependencies {
     testImplementation(libs.robolectric)
 }
 
-tasks.register<Copy>("copyApkToRoot") {
-    from(layout.buildDirectory.dir("outputs/apk/debug"))
-    into(rootProject.layout.projectDirectory)
-    include("app-debug.apk")
+abstract class CopyApkToDestinationsTask : DefaultTask() {
+    @get:InputFile
+    abstract val sourceApk: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val rootDestDir: DirectoryProperty
+
+    @get:OutputDirectory
+    abstract val buildOutputsDestDir: DirectoryProperty
+
+    @TaskAction
+    fun copy() {
+        val src = sourceApk.get().asFile
+        if (src.exists()) {
+            val rootDest = rootDestDir.file("app-debug.apk").get().asFile
+            val buildOutputsDest = buildOutputsDestDir.file("app-debug.apk").get().asFile
+            
+            buildOutputsDest.parentFile.mkdirs()
+            src.copyTo(rootDest, overwrite = true)
+            src.copyTo(buildOutputsDest, overwrite = true)
+            println("APK copied successfully to $rootDest and $buildOutputsDest")
+        } else {
+            println("Source APK does not exist: ${src.absolutePath}")
+        }
+    }
+}
+
+tasks.register<CopyApkToDestinationsTask>("copyApkToDestinations") {
+    sourceApk.set(layout.buildDirectory.file("outputs/apk/debug/app-debug.apk"))
+    rootDestDir.set(rootProject.layout.projectDirectory)
+    buildOutputsDestDir.set(rootProject.layout.projectDirectory.dir(".build-outputs"))
 }
 
 tasks.configureEach {
     if (name == "assembleDebug") {
-        finalizedBy("copyApkToRoot")
+        finalizedBy("copyApkToDestinations")
     }
     if (name == "createDebugApkListingFileRedirect") {
-        mustRunAfter("copyApkToRoot")
+        mustRunAfter("copyApkToDestinations")
     }
 }
 
@@ -106,5 +133,13 @@ tasks.register("printApkSize") {
         val rootApk = file("../app-debug.apk")
         println("rootApk exists: " + rootApk.exists())
         println("rootApk size: " + rootApk.length() + " bytes")
+        
+        // Let's also search for all APKs in the build directory
+        project.fileTree(mapOf("dir" to project.layout.buildDirectory, "include" to "**/*.apk")).forEach { apkFile ->
+            println("Found APK in buildDir: ${apkFile.absolutePath}")
+        }
+        rootProject.fileTree(mapOf("dir" to rootProject.layout.projectDirectory, "include" to "**/*.apk")).forEach { apkFile ->
+            println("Found APK in rootProject: ${apkFile.absolutePath}")
+        }
     }
 }
