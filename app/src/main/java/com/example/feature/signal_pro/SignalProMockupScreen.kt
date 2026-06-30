@@ -35,8 +35,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.*
+import com.example.model.Mission
 import com.example.viewmodel.AppScreen
 import com.example.viewmodel.CryptoViewModel
+import kotlin.math.abs
 
 private val T_Surface = Color(0xFF111112)
 private val T_Bg = DarkBackground
@@ -51,13 +53,179 @@ private val T_Cyan = CryptoCyan
 private val T_Gold = TitanGold
 private val T_Orange = TitanOrange
 
+data class SignalInsightSnapshot(
+    val symbol: String = "BTC",
+    val marketMode: String = "FUTURES LONG",
+    val direction: String = "LONG",
+    val marketType: String = "Futures",
+    val timeframe: String = "24H",
+    val context: String = "BTC | F-LONG | 24H",
+    val entry: String = "\$63,920.00",
+    val current: String = "\$63,994.00",
+    val expected: String = "\$65,400.00",
+    val predicted: String = "\$66,200.00",
+    val target: String = "\$66,500.00",
+    val stopLoss: String = "\$62,780.00",
+    val allocation: String = "5.0% Cap",
+    val confidence: Int = 82,
+    val cqiScore: Int = 82,
+    val classification: String = "MODERATE CONFIDENCE",
+    val signalState: String = "ACTIVE",
+    val validity: String = "VALIDATED",
+    val freshness: String = "LIVE",
+    val riskScore: Int = 24,
+    val riskLabel: String = "MEDIUM",
+    val consensusBias: String = "MODERATE",
+    val voteSplit: String = "4-0-1 (1 Outlier)",
+    val riskReward: String = "2.4R",
+    val slDistance: String = "N/A",
+    val directionLogic: String = "VALID",
+    val decisionGate: String = "REVIEW",
+    val remark: String = "RECOMMENDED | SIGNAL PRO AUTO-SETUP",
+    val source: String = "SIGNAL PRO"
+)
+
+private fun insightFormatMoney(value: Double): String {
+    if (value <= 0.0 || value.isNaN() || value.isInfinite()) return "N/A"
+    return when {
+        value < 0.01 -> "$" + String.format("%.6f", value)
+        value < 1.0 -> "$" + String.format("%.4f", value)
+        else -> "$" + String.format("%,.2f", value)
+    }
+}
+
+private fun insightCleanDisplayPrice(value: String?): String {
+    val cleaned = value.orEmpty().trim()
+    return cleaned.takeIf { it.isNotBlank() && !it.equals("N/A", true) && !it.equals("NOT SET", true) } ?: "N/A"
+}
+
+private fun insightPriceToDouble(value: String?): Double? {
+    return value.orEmpty().replace(",", "").filter { it.isDigit() || it == '.' || it == '-' }.toDoubleOrNull()
+}
+
+private fun insightTargetsFromMission(mission: Mission?): List<String> {
+    if (mission == null) return listOf("\$66,500.00")
+    return listOf(mission.tp1, mission.tp2, mission.tp3, mission.target, mission.targets)
+        .flatMap { item -> item.orEmpty().split("/") }
+        .map { it.trim() }
+        .filter { it.isNotBlank() && !it.equals("N/A", true) && !it.equals("NOT SET", true) }
+        .distinct()
+}
+
+private fun insightClassForConfidence(confidence: Int): String = when {
+    confidence >= 90 -> "INSTITUTIONAL GRADE"
+    confidence >= 85 -> "HIGH CONFIDENCE"
+    confidence >= 75 -> "MODERATE CONFIDENCE"
+    confidence >= 65 -> "CAUTION"
+    else -> "LOW CONFIDENCE"
+}
+
+private fun insightRiskLabel(score: Int): String = when {
+    score <= 15 -> "LOW"
+    score <= 25 -> "MEDIUM"
+    score <= 35 -> "HIGH"
+    else -> "EXTREME"
+}
+
+private fun insightBiasForMission(mission: Mission?, confidence: Int): String {
+    return mission?.riskProfile?.uppercase()?.takeIf { it.isNotBlank() } ?: when {
+        confidence >= 88 -> "AGGRESSIVE"
+        confidence >= 75 -> "MODERATE"
+        else -> "CONSERVATIVE"
+    }
+}
+
+private fun insightAllocationForBias(bias: String): String = when (bias.uppercase()) {
+    "AGGRESSIVE" -> "10.0% Max"
+    "CONSERVATIVE" -> "2.0% Cap"
+    else -> "5.0% Cap"
+}
+
+private fun insightBuildSnapshot(mission: Mission?, livePrice: Double?): SignalInsightSnapshot {
+    if (mission == null) return SignalInsightSnapshot()
+
+    val symbol = mission.coinSymbol.trim().uppercase().ifBlank { "ASSET" }
+    val direction = mission.type.trim().uppercase().ifBlank { "LONG" }
+    val isFutures = mission.marketType.contains("Futures", true)
+    val marketType = if (isFutures) "Futures" else "Spot"
+    val marketCode = if (isFutures) "F" else "S"
+    val timeframe = mission.signalTimeframe.trim().uppercase().ifBlank { "TF" }
+    val context = "$symbol | $marketCode-$direction | $timeframe"
+    val confidence = mission.confidence.coerceIn(0, 100)
+    val targetList = insightTargetsFromMission(mission)
+    val target = insightCleanDisplayPrice(targetList.lastOrNull())
+    val expected = insightCleanDisplayPrice(targetList.firstOrNull() ?: target)
+    val stopLoss = insightCleanDisplayPrice(mission.manualStopLoss ?: mission.stopLoss)
+    val currentDouble = livePrice ?: mission.currentPrice.takeIf { it > 0.0 } ?: mission.entryPrice
+    val entryDouble = mission.entryPrice
+    val riskRaw = (100 - confidence).coerceIn(0, 100)
+    val riskScore = riskRaw.coerceAtLeast(12)
+    val bias = insightBiasForMission(mission, confidence)
+    val allocation = mission.positionSize?.takeIf { it.isNotBlank() } ?: insightAllocationForBias(bias)
+    val targetDouble = insightPriceToDouble(target)
+    val stopDouble = insightPriceToDouble(stopLoss)
+    val riskReward = if (targetDouble != null && stopDouble != null && entryDouble > 0.0 && abs(entryDouble - stopDouble) > 0.0) {
+        String.format("%.2fR", abs(targetDouble - entryDouble) / abs(entryDouble - stopDouble))
+    } else {
+        "N/A"
+    }
+    val slDistance = if (stopDouble != null && entryDouble > 0.0) {
+        String.format("%.2f%%", abs(entryDouble - stopDouble) / entryDouble * 100.0)
+    } else {
+        "N/A"
+    }
+    val signalState = mission.setupStatus?.uppercase()?.takeIf { it.isNotBlank() } ?: "ACTIVE"
+    val validity = mission.conditionValidity?.uppercase()?.takeIf { it.isNotBlank() } ?: "VALIDATED"
+    val source = if (mission.aiStatusEnglish.contains("Radar", true) || mission.aiStatusBengali.contains("রাডার")) "LIVE RADAR" else "SIGNAL PRO"
+    val remark = mission.setupRemark?.takeIf { it.isNotBlank() } ?: "RECOMMENDED | $source AUTO-SETUP"
+
+    return SignalInsightSnapshot(
+        symbol = symbol,
+        marketMode = "${marketType.uppercase()} $direction",
+        direction = direction,
+        marketType = marketType,
+        timeframe = timeframe,
+        context = context,
+        entry = insightFormatMoney(entryDouble),
+        current = insightFormatMoney(currentDouble),
+        expected = expected,
+        predicted = target,
+        target = target,
+        stopLoss = stopLoss,
+        allocation = allocation,
+        confidence = confidence,
+        cqiScore = confidence,
+        classification = insightClassForConfidence(confidence),
+        signalState = signalState,
+        validity = validity,
+        freshness = if (livePrice != null) "LIVE" else "SIGNAL",
+        riskScore = riskScore,
+        riskLabel = insightRiskLabel(riskScore),
+        consensusBias = bias,
+        voteSplit = if (confidence >= 85) "4-1-0" else "3-1-1",
+        riskReward = riskReward,
+        slDistance = slDistance,
+        directionLogic = if (validity == "VALID" || validity == "VALIDATED") "VALID" else "REVIEW",
+        decisionGate = if (validity == "VALID" || confidence >= 85) "READY" else "REVIEW",
+        remark = remark,
+        source = source
+    )
+}
+
 @Composable
 fun SignalProMockupScreen(
     viewModel: CryptoViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    mission: Mission? = null,
+    livePrice: Double? = null,
+    onBackOverride: (() -> Unit)? = null,
+    onSignalSetup: (() -> Unit)? = null,
+    onAcceptSignal: (() -> Unit)? = null
 ) {
+    val snapshot = remember(mission, livePrice) { insightBuildSnapshot(mission, livePrice) }
+    val closeInsight = onBackOverride ?: { viewModel.navigateTo(AppScreen.Home) }
     androidx.activity.compose.BackHandler {
-        viewModel.navigateTo(AppScreen.Home)
+        closeInsight()
     }
 
     Box(
@@ -73,32 +241,32 @@ fun SignalProMockupScreen(
             contentPadding = PaddingValues(bottom = 72.dp, top = 2.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            item { SignalProHeader(onBack = { viewModel.navigateTo(AppScreen.Home) }) }
-            item { PriceMatrixBlock() }
-            item { CQISurface() }
+            item { SignalProHeader(snapshot = snapshot, onBack = closeInsight) }
+            item { PriceMatrixBlock(snapshot) }
+            item { CQISurface(snapshot) }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Box(modifier = Modifier.weight(1f)) { RiskScoreSurface() }
-                    Box(modifier = Modifier.weight(1f)) { ExecutionReadinessSurface() }
+                    Box(modifier = Modifier.weight(1f)) { RiskScoreSurface(snapshot) }
+                    Box(modifier = Modifier.weight(1f)) { ExecutionReadinessSurface(snapshot) }
                 }
             }
-            item { ConsensusSummarySurface() }
+            item { ConsensusSummarySurface(snapshot) }
             item { MultiAIConsensusSurface() }
-            item { DirectionValidationSurface() }
+            item { DirectionValidationSurface(snapshot) }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Box(modifier = Modifier.weight(1f)) { RRValidationSurface() }
-                    Box(modifier = Modifier.weight(1f)) { SLSanitySurface() }
+                    Box(modifier = Modifier.weight(1f)) { RRValidationSurface(snapshot) }
+                    Box(modifier = Modifier.weight(1f)) { SLSanitySurface(snapshot) }
                 }
             }
-            item { TPMatrixSurface() }
-            item { PositionAllocationSurface() }
-            item { DecisionGateSurface() }
+            item { TPMatrixSurface(snapshot) }
+            item { PositionAllocationSurface(snapshot) }
+            item { DecisionGateSurface(snapshot) }
             item { ConflictFlagSurface() }
-            item { AuditRow() }
+            item { AuditRow(snapshot) }
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                ActionButtonsSurface(onBack = { viewModel.navigateTo(AppScreen.Home) })
+                ActionButtonsSurface(onBack = closeInsight, snapshot = snapshot, onSignalSetup = onSignalSetup, onAcceptSignal = onAcceptSignal)
                 Spacer(modifier = Modifier.height(18.dp))
             }
         }
@@ -106,7 +274,7 @@ fun SignalProMockupScreen(
 }
 
 @Composable
-fun SignalProHeader(onBack: () -> Unit) {
+fun SignalProHeader(snapshot: SignalInsightSnapshot, onBack: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack, modifier = Modifier.size(28.dp)) {
@@ -123,35 +291,35 @@ fun SignalProHeader(onBack: () -> Unit) {
         
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column {
-                Text("Symbol: BTC", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                Text("Mode: FUTURES LONG", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("Symbol: ${snapshot.symbol}", color = T_TextPrimary, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("Mode: ${snapshot.marketMode}", color = if (snapshot.direction == "SHORT") T_Red else T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("Signal State: ACTIVE", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                Text("Validity: 42m", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Text("Signal State: ${snapshot.signalState}", color = if (snapshot.signalState.contains("READY") || snapshot.signalState.contains("ACTIVE")) T_Green else T_Gold, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("Validity: ${snapshot.validity}", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             }
         }
         Spacer(modifier = Modifier.height(5.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Timeframe: 24H", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-            Text("Freshness: 12s", color = T_Green, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+            Text("Timeframe: ${snapshot.timeframe}", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+            Text("Freshness: ${snapshot.freshness}", color = T_Green, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
         }
     }
 }
 
 @Composable
-fun PriceMatrixBlock() {
+fun PriceMatrixBlock(snapshot: SignalInsightSnapshot) {
     SurfaceBlock("PRICE MATRIX") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            PriceItem("Entry", "$63,920", T_Cyan)
-            PriceItem("Current", "$63,994", T_TextPrimary)
-            PriceItem("Expected", "$65,400", T_Gold)
+            PriceItem("Entry", snapshot.entry, T_Cyan)
+            PriceItem("Current", snapshot.current, T_TextPrimary)
+            PriceItem("Expected", snapshot.expected, T_Gold)
         }
         Spacer(modifier = Modifier.height(7.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            PriceItem("Predicted", "$66,200", T_Green)
-            PriceItem("TP", "$66,500", T_Green)
-            PriceItem("SL", "$62,780", T_Red)
+            PriceItem("Predicted", snapshot.predicted, T_Green)
+            PriceItem("TP", snapshot.target, T_Green)
+            PriceItem("SL", snapshot.stopLoss, T_Red)
         }
     }
 }
@@ -165,65 +333,65 @@ fun PriceItem(label: String, value: String, valueColor: Color) {
 }
 
 @Composable
-fun CQISurface() {
+fun CQISurface(snapshot: SignalInsightSnapshot) {
     SurfaceBlock("SIGNAL QUALITY ENGINE (CQI)") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Column {
                 Text("CQI Score", color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Text("88", color = T_Green, fontSize = 21.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text(snapshot.cqiScore.toString(), color = if (snapshot.cqiScore >= 75) T_Green else T_Gold, fontSize = 21.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text("Classification", color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Text("HIGH CONFIDENCE", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text(snapshot.classification, color = if (snapshot.cqiScore >= 75) T_Green else T_Gold, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
         }
         Spacer(modifier = Modifier.height(5.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Probability: 82%", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
-            Text("Status: VALIDATED", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+            Text("Probability: ${snapshot.confidence}%", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+            Text("Status: ${snapshot.validity}", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
         }
     }
 }
 
 @Composable
-fun RiskScoreSurface() {
+fun RiskScoreSurface(snapshot: SignalInsightSnapshot) {
     SurfaceBlock("RISK SCORE / ঝুঁকির পরিমান") {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            Text("24", color = T_Gold, fontSize = 21.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            Text("MEDIUM", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text(snapshot.riskScore.toString(), color = if (snapshot.riskScore <= 15) T_Green else if (snapshot.riskScore <= 25) T_Gold else T_Orange, fontSize = 21.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text(snapshot.riskLabel, color = if (snapshot.riskScore <= 15) T_Green else if (snapshot.riskScore <= 25) T_Gold else T_Orange, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
     }
 }
 
 @Composable
-fun ExecutionReadinessSurface() {
+fun ExecutionReadinessSurface(snapshot: SignalInsightSnapshot) {
     SurfaceBlock("EXECUTION READINESS") {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
             Text("ACCEPTABLE", color = T_Cyan, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
             Text("Spread: 0.04% | Liq: High", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-            Text("Slip: Low | Latency: 180ms", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+            Text("Slip: Low | Source: ${snapshot.source}", color = T_TextSecondary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
         }
     }
 }
 
 @Composable
-fun ConsensusSummarySurface() {
+fun ConsensusSummarySurface(snapshot: SignalInsightSnapshot) {
     SurfaceBlock("CONSENSUS SUMMARY") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column {
                 Text("Consensus Confidence", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-                Text("HIGH (84%)", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text("${snapshot.classification} (${snapshot.confidence}%)", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(5.dp))
                 Text("Consensus Bias", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-                Text("AGGRESSIVE", color = T_Gold, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text(snapshot.consensusBias, color = if (snapshot.consensusBias == "AGGRESSIVE") T_Gold else T_Cyan, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text("Direction", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-                Text("BULLISH", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text(if (snapshot.direction == "SHORT") "BEARISH" else "BULLISH", color = if (snapshot.direction == "SHORT") T_Red else T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(5.dp))
                 Text("Vote Split", color = T_TextMuted, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-                Text("4-0-1 (1 Outlier)", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                Text(snapshot.voteSplit, color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
             }
         }
         Spacer(modifier = Modifier.height(6.dp))
@@ -264,30 +432,30 @@ fun EngineCard(name: String, score: String, vote: String, status: String, color:
 }
 
 @Composable
-fun DirectionValidationSurface() {
+fun DirectionValidationSurface(snapshot: SignalInsightSnapshot) {
     SurfaceBlock("DIRECTION / TRADE LOGIC VALIDATION") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column {
                 Text("Direction Logic", color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Text("LONG", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text(snapshot.direction, color = if (snapshot.direction == "SHORT") T_Red else T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text("Entry State", color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Text("VALID", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Text(snapshot.directionLogic, color = if (snapshot.directionLogic == "VALID") T_Green else T_Gold, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
         }
         Spacer(modifier = Modifier.height(7.dp))
-        Text("StopLoss < Entry : VALID", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
-        Text("Target > Entry : VALID", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+        Text(if (snapshot.direction == "SHORT") "StopLoss > Entry : ${snapshot.directionLogic}" else "StopLoss < Entry : ${snapshot.directionLogic}", color = if (snapshot.directionLogic == "VALID") T_Green else T_Gold, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+        Text(if (snapshot.direction == "SHORT") "Target < Entry : ${snapshot.directionLogic}" else "Target > Entry : ${snapshot.directionLogic}", color = if (snapshot.directionLogic == "VALID") T_Green else T_Gold, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
     }
 }
 
 @Composable
-fun RRValidationSurface() {
+fun RRValidationSurface(snapshot: SignalInsightSnapshot) {
     SurfaceBlock("RISK / REWARD") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("RR: 2.4R", color = T_Cyan, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            Text("VALID", color = T_Green, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("RR: ${snapshot.riskReward}", color = T_Cyan, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text(snapshot.directionLogic, color = if (snapshot.directionLogic == "VALID") T_Green else T_Gold, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text("Risk Path: Standard", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
@@ -295,10 +463,10 @@ fun RRValidationSurface() {
 }
 
 @Composable
-fun SLSanitySurface() {
+fun SLSanitySurface(snapshot: SignalInsightSnapshot) {
     SurfaceBlock("STOP-LOSS SANITY") {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            Text("3.8%", color = T_Green, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text(snapshot.slDistance, color = T_Green, fontSize = 16.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
             Text("State: Standard", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
         }
@@ -306,13 +474,13 @@ fun SLSanitySurface() {
 }
 
 @Composable
-fun TPMatrixSurface() {
+fun TPMatrixSurface(snapshot: SignalInsightSnapshot) {
     SurfaceBlock("TAKE PROFIT MATRIX") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             TPItem("TP1", "+3%")
             TPItem("TP2", "+7%")
             TPItem("TP3", "+10%")
-            TPItem("Final Target", "+12.5%")
+            TPItem("Target", snapshot.target)
         }
     }
 }
@@ -326,22 +494,22 @@ fun TPItem(label: String, value: String) {
 }
 
 @Composable
-fun PositionAllocationSurface() {
+fun PositionAllocationSurface(snapshot: SignalInsightSnapshot) {
     SurfaceBlock("POSITION ALLOCATION") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text("Posture", color = T_TextMuted, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
-            Text("Moderate", color = T_Cyan, fontSize = 12.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            Text("5.0% Cap", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+            Text(snapshot.consensusBias.lowercase().replaceFirstChar { it.uppercase() }, color = T_Cyan, fontSize = 12.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text(snapshot.allocation, color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
         }
     }
 }
 
 @Composable
-fun DecisionGateSurface() {
+fun DecisionGateSurface(snapshot: SignalInsightSnapshot) {
     SurfaceBlock("DECISION GATE SUMMARY") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Decision Gate:", color = T_TextPrimary, fontSize = 12.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            Text("REVIEW", color = T_Gold, fontSize = 12.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text(snapshot.decisionGate, color = if (snapshot.decisionGate == "READY") T_Green else T_Gold, fontSize = 12.5.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(5.dp))
         Text("Blocked: None", color = T_TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
@@ -372,11 +540,11 @@ fun ConflictFlagSurface() {
 }
 
 @Composable
-fun AuditRow() {
+fun AuditRow(snapshot: SignalInsightSnapshot) {
     SurfaceBlock("SOURCE / PROVENANCE / AUDIT") {
         Column {
-            Text("Signal ID: SIG-BTC-24H-001", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-            Text("Source: Local Mock", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+            Text("Signal ID: SIG-${snapshot.symbol}-${snapshot.timeframe}", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+            Text("Source: ${snapshot.source}", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             Text("Rules Fired: 8", color = T_TextSecondary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             Text("Audit: Pending", color = T_TextMuted, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
         }
@@ -426,7 +594,12 @@ private fun SignalInsightPresetChip(label: String, selected: Boolean, accent: Co
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActionButtonsSurface(onBack: () -> Unit) {
+fun ActionButtonsSurface(
+    onBack: () -> Unit,
+    snapshot: SignalInsightSnapshot = SignalInsightSnapshot(),
+    onSignalSetup: (() -> Unit)? = null,
+    onAcceptSignal: (() -> Unit)? = null
+) {
     var step by remember { mutableStateOf(0) }
     var showDecisionBrief by remember { mutableStateOf(false) }
     
@@ -506,7 +679,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                             shape = RoundedCornerShape(8.dp)
                         )
                         .border(0.8.dp, T_TextPrimary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
-                        .clickable { showDecisionBrief = false; step = 2 },
+                        .clickable { showDecisionBrief = false; onSignalSetup?.invoke() ?: run { step = 2 } },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -522,14 +695,14 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Button(
-                        onClick = { showDecisionBrief = false; step = 2 },
+                        onClick = { showDecisionBrief = false; onSignalSetup?.invoke() ?: run { step = 2 } },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = T_Cyan),
                         border = androidx.compose.foundation.BorderStroke(1.dp, T_Cyan.copy(alpha=0.72f)),
                         modifier = Modifier.weight(1f).height(46.dp)
                     ) { Text("SIGNAL SETUP", fontWeight = FontWeight.Black, fontSize = 11.sp) }
                     
                     Button(
-                        onClick = { showDecisionBrief = false; step = 2 },
+                        onClick = { showDecisionBrief = false; onAcceptSignal?.invoke() ?: run { step = 2 } },
                         colors = ButtonDefaults.buttonColors(containerColor = T_Green, contentColor = T_Bg),
                         modifier = Modifier.weight(1f).height(46.dp)
                     ) { Text("ACCEPT SIGNAL", fontWeight = FontWeight.Black, fontSize = 11.sp) }
@@ -571,7 +744,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                 Text("SIGNAL SETUP", fontSize = 20.sp, fontWeight = FontWeight.Black, color = T_Cyan)
                 Text("Auto-filled from the current signal. Review before accepting.", fontSize = 11.sp, color = T_TextSecondary)
 
-                SignalInsightSetupPanel(title = "ONE-TAP QUICK SELECTION", context = "BTC | F-LONG | 24H") {
+                SignalInsightSetupPanel(title = "ONE-TAP QUICK SELECTION", context = snapshot.context) {
                     Text(
                         "RECOMMENDED is the default setup. Select SETUP-1 / SETUP-2 for faster simulation review before Mission Center handoff.",
                         color = T_TextSecondary,
@@ -586,11 +759,11 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                     }
                 }
 
-                SignalInsightSetupPanel(title = "PRICE / EXIT MATRIX", context = "BTC | F-LONG | 24H") {
-                    OutlinedTextField(value = "66500", onValueChange = {}, label = { Text("TARGET") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    OutlinedTextField(value = "62780", onValueChange = {}, label = { Text("SL1 / STOP LOSS") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    OutlinedTextField(value = "5.0% Cap", onValueChange = {}, label = { Text("ALLOCATION") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    Text("Remark: RECOMMENDED | SIGNAL PRO AUTO-SETUP", color = T_Cyan, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                SignalInsightSetupPanel(title = "PRICE / EXIT MATRIX", context = snapshot.context) {
+                    OutlinedTextField(value = snapshot.target, onValueChange = {}, label = { Text("TARGET") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    OutlinedTextField(value = snapshot.stopLoss, onValueChange = {}, label = { Text("SL1 / STOP LOSS") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    OutlinedTextField(value = snapshot.allocation, onValueChange = {}, label = { Text("ALLOCATION") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    Text("Remark: ${snapshot.remark}", color = T_Cyan, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -598,7 +771,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                         Text("CLOSE", color = T_TextSecondary, fontWeight = FontWeight.Bold)
                     }
                     Button(
-                        onClick = { guardedSetupMutation { step = 0 } },
+                        onClick = { guardedSetupMutation { onAcceptSignal?.invoke() ?: run { step = 0 } } },
                         colors = ButtonDefaults.buttonColors(containerColor = T_Green, contentColor = T_Bg),
                         modifier = Modifier.weight(1f).height(46.dp)
                     ) { Text("ACCEPT SIGNAL", fontWeight = FontWeight.Black) }
@@ -662,7 +835,7 @@ fun ActionButtonsSurface(onBack: () -> Unit) {
                     .height(44.dp)
                     .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(T_Cyan.copy(alpha = pulseAlpha), T_Green.copy(alpha = pulseAlpha))), RoundedCornerShape(10.dp))
                     .border(0.8.dp, T_TextPrimary.copy(alpha = 0.28f), RoundedCornerShape(10.dp))
-                    .clickable(interactionSource = interactionSource, indication = androidx.compose.foundation.LocalIndication.current, onClick = { step = 2 })
+                    .clickable(interactionSource = interactionSource, indication = androidx.compose.foundation.LocalIndication.current, onClick = { onAcceptSignal?.invoke() ?: run { step = 2 } })
                     .padding(horizontal = 10.dp),
                 contentAlignment = Alignment.Center
             ) {

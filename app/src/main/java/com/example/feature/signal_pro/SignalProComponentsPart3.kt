@@ -1038,7 +1038,20 @@ fun StartTradeFlow(
             onDismissRequest = { showMockupUi = false },
             properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            SignalProMockupScreen(viewModel = viewModel)
+            SignalProMockupScreen(
+                viewModel = viewModel,
+                mission = syncedMission,
+                livePrice = livePrice,
+                onBackOverride = { showMockupUi = false },
+                onSignalSetup = {
+                    showMockupUi = false
+                    step = 2
+                },
+                onAcceptSignal = {
+                    showMockupUi = false
+                    if (step == 0) step = 1
+                }
+            )
         }
     }
 
