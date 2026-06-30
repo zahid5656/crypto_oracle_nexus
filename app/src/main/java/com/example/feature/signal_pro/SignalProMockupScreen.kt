@@ -424,6 +424,7 @@ private fun SignalInsightPresetChip(label: String, selected: Boolean, accent: Co
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActionButtonsSurface(onBack: () -> Unit) {
     var step by remember { mutableStateOf(0) }
