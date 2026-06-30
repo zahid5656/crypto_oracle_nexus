@@ -289,11 +289,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             val isExpanded = expandedKey == "spot_$index"
             val spotRadarAutoFitRequester = remember(timeframe, index) { BringIntoViewRequester() }
             LaunchedEffect(isExpanded) {
-                AnimatedVisibility(
-                    visible = isExpanded,
-                    enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
-                    exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
-                ) {
+                if (isExpanded) {
                     delay(180)
                     spotRadarAutoFitRequester.bringIntoView()
                 }
@@ -438,11 +434,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             val isExpanded = expandedKey == "long_$index"
             val longRadarAutoFitRequester = remember(timeframe, index) { BringIntoViewRequester() }
             LaunchedEffect(isExpanded) {
-                AnimatedVisibility(
-                    visible = isExpanded,
-                    enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
-                    exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
-                ) {
+                if (isExpanded) {
                     delay(180)
                     longRadarAutoFitRequester.bringIntoView()
                 }
@@ -587,11 +579,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             val isExpanded = expandedKey == "short_$index"
             val shortRadarAutoFitRequester = remember(timeframe, index) { BringIntoViewRequester() }
             LaunchedEffect(isExpanded) {
-                AnimatedVisibility(
-                    visible = isExpanded,
-                    enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
-                    exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
-                ) {
+                if (isExpanded) {
                     delay(180)
                     shortRadarAutoFitRequester.bringIntoView()
                 }
