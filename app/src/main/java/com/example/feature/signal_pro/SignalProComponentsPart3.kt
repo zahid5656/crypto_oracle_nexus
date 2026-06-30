@@ -126,6 +126,12 @@ fun StartTradeFlow(
         ).joinToString("|")
     }
 
+    LaunchedEffect(step, tradeFlowStateKey) {
+        if (step != 1) {
+            missionConfirmLocked = false
+        }
+    }
+
     val highConfidence = mission.confidence >= 85
     val isLong = mission.type.uppercase() == "LONG"
 
@@ -374,6 +380,7 @@ fun StartTradeFlow(
         )
         viewModel.sendLocalAlert("Mission Started", "TITAN AI intelligence system successfully started monitoring ${mission.coinSymbol}")
         showDecisionBrief = false
+        missionConfirmLocked = false
         step = 0
     }
     if (showDecisionBrief) {
@@ -681,7 +688,7 @@ fun StartTradeFlow(
                                 )
                             )
                             .border(0.8.dp, Color.White.copy(alpha = 0.22f), RoundedCornerShape(14.dp))
-                            .clickable { guardedSetupMutation { step = 1 } },
+                            .clickable { guardedSetupMutation { missionConfirmLocked = false; step = 1 } },
                         contentAlignment = Alignment.Center
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
@@ -901,24 +908,9 @@ fun StartTradeFlow(
                             )
                             .border(0.8.dp, Color.White.copy(alpha = 0.22f), RoundedCornerShape(14.dp))
                             .clickable(enabled = !missionConfirmLocked) {
+                                if (missionConfirmLocked) return@clickable
                                 missionConfirmLocked = true
-                                viewModel.startMission(
-                                    syncedMission.copy(
-                                        id = java.util.UUID.randomUUID().toString(),
-                                        entryPrice = verifiedEntryLocked,
-                                        originalSignalEntry = if (mission.originalSignalEntry > 0.0) mission.originalSignalEntry else mission.entryPrice,
-                                        currentPrice = livePrice,
-                                        startTime = System.currentTimeMillis(),
-                                        lastUpdated = System.currentTimeMillis(),
-                                        setupMode = selectedSetupMode,
-                                        copilotMode = setupCopilotPolicy,
-                                        executionMode = setupCopilotPolicy,
-                                        autoCloseEnabled = acceptAutoTradingEnabled && autoCloseConditions.isNotEmpty(),
-                                        autoCloseConditions = if (acceptAutoTradingEnabled) autoCloseConditions else emptyList()
-                                    )
-                                )
-                                viewModel.sendLocalAlert("Mission Started", "TITAN AI intelligence system successfully started monitoring ${mission.coinSymbol}")
-                                step = 0
+                                startAcceptedMission(verifiedEntryLocked)
                             },
                         contentAlignment = Alignment.Center
                     ) {
