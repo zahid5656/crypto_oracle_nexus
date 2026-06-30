@@ -1,6 +1,10 @@
 package com.example.feature.live_radar
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,6 +38,7 @@ import com.example.core.radar.RadarAlert
 import com.example.feature.signal_pro.StartTradeFlow
 import com.example.ui.theme.*
 import com.example.viewmodel.CryptoViewModel
+import kotlinx.coroutines.delay
 import kotlin.random.Random
 
 // Extracted from LiveRadarScreen.kt to keep the public screen entry point compact.
@@ -92,6 +97,7 @@ internal fun RadarTriggerSectionHeader(
         }
     }
 }
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, viewModel: CryptoViewModel) {
     var expandedKey by rememberSaveable(timeframe) { mutableStateOf<String?>(null) }
@@ -281,6 +287,13 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             val potential = 1.5 + index * 0.4
             val target = basePrice * (1.0 + potential / 100)
             val isExpanded = expandedKey == "spot_$index"
+            val spotRadarAutoFitRequester = remember(timeframe, index) { BringIntoViewRequester() }
+            LaunchedEffect(isExpanded) {
+                if (isExpanded) {
+                    delay(180)
+                    spotRadarAutoFitRequester.bringIntoView()
+                }
+            }
             val details = spotDetails[index % spotDetails.size]
 
             Column(
@@ -297,6 +310,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .bringIntoViewRequester(spotRadarAutoFitRequester)
                         .clip(RoundedCornerShape(7.dp))
                         .clickable {
                             expandedKey = if (isExpanded) null else "spot_$index"
@@ -342,7 +356,12 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                     }
                 }
 
-                if (isExpanded) {
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                     Spacer(modifier = Modifier.height(7.dp))
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(6.dp))
@@ -381,6 +400,22 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         )
                     }
                     StartTradeFlow(viewModel = viewModel, mission = mission)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = if (isBengali) "বিস্তারিত বন্ধ করুন ⤴" else "COLLAPSE DETAILS ⤴",
+                        fontSize = 10.sp,
+                        color = CryptoCyan,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(CryptoCyan.copy(alpha = 0.08f))
+                            .border(0.6.dp, CryptoCyan.copy(alpha = 0.38f), RoundedCornerShape(8.dp))
+                            .clickable { expandedKey = null }
+                            .padding(vertical = 6.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    }
                 }
             }
         }
@@ -399,6 +434,13 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             val potential = 3.2 + index * 0.8
             val target = basePrice * (1.0 + potential / 100)
             val isExpanded = expandedKey == "long_$index"
+            val longRadarAutoFitRequester = remember(timeframe, index) { BringIntoViewRequester() }
+            LaunchedEffect(isExpanded) {
+                if (isExpanded) {
+                    delay(180)
+                    longRadarAutoFitRequester.bringIntoView()
+                }
+            }
             val details = longDetails[index % longDetails.size]
 
             Column(
@@ -415,6 +457,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .bringIntoViewRequester(longRadarAutoFitRequester)
                         .clip(RoundedCornerShape(7.dp))
                         .clickable {
                             expandedKey = if (isExpanded) null else "long_$index"
@@ -460,7 +503,12 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                     }
                 }
 
-                if (isExpanded) {
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                     Spacer(modifier = Modifier.height(7.dp))
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(6.dp))
@@ -499,6 +547,22 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         )
                     }
                     StartTradeFlow(viewModel = viewModel, mission = mission)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = if (isBengali) "বিস্তারিত বন্ধ করুন ⤴" else "COLLAPSE DETAILS ⤴",
+                        fontSize = 10.sp,
+                        color = CryptoCyan,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(CryptoCyan.copy(alpha = 0.08f))
+                            .border(0.6.dp, CryptoCyan.copy(alpha = 0.38f), RoundedCornerShape(8.dp))
+                            .clickable { expandedKey = null }
+                            .padding(vertical = 6.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    }
                 }
             }
         }
@@ -517,6 +581,13 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             val potential = 2.8 + index * 0.7
             val target = basePrice * (1.0 - potential / 100)
             val isExpanded = expandedKey == "short_$index"
+            val shortRadarAutoFitRequester = remember(timeframe, index) { BringIntoViewRequester() }
+            LaunchedEffect(isExpanded) {
+                if (isExpanded) {
+                    delay(180)
+                    shortRadarAutoFitRequester.bringIntoView()
+                }
+            }
             val details = shortDetails[index % shortDetails.size]
 
             Column(
@@ -533,6 +604,7 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .bringIntoViewRequester(shortRadarAutoFitRequester)
                         .clip(RoundedCornerShape(7.dp))
                         .clickable {
                             expandedKey = if (isExpanded) null else "short_$index"
@@ -578,7 +650,12 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                     }
                 }
 
-                if (isExpanded) {
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                     Spacer(modifier = Modifier.height(7.dp))
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(6.dp))
@@ -617,6 +694,22 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                         )
                     }
                     StartTradeFlow(viewModel = viewModel, mission = mission)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = if (isBengali) "বিস্তারিত বন্ধ করুন ⤴" else "COLLAPSE DETAILS ⤴",
+                        fontSize = 10.sp,
+                        color = CryptoCyan,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(CryptoCyan.copy(alpha = 0.08f))
+                            .border(0.6.dp, CryptoCyan.copy(alpha = 0.38f), RoundedCornerShape(8.dp))
+                            .clickable { expandedKey = null }
+                            .padding(vertical = 6.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    }
                 }
             }
         }
