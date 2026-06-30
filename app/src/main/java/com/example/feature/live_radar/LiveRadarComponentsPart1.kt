@@ -1,6 +1,10 @@
 package com.example.feature.live_radar
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,6 +38,7 @@ import com.example.core.radar.RadarAlert
 import com.example.feature.signal_pro.StartTradeFlow
 import com.example.ui.theme.*
 import com.example.viewmodel.CryptoViewModel
+import kotlinx.coroutines.delay
 import kotlin.random.Random
 
 // Extracted from LiveRadarScreen.kt to keep the public screen entry point compact.
@@ -92,6 +97,7 @@ internal fun RadarTriggerSectionHeader(
         }
     }
 }
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, viewModel: CryptoViewModel) {
     var expandedKey by rememberSaveable(timeframe) { mutableStateOf<String?>(null) }
@@ -281,11 +287,23 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             val potential = 1.5 + index * 0.4
             val target = basePrice * (1.0 + potential / 100)
             val isExpanded = expandedKey == "spot_$index"
+            val spotRadarAutoFitRequester = remember(timeframe, index) { BringIntoViewRequester() }
+            LaunchedEffect(isExpanded) {
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
+                ) {
+                    delay(180)
+                    spotRadarAutoFitRequester.bringIntoView()
+                }
+            }
             val details = spotDetails[index % spotDetails.size]
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .bringIntoViewRequester(spotRadarAutoFitRequester)
                     .background(DarkBackground, RoundedCornerShape(8.dp))
                     .border(
                         1.dp,
@@ -342,7 +360,11 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                     }
                 }
 
-                if (isExpanded) {
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
+                ) {
                     Spacer(modifier = Modifier.height(7.dp))
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(6.dp))
@@ -414,11 +436,23 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             val potential = 3.2 + index * 0.8
             val target = basePrice * (1.0 + potential / 100)
             val isExpanded = expandedKey == "long_$index"
+            val longRadarAutoFitRequester = remember(timeframe, index) { BringIntoViewRequester() }
+            LaunchedEffect(isExpanded) {
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
+                ) {
+                    delay(180)
+                    longRadarAutoFitRequester.bringIntoView()
+                }
+            }
             val details = longDetails[index % longDetails.size]
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .bringIntoViewRequester(longRadarAutoFitRequester)
                     .background(DarkBackground, RoundedCornerShape(8.dp))
                     .border(
                         1.dp,
@@ -475,7 +509,11 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                     }
                 }
 
-                if (isExpanded) {
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
+                ) {
                     Spacer(modifier = Modifier.height(7.dp))
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(6.dp))
@@ -547,11 +585,23 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
             val potential = 2.8 + index * 0.7
             val target = basePrice * (1.0 - potential / 100)
             val isExpanded = expandedKey == "short_$index"
+            val shortRadarAutoFitRequester = remember(timeframe, index) { BringIntoViewRequester() }
+            LaunchedEffect(isExpanded) {
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
+                ) {
+                    delay(180)
+                    shortRadarAutoFitRequester.bringIntoView()
+                }
+            }
             val details = shortDetails[index % shortDetails.size]
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .bringIntoViewRequester(shortRadarAutoFitRequester)
                     .background(DarkBackground, RoundedCornerShape(8.dp))
                     .border(
                         1.dp,
@@ -608,7 +658,11 @@ fun ShortTermOpportunisticSignalsSection(timeframe: String, isBengali: Boolean, 
                     }
                 }
 
-                if (isExpanded) {
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
+                ) {
                     Spacer(modifier = Modifier.height(7.dp))
                     HorizontalDivider(color = BorderColor, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(6.dp))

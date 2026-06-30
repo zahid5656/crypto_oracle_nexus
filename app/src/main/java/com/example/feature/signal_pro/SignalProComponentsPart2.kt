@@ -1,6 +1,9 @@
 package com.example.feature.signal_pro
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import com.example.R
@@ -69,12 +72,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.draw.shadow
 
 // Extracted from SignalProScreen.kt to keep the public screen entry point compact.
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewModel, livePrices: Map<String, Double>) {
     val isBengali by viewModel.isBengali.collectAsState()
     var isExpandedInternal by remember { mutableStateOf(false) }
     val expandedAsset = com.example.feature.signal_pro.LocalExpandedAsset.current
     val isExpanded = expandedAsset.value == coin.coinSymbol
+    val spotAutoFitRequester = remember { BringIntoViewRequester() }
+    LaunchedEffect(isExpanded) {
+        if (isExpanded) {
+            delay(180)
+            spotAutoFitRequester.bringIntoView()
+        }
+    }
     
     val livePrice = livePrices["${coin.coinSymbol}USDT"] ?: coin.currentPrice
 
@@ -96,6 +107,7 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .bringIntoViewRequester(spotAutoFitRequester)
             .border(1.dp, if (isExpanded) CryptoCyan else BorderColor, RoundedCornerShape(16.dp))
             .clickable(enabled = !isExpanded) {
                 expandedAsset.value = coin.coinSymbol
@@ -307,8 +319,8 @@ fun SpotItemCard(coin: SpotSignal, timeframeIndex: Int, viewModel: CryptoViewMod
 
             AnimatedVisibility(
                 visible = isExpanded,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
+                enter = expandVertically(animationSpec = tween(360)) + fadeIn(animationSpec = tween(220)),
+                exit = shrinkVertically(animationSpec = tween(260)) + fadeOut(animationSpec = tween(180))
             ) {
                 Column {
                     Spacer(modifier = Modifier.height(10.dp))
